@@ -1,0 +1,46 @@
+name: 🛡️ Quality Gate & Spec Verification
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js (si existe package.json)
+        if: hashFiles('package.json') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        if: hashFiles('package.json') != ''
+        run: npm ci || npm install
+
+      - name: Ejecutar Linting
+        if: hashFiles('package.json') != ''
+        run: npm run lint --if-present
+
+      - name: Ejecutar Typecheck
+        if: hashFiles('package.json') != ''
+        run: npm run typecheck --if-present
+
+      - name: Ejecutar Pruebas
+        if: hashFiles('package.json') != ''
+        run: npm test --if-present
+
+      - name: Validar Estado de Especificaciones (Spec-Kit)
+        run: |
+          if [ -f "./.specify/scripts/verify-spec.sh" ]; then
+            chmod +x ./.specify/scripts/verify-spec.sh
+            ./.specify/scripts/verify-spec.sh
+          fi
