@@ -102,40 +102,54 @@ Una vez integrado en tu editor o asistente de IA (Cursor, Claude Code, GitHub Co
 
 ---
 
-### Opción B: Integrar en un Proyecto Existente (Brownfield)
+### Opción B: Integrar en un Proyecto Existente (Brownfield) o Crear Nuevo
 
-Puedes integrar Spec-Kit en cualquier repositorio existente de dos maneras:
+Puedes ejecutar el integrador directamente desde GitHub **sin necesidad de descargar ni clonar el repositorio**:
 
-#### 1. Mediante el Script de Integración (Recomendado)
-Ejecuta el script apuntando a tu proyecto (o desde la raíz del mismo):
+#### 1. Mediante `npx` (Directo desde GitHub, sin instalación previa)
+Abre la terminal en la carpeta de tu proyecto (nuevo o existente) y ejecuta:
+```bash
+# Asistente interactivo directo desde GitHub
+npx --yes github:BeLc3bU/elite-agent-bootstrap
 
+# O con URL completa
+npx --yes git+https://github.com/BeLc3bU/elite-agent-bootstrap.git
+
+# O creando un proyecto nuevo directamente
+npx --yes github:BeLc3bU/elite-agent-bootstrap ./nuevo-proyecto --mode new --yes
+```
+
+#### 2. Instalación Global de la Herramienta (Tipo `uv tool`)
+Si prefieres tener el comando `speckit` disponible globalmente en cualquier terminal:
+```bash
+# Instalar herramienta global
+npm install -g git+https://github.com/BeLc3bU/elite-agent-bootstrap.git
+
+# Ejecutar en cualquier carpeta
+speckit
+```
+
+#### 3. Mediante One-Liner (PowerShell / Bash)
 - **En Windows (PowerShell)**:
   ```powershell
-  # Si ejecutas desde la plantilla apuntando a tu proyecto:
-  .\scripts\integrate-speckit.ps1 -TargetDir "C:\Ruta\A\Tu\Proyecto"
-
-  # O copia la carpeta scripts a tu proyecto y ejecuta:
-  .\scripts\integrate-speckit.ps1
+  irm https://raw.githubusercontent.com/BeLc3bU/elite-agent-bootstrap/main/scripts/install.ps1 | iex
   ```
 
 - **En Linux / macOS (Bash)**:
   ```bash
-  ./scripts/integrate-speckit.sh /ruta/a/tu/proyecto
+  curl -fsSL https://raw.githubusercontent.com/BeLc3bU/elite-agent-bootstrap/main/scripts/install.sh | bash
   ```
 
-El script automáticamente:
-- Crea la estructura `.specify/`, `specs/` y `.github/prompts/`.
-- Detecta si usas Node.js, Python, Rust o Go y configura los comandos de test, lint y build en `AGENTS.md`.
-- Inicializa `PROJECT_LOG.md` y `.cursorrules`.
+> 🛡️ **Garantía Zero-Overwrite**:
+> - Si tu proyecto ya tiene `README.md`, se mantiene intacto y se crea `SPECKIT_GUIDE.md`.
+> - Si ya tiene `AGENTS.md`, se crea `AGENTS.speckit.md` o backup `.bak` para que no pierdas tus reglas.
+> - Si ya tiene `PROJECT_LOG.md` o `.cursorrules`, se agregan las nuevas directrices al final (*append*).
 
-#### 2. Mediante el CLI Oficial de Spec-Kit (`uvx` / `specify`)
+#### 4. Mediante el CLI Oficial de Spec-Kit (`uvx` / `specify`)
 Si tienes instalado [uv](https://astral.sh/uv/):
 ```bash
 # Inicializar en el directorio actual
 uvx --from git+https://github.com/github/spec-kit.git specify init --here
-
-# O crear un proyecto nuevo
-uvx --from git+https://github.com/github/spec-kit.git specify init mi-proyecto --ai copilot
 ```
 
 ---

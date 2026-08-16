@@ -1,0 +1,43 @@
+{
+  "name": "elite-speckit",
+  "version": "1.0.0",
+  "description": "CLI Universal y plantilla maestra para Spec-Driven Development (SDD) y Elite Agent",
+  "main": "bin/cli.js",
+  "bin": {
+    "elite-speckit": "./bin/cli.js",
+    "speckit": "./bin/cli.js"
+  },
+  "keywords": [
+    "spec-kit",
+    "sdd",
+    "ai-agents",
+    "cursorrules",
+    "gemini",
+    "claude",
+    "copilot",
+    "tdd"
+  ],
+  "author": "BeLc3bU",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BeLc3bU/elite-agent-bootstrap.git"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "scripts": {
+    "start": "node bin/cli.js",
+    "speckit": "node bin/cli.js",
+    "test:verify": "powershell ./.specify/scripts/verify-spec.ps1"
+  },
+  "files": [
+    "bin",
+    ".specify",
+    ".github/prompts",
+    "specs",
+    "scripts",
+    "README.md",
+    "AGENTS.template.md"
+  ]
+}

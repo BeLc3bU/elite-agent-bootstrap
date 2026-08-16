@@ -63,11 +63,33 @@ El agente creará la carpeta `specs/001-auth/` y te guiará por el ciclo complet
 
 ## 🔄 Escenario B: Integrar en un Proyecto Existente (Brownfield)
 
-Si ya tienes un repositorio con código funcionando y quieres añadirle esta metodología y reglas de agente:
+Si ya tienes un repositorio con código funcionando y quieres añadirle esta metodología y reglas de agente sin alterar tus archivos originales:
 
-### Método 1: Con 1 Solo Comando (Recomendado)
+### Método 1: Con `npx` Directo desde GitHub (Recomendado)
 
-Abre tu terminal en la carpeta de la plantilla y ejecuta:
+En la terminal de cualquier proyecto (o en una carpeta vacía para empezar uno nuevo):
+```bash
+# Ejecutar asistente interactivo directamente desde GitHub (sin clonar previamente)
+npx --yes github:BeLc3bU/elite-agent-bootstrap
+
+# O instalando la herramienta globalmente
+npm install -g git+https://github.com/BeLc3bU/elite-agent-bootstrap.git
+speckit
+```
+
+### Método 2: Con One-Liner (PowerShell / Bash)
+
+#### En Windows (PowerShell):
+```powershell
+irm https://raw.githubusercontent.com/BeLc3bU/elite-agent-bootstrap/main/scripts/install.ps1 | iex
+```
+
+#### En Linux / macOS (Bash):
+```bash
+curl -fsSL https://raw.githubusercontent.com/BeLc3bU/elite-agent-bootstrap/main/scripts/install.sh | bash
+```
+
+### Método 3: Con los Scripts Locales (si ya tienes la plantilla clonada)
 
 #### En Windows (PowerShell):
 ```powershell
@@ -79,24 +101,12 @@ powershell -ExecutionPolicy Bypass -File ".\scripts\integrate-speckit.ps1" -Targ
 ./scripts/integrate-speckit.sh /ruta/a/tu/proyecto
 ```
 
-> **¿Qué hace el script automáticamente?**
-> 1. Detecta tu stack (Node.js/TS, Python, Rust, Go, etc.) y tus comandos de test/lint.
-> 2. Copia las carpetas `.specify/`, `specs/` y `.github/prompts/`.
-> 3. Genera un `AGENTS.md` adaptado a tu proyecto, `.cursorrules` y `PROJECT_LOG.md`.
-> 4. **No toca ni rompe ninguna línea de tu código existente.**
-
----
-
-### Método 2: Copiado Manual
-
-Si prefieres hacerlo a mano, copia estas carpetas y archivos en la raíz de tu proyecto:
-
-1. Carpeta `.specify/` *(Contiene las plantillas y constitución)*
-2. Carpeta `specs/` *(Donde se almacenarán las futuras features)*
-3. Carpeta `.github/prompts/` *(Para que aparezcan los comandos `/speckit.*` en el editor)*
-4. Archivo `AGENTS.md` o `.cursorrules` *(Directrices para la IA)*
-
----
+> **🛡️ ¿Qué hace el instalador con garantía Zero-Overwrite?**
+> 1. **Detección inteligente**: Detecta tu stack (Node.js/TS, Python, Rust, Go, etc.) y tus comandos de desarrollo, test y linting.
+> 2. **Protección de `README.md`**: Si ya tienes un `README.md`, **no lo sobreescribe**. Genera un archivo complementario `SPECKIT_GUIDE.md` con la guía de comandos.
+> 3. **Protección de `AGENTS.md`**: Si ya tienes un `AGENTS.md`, genera `AGENTS.speckit.md` (o realiza backup `.bak` si fuerzas la actualización) para que no pierdas configuraciones previas.
+> 4. **Copia del motor**: Instala `.specify/`, `specs/` y `.github/prompts/` sin modificar el código fuente de tu aplicación.
+> 5. **Append en logs y reglas**: Si ya tienes `PROJECT_LOG.md` o `.cursorrules`, añade las nuevas directrices al final sin borrar las existentes.
 
 ## 🎮 Catálogo de Comandos en el Chat
 
