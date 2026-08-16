@@ -78,20 +78,20 @@ Si el repositorio ya cuenta con código o el usuario pide integrar Spec-Kit en u
 3. Identifica la estructura de directorios actual (`src/`, `lib/`, `app/`, `tests/`, etc.).
 
 #### Paso 2.2: Inyección de Spec-Kit
-1. Si tienes acceso a terminal, ejecuta o sugiere ejecutar el script de integración:
+1. Si tienes acceso a terminal, ejecuta o sugiere ejecutar el integrador directo desde GitHub:
+   - **Vía `npx` (Sin clonar previamente)**:
+     ```bash
+     npx --yes github:BeLc3bU/elite-agent-bootstrap
+     ```
    - **En Windows (PowerShell)**:
      ```powershell
-     .\scripts\integrate-speckit.ps1
+     irm https://raw.githubusercontent.com/BeLc3bU/elite-agent-bootstrap/main/scripts/install.ps1 | iex
      ```
    - **En Linux / macOS (Bash)**:
      ```bash
-     ./scripts/integrate-speckit.sh
+     curl -fsSL https://raw.githubusercontent.com/BeLc3bU/elite-agent-bootstrap/main/scripts/install.sh | bash
      ```
-   - **O vía CLI Oficial de Spec-Kit (uvx)**:
-     ```bash
-     uvx --from git+https://github.com/github/spec-kit.git specify init --here
-     ```
-2. Genera los archivos `.specify/`, `specs/`, `.github/prompts/` y adapta el `AGENTS.md` con los comandos detectados del proyecto sin romper ningún archivo existente.
+2. El instalador aplica **Zero-Overwrite**: no sobreescribe `README.md` ni `AGENTS.md` existentes, genera `SPECKIT_GUIDE.md` y añade directrices no destructivas en logs y reglas.
 3. Genera la primera especificación en `specs/` para la siguiente tarea o refactorización que el usuario desee realizar.
 
 ---

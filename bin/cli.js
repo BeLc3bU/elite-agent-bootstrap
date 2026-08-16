@@ -2,7 +2,7 @@
 
 /**
  * Elite Agent + Spec-Kit Universal CLI
- * Instalador y orquestador seguro de Spec-Driven Development (SDD)
+ * Herramienta de gestión e integración para Spec-Driven Development (SDD)
  */
 
 const fs = require('fs');
@@ -36,72 +36,7 @@ ${colors.cyan}${colors.bold}====================================================
 }
 
 // ==========================================
-// Parseo de Argumentos CLI
-// ==========================================
-const args = process.argv.slice(2);
-const options = {
-  targetDir: process.cwd(),
-  mode: 'auto', // 'auto' | 'new' | 'existing'
-  force: false,
-  backup: true,
-  nonInteractive: false,
-  help: false,
-  version: false
-};
-
-for (let i = 0; i < args.length; i++) {
-  const arg = args[i];
-  if (arg === '--help' || arg === '-h') {
-    options.help = true;
-  } else if (arg === '--version' || arg === '-v') {
-    options.version = true;
-  } else if (arg === '--force' || arg === '-f') {
-    options.force = true;
-  } else if (arg === '--no-backup') {
-    options.backup = false;
-  } else if (arg === '--yes' || arg === '-y') {
-    options.nonInteractive = true;
-  } else if (arg === '--mode' || arg === '-m') {
-    options.mode = args[++i] || 'auto';
-  } else if (arg === '--target' || arg === '-t') {
-    options.targetDir = path.resolve(args[++i] || process.cwd());
-  } else if (!arg.startsWith('-')) {
-    options.targetDir = path.resolve(arg);
-  }
-}
-
-if (options.help) {
-  printBanner();
-  log(`
-Uso:
-  npx elite-speckit [opciones] [directorio-destino]
-  node bin/cli.js [opciones] [directorio-destino]
-
-Opciones:
-  -t, --target <dir>    Directorio destino del proyecto (por defecto: carpeta actual)
-  -m, --mode <mode>     Modo de instalación: 'auto' | 'new' | 'existing' (por defecto: 'auto')
-  -f, --force           Sobrescribe archivos incluso si ya existen
-  -y, --yes             Modo no interactivo (acepta valores por defecto sin preguntar)
-      --no-backup       No crea copias .bak de archivos existentes
-  -h, --help            Muestra esta ayuda
-  -v, --version         Muestra la versión instalada
-
-Ejemplos:
-  npx elite-speckit                        # Ejecuta asistente interactivo en la carpeta actual
-  npx elite-speckit ../mi-app-existente    # Integra Spec-Kit en un proyecto existente
-  npx elite-speckit ./nuevo-proyecto -m new -y  # Inicializa un proyecto nuevo desde cero
-`);
-  process.exit(0);
-}
-
-if (options.version) {
-  const pkg = require('../package.json');
-  log(`v${pkg.version}`);
-  process.exit(0);
-}
-
-// ==========================================
-// Rutas de Plantillas
+// Rutas Base de la Plantilla
 // ==========================================
 const ROOT_DIR = path.resolve(__dirname, '..');
 const TEMPLATES_SCAFFOLD_DIR = path.join(ROOT_DIR, '.specify', 'templates', 'scaffold');
@@ -158,11 +93,10 @@ function backupFile(filePath) {
 }
 
 // ==========================================
-// Detección de Stack y Estado de Proyecto
+// Detección de Stack y Contexto
 // ==========================================
 function detectProjectContext(targetDir) {
   const isDirEmpty = !fs.existsSync(targetDir) || fs.readdirSync(targetDir).length === 0;
-  
   const files = fs.existsSync(targetDir) ? fs.readdirSync(targetDir) : [];
   const hasExistingCode = files.some(f => 
     ['package.json', 'pyproject.toml', 'Cargo.toml', 'go.mod', 'pom.xml', 'build.gradle', 'composer.json', 'src', 'app', 'lib'].includes(f)
@@ -179,7 +113,6 @@ function detectProjectContext(targetDir) {
     projectName: path.basename(targetDir) || 'Proyecto'
   };
 
-  // Node / Web
   const pkgPath = path.join(targetDir, 'package.json');
   if (fs.existsSync(pkgPath)) {
     try {
@@ -196,26 +129,20 @@ function detectProjectContext(targetDir) {
     } catch (e) {
       stack.name = 'Node.js / JavaScript';
     }
-  } 
-  // Python
-  else if (fs.existsSync(path.join(targetDir, 'pyproject.toml')) || fs.existsSync(path.join(targetDir, 'requirements.txt'))) {
+  } else if (fs.existsSync(path.join(targetDir, 'pyproject.toml')) || fs.existsSync(path.join(targetDir, 'requirements.txt'))) {
     stack.name = 'Python (UV / Poetry / Pytest)';
     stack.devCmd = 'uv run python main.py';
     stack.buildCmd = 'uv build';
     stack.lintCmd = 'ruff check .';
     stack.testCmd = 'pytest';
     stack.srcPath = fs.existsSync(path.join(targetDir, 'app')) ? 'app/' : 'src/';
-  } 
-  // Rust
-  else if (fs.existsSync(path.join(targetDir, 'Cargo.toml'))) {
+  } else if (fs.existsSync(path.join(targetDir, 'Cargo.toml'))) {
     stack.name = 'Rust (Cargo)';
     stack.devCmd = 'cargo run';
     stack.buildCmd = 'cargo build --release';
     stack.lintCmd = 'cargo clippy';
     stack.testCmd = 'cargo test';
-  } 
-  // Go
-  else if (fs.existsSync(path.join(targetDir, 'go.mod'))) {
+  } else if (fs.existsSync(path.join(targetDir, 'go.mod'))) {
     stack.name = 'Go (Golang)';
     stack.devCmd = 'go run .';
     stack.buildCmd = 'go build';
@@ -234,24 +161,145 @@ function detectProjectContext(targetDir) {
 }
 
 // ==========================================
-// Flujo Principal de Ejecución
+// Comando: Verificar Specs (verify)
 // ==========================================
-async function main() {
+function cmdVerify(targetDir) {
   printBanner();
-  
+  const specsDir = path.join(targetDir, 'specs');
+  if (!fs.existsSync(specsDir)) {
+    log(`[-] No se encontró la carpeta 'specs/' en: ${targetDir}`, colors.red);
+    return;
+  }
+
+  log(`\n🔍 Verificando especificaciones en: ${colors.bold}${specsDir}${colors.reset}\n`);
+  const entries = fs.readdirSync(specsDir, { withFileTypes: true })
+    .filter(e => e.isDirectory());
+
+  if (entries.length === 0) {
+    log(`[INFO] No hay especificaciones creadas aún en 'specs/'. Usa 'speckit create <nombre>'`, colors.gray);
+    return;
+  }
+
+  log(`=== Estado de Especificaciones y Tareas ===\n`, colors.cyan);
+
+  for (const entry of entries) {
+    const featureDir = path.join(specsDir, entry.name);
+    const hasSpec = fs.existsSync(path.join(featureDir, 'spec.md'));
+    const hasPlan = fs.existsSync(path.join(featureDir, 'plan.md'));
+    const hasTasks = fs.existsSync(path.join(featureDir, 'tasks.md'));
+
+    log(`[*] Feature: ${colors.bold}${entry.name}${colors.reset}`, colors.yellow);
+    log(`   - spec.md:  ${hasSpec ? colors.green + '[OK] Presente' : colors.red + '[X] Faltante'}${colors.reset}`);
+    log(`   - plan.md:  ${hasPlan ? colors.green + '[OK] Presente' : colors.red + '[X] Faltante'}${colors.reset}`);
+    log(`   - tasks.md: ${hasTasks ? colors.green + '[OK] Presente' : colors.red + '[X] Faltante'}${colors.reset}`);
+
+    if (hasTasks) {
+      const tasksContent = fs.readFileSync(path.join(featureDir, 'tasks.md'), 'utf8');
+      const lines = tasksContent.split('\n');
+      const totalTasks = lines.filter(l => /^- \[( |x)\] \*\*`\[TASK-/.test(l)).length;
+      const doneTasks = lines.filter(l => /^- \[x\] \*\*`\[TASK-/.test(l)).length;
+
+      if (totalTasks > 0) {
+        const pct = ((doneTasks / totalTasks) * 100).toFixed(1);
+        const color = doneTasks === totalTasks ? colors.green : colors.cyan;
+        log(`   - Tareas:   ${doneTasks} / ${totalTasks} completadas (${pct}%)`, color);
+      } else {
+        log(`   - Tareas:   Sin tareas estructuradas [TASK-XXX]`, colors.gray);
+      }
+    }
+    console.log('');
+  }
+
+  log(`===========================================`, colors.cyan);
+}
+
+// ==========================================
+// Comando: Crear Feature (create)
+// ==========================================
+function cmdCreate(targetDir, featureName) {
+  printBanner();
+  if (!featureName) {
+    log(`[-] Error: Debes especificar el nombre de la feature.`, colors.red);
+    log(`    Ejemplo: speckit create auth-login`, colors.yellow);
+    return;
+  }
+
+  const specsDir = path.join(targetDir, 'specs');
+  ensureDirSync(specsDir);
+
+  // Calcular siguiente ID
+  const existing = fs.readdirSync(specsDir, { withFileTypes: true })
+    .filter(e => e.isDirectory())
+    .map(e => e.name);
+
+  let nextNum = 1;
+  for (const name of existing) {
+    const match = name.match(/^(\d+)-/);
+    if (match) {
+      const num = parseInt(match[1], 10);
+      if (num >= nextNum) nextNum = num + 1;
+    }
+  }
+
+  const paddedId = String(nextNum).padStart(3, '0');
+  const cleanName = featureName.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+  const slug = `${paddedId}-${cleanName}`;
+  const featureDir = path.join(specsDir, slug);
+
+  if (fs.existsSync(featureDir)) {
+    log(`[-] La feature ya existe en: ${featureDir}`, colors.red);
+    return;
+  }
+
+  ensureDirSync(featureDir);
+  const templatesDir = path.join(targetDir, '.specify', 'templates');
+  const fallbackTemplatesDir = path.join(ROOT_DIR, '.specify', 'templates');
+  const actualTemplatesDir = fs.existsSync(templatesDir) ? templatesDir : fallbackTemplatesDir;
+
+  const dateStr = new Date().toISOString().split('T')[0];
+
+  const files = [
+    { src: 'spec-template.md', dest: 'spec.md' },
+    { src: 'plan-template.md', dest: 'plan.md' },
+    { src: 'tasks-template.md', dest: 'tasks.md' },
+    { src: 'clarify-template.md', dest: 'clarify.md' },
+    { src: 'checklist-template.md', dest: 'checklist.md' }
+  ];
+
+  for (const f of files) {
+    const srcPath = path.join(actualTemplatesDir, f.src);
+    if (fs.existsSync(srcPath)) {
+      let content = fs.readFileSync(srcPath, 'utf8');
+      content = content
+        .replace(/\[NOMBRE_FEATURE\]/g, cleanName)
+        .replace(/\[ID_FEATURE\]/g, paddedId)
+        .replace(/\[YYYY-MM-DD\]/g, dateStr);
+      fs.writeFileSync(path.join(featureDir, f.dest), content, 'utf8');
+    }
+  }
+
+  log(`\n✨ Feature creada con éxito en: ${colors.bold}specs/${slug}${colors.reset}`, colors.green);
+  log(`Archivos listos para trabajar:`);
+  log(`  📄 specs/${slug}/spec.md       - Especificación funcional`);
+  log(`  📐 specs/${slug}/plan.md       - Arquitectura técnica`);
+  log(`  📝 specs/${slug}/tasks.md      - Desglose de tareas`);
+  log(`  ❓ specs/${slug}/clarify.md    - Dudas y casos límite\n`);
+}
+
+// ==========================================
+// Comando: Integración / Inicialización (init)
+// ==========================================
+async function cmdInit(options) {
+  printBanner();
   const targetDir = options.targetDir;
   ensureDirSync(targetDir);
-  
+
   log(`\n📂 Directorio Destino: ${colors.bold}${targetDir}${colors.reset}`);
-  
   const context = detectProjectContext(targetDir);
   log(`🔍 Stack Detectado:   ${colors.magenta}${context.stack.name}${colors.reset}`);
   log(`📊 Estado de Proyecto: ${colors.cyan}${context.defaultMode === 'new' ? 'Proyecto Nuevo (Scaffold)' : 'Proyecto Existente (Integración Segura)'}${colors.reset}`);
 
-  let chosenMode = options.mode;
-  if (chosenMode === 'auto') {
-    chosenMode = context.defaultMode;
-  }
+  let chosenMode = options.mode === 'auto' ? context.defaultMode : options.mode;
 
   if (!options.nonInteractive) {
     log(`\nSelecciona el modo de instalación:`);
@@ -267,12 +315,11 @@ async function main() {
 
   log(`\n🚀 Ejecutando en modo: ${colors.bold}${chosenMode.toUpperCase()}${colors.reset}\n`);
 
-  // 1. Instalar estructura núcleo .specify
+  // 1. Instalar motor .specify
   const targetSpecify = path.join(targetDir, '.specify');
   ensureDirSync(path.join(targetSpecify, 'memory'));
   ensureDirSync(path.join(targetSpecify, 'templates'));
   ensureDirSync(path.join(targetSpecify, 'scripts'));
-  
   copyDirRecursiveSync(SPECIFY_SRC_DIR, targetSpecify, options.force);
   log(`  [+] Instalado motor: .specify/`, colors.green);
 
@@ -302,7 +349,7 @@ async function main() {
       readmeTpl = readmeTpl
         .replace(/\{\{PROJECT_NAME\}\}/g, context.stack.projectName)
         .replace(/\{\{PROJECT_DESCRIPTION\}\}/g, `Proyecto desarrollado con arquitectura modular y metodología Spec-Driven Development (SDD).`)
-        .replace(/\{\{PREREQUISITES\}\}/g, `Node.js >= 18, pnpm o npm`)
+        .replace(/\{\{PREREQUISITES\}\}/g, `Entorno configurado para ${context.stack.name}`)
         .replace(/\{\{INSTALL_COMMAND\}\}/g, `npm install`)
         .replace(/\{\{DEV_COMMAND\}\}/g, context.stack.devCmd)
         .replace(/\{\{BUILD_COMMAND\}\}/g, context.stack.buildCmd)
@@ -316,12 +363,11 @@ async function main() {
       log(`  [INFO] README.md ya existe. Se preserva sin cambios.`, colors.gray);
     }
   } else {
-    // Modo Proyecto Existente: NUNCA pisar README.md
     const guideDest = path.join(targetDir, 'SPECKIT_GUIDE.md');
     const guideSrc = path.join(TEMPLATES_SCAFFOLD_DIR, 'SPECKIT_GUIDE.template.md');
     if (fs.existsSync(guideSrc) && (!fs.existsSync(guideDest) || options.force)) {
       fs.copyFileSync(guideSrc, guideDest);
-      log(`  [+] Generado: SPECKIT_GUIDE.md (Preservando tu README.md original)`, colors.green);
+      log(`  [+] Generado: SPECKIT_GUIDE.md (Tu README.md original ha sido protegido)`, colors.green);
     }
   }
 
@@ -366,7 +412,6 @@ async function main() {
     fs.writeFileSync(targetLog, logTpl, 'utf8');
     log(`  [+] Generado: PROJECT_LOG.md`, colors.green);
   } else {
-    // Append seguro
     const currentLog = fs.readFileSync(targetLog, 'utf8');
     if (!currentLog.includes(`[${dateStr}] - Integración de Spec-Kit`)) {
       const appendEntry = `\n\n## [${dateStr}] - Integración de Spec-Kit (SDD)\n- **Evento**: Integración segura de Spec-Kit.\n- **Stack**: ${context.stack.name}\n- **Estado**: Guardrails y plantillas activadas sin alterar archivos existentes.\n`;
@@ -389,7 +434,7 @@ async function main() {
     }
   }
 
-  // 8. Manejo de .github/workflows/release-please.yml
+  // 8. Workflow de release-please
   const srcWorkflow = path.join(WORKFLOWS_SRC_DIR, 'release-please.yml');
   const targetWorkflowDir = path.join(targetDir, '.github', 'workflows');
   const targetWorkflow = path.join(targetWorkflowDir, 'release-please.yml');
@@ -399,23 +444,102 @@ async function main() {
     log(`  [+] Configurado workflow: .github/workflows/release-please.yml`, colors.green);
   }
 
-  // Finalización
   log(`
 ${colors.green}${colors.bold}=======================================================
 🎉 ¡Spec-Kit integrado con éxito en modo ${chosenMode.toUpperCase()}!
 =======================================================${colors.reset}
 
-${colors.yellow}Comandos disponibles en el chat de tu IA:${colors.reset}
+${colors.yellow}Comandos disponibles en tu editor / IA:${colors.reset}
   👉 ${colors.bold}/speckit.specify${colors.reset}   - Crear una nueva especificación formal
   👉 ${colors.bold}/speckit.clarify${colors.reset}   - Resolver ambigüedades técnicas
   👉 ${colors.bold}/speckit.plan${colors.reset}      - Diseñar arquitectura y contratos
   👉 ${colors.bold}/speckit.tasks${colors.reset}     - Desglosar checklist de tareas atómicas
   👉 ${colors.bold}/speckit.implement${colors.reset} - Desarrollar paso a paso con TDD
   👉 ${colors.bold}/speckit.converge${colors.reset}  - Validar guardrails y preparar PR
+
+${colors.yellow}Comandos CLI disponibles en la terminal:${colors.reset}
+  👉 ${colors.bold}speckit create <nombre>${colors.reset} - Crea una nueva spec con plantillas
+  👉 ${colors.bold}speckit verify${colors.reset}          - Comprueba el estado de todas las specs
 `);
 }
 
+// ==========================================
+// Enrutamiento Principal CLI
+// ==========================================
+async function main() {
+  const rawArgs = process.argv.slice(2);
+  const command = rawArgs[0] || 'init';
+
+  if (command === '--help' || command === '-h' || command === 'help') {
+    printBanner();
+    log(`
+Uso:
+  npx elite-speckit [comando] [opciones]
+  speckit [comando] [opciones]
+
+Comandos:
+  init [directorio]      Inicializa o integra Spec-Kit en un proyecto (por defecto)
+  create <nombre>        Crea una nueva especificación numerada en specs/
+  verify                 Comprueba el estado y avance de todas las especificaciones
+  version                Muestra la versión instalada
+
+Opciones de 'init':
+  -t, --target <dir>     Directorio destino (por defecto: carpeta actual)
+  -m, --mode <mode>      'auto' | 'new' | 'existing' (por defecto: 'auto')
+  -f, --force            Sobrescribe archivos
+  -y, --yes              Modo no interactivo
+      --no-backup        No genera copias .bak
+
+Ejemplos:
+  npx elite-speckit init                          # Asistente interactivo
+  npx elite-speckit create auth-jwt               # Crea specs/001-auth-jwt/
+  npx elite-speckit verify                        # Valida avance de tareas
+`);
+    process.exit(0);
+  }
+
+  if (command === '--version' || command === '-v' || command === 'version') {
+    const pkg = require('../package.json');
+    log(`v${pkg.version}`);
+    process.exit(0);
+  }
+
+  if (command === 'verify' || command === 'check') {
+    const targetDir = rawArgs[1] ? path.resolve(rawArgs[1]) : process.cwd();
+    cmdVerify(targetDir);
+    return;
+  }
+
+  if (command === 'create' || command === 'new') {
+    const featureName = rawArgs[1];
+    cmdCreate(process.cwd(), featureName);
+    return;
+  }
+
+  // Parseo de opciones para 'init'
+  const options = {
+    targetDir: process.cwd(),
+    mode: 'auto',
+    force: false,
+    backup: true,
+    nonInteractive: false
+  };
+
+  const initArgs = command === 'init' ? rawArgs.slice(1) : rawArgs;
+  for (let i = 0; i < initArgs.length; i++) {
+    const arg = initArgs[i];
+    if (arg === '--force' || arg === '-f') options.force = true;
+    else if (arg === '--no-backup') options.backup = false;
+    else if (arg === '--yes' || arg === '-y') options.nonInteractive = true;
+    else if (arg === '--mode' || arg === '-m') options.mode = initArgs[++i] || 'auto';
+    else if (arg === '--target' || arg === '-t') options.targetDir = path.resolve(initArgs[++i] || process.cwd());
+    else if (!arg.startsWith('-')) options.targetDir = path.resolve(arg);
+  }
+
+  await cmdInit(options);
+}
+
 main().catch((err) => {
-  log(`\n❌ Error durante la instalación: ${err.message}`, colors.red);
+  log(`\n❌ Error: ${err.message}`, colors.red);
   process.exit(1);
 });
