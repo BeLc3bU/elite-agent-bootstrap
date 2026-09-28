@@ -550,6 +550,118 @@ function cmdEvidence(targetDir, subAction = 'verify') {
 }
 
 // ==========================================
+// Comandos de Enrutamiento y Decisión (route)
+// ==========================================
+async function cmdRoute(targetDir, query) {
+  printBanner();
+  if (!query) {
+    log(`[-] Error: Debes especificar una descripción de la tarea a enrutar.`, colors.red);
+    log(`    Ejemplo: speckit route "escribir pruebas unitarias con Jest"`, colors.yellow);
+    return;
+  }
+
+  const { createDecisionProvider } = require('../lib/adapters/DecisionProvider');
+  const registryPath = path.join(targetDir, '.agents', 'registry.json');
+  const provider = createDecisionProvider({ registryPath });
+
+  log(`\n🎯 Enrutando Tarea a través de la Capa de Decisión:\n`, colors.cyan);
+  log(`   Tarea: "${query}"`, colors.bold);
+
+  const decision = await provider.decide(query);
+  const approvalBadge = decision.requires_human_approval ? `${colors.red}🔒 Requerida (Agent ≠ Authority)${colors.reset}` : `${colors.green}⚡ No requerida${colors.reset}`;
+  const confPct = Math.round((decision.confidence || 0) * 100);
+
+  log(`\n📋 Resultado del Enrutamiento:`, colors.yellow);
+  log(`   • Agente ID:         ${colors.bold}${decision.agent_id}${colors.reset}`);
+  log(`   • Rol / Nombre:      ${decision.agent_name || decision.agent_id}`);
+  log(`   • Nivel de Riesgo:   ${decision.risk_level}`);
+  log(`   • Aprobación Humana: ${approvalBadge}`);
+  log(`   • Nivel Confianza:   ${confPct}% (${decision.engine})`);
+  log(`   • Justificación:     ${decision.reason}`);
+  if (decision.allowed_files && decision.allowed_files.length > 0) {
+    log(`   • Rutas Permitidas:  ${decision.allowed_files.join(', ')}`);
+  }
+  console.log('');
+}
+
+// ==========================================
+// Comando de Evaluación Sintética (eval)
+// ==========================================
+async function cmdEval(targetDir) {
+  printBanner();
+  const evalsFile = path.join(targetDir, '.evals', 'scenarios', 'routing-scenarios.json');
+  if (!fs.existsSync(evalsFile)) {
+    log(`❌ Archivo de escenarios no encontrado en: ${evalsFile}`, colors.red);
+    process.exit(1);
+  }
+
+  let scenarios;
+  try {
+    scenarios = JSON.parse(fs.readFileSync(evalsFile, 'utf8'));
+  } catch (err) {
+    log(`❌ Error al parsear ${evalsFile}: ${err.message}`, colors.red);
+    process.exit(1);
+  }
+
+  const { createDecisionProvider } = require('../lib/adapters/DecisionProvider');
+  const registryPath = path.join(targetDir, '.agents', 'registry.json');
+  const provider = createDecisionProvider({ registryPath });
+
+  log(`\n🧪 Ejecutando Suite de Evaluación Sintética (.evals):\n`, colors.cyan);
+  log(`Escenarios cargados: ${scenarios.length}\n`, colors.gray);
+
+  let passed = 0;
+  let failed = 0;
+
+  for (const sc of scenarios) {
+    const res = await provider.decide(sc.input);
+    const agentMatch = res.agent_id === sc.expected_agent;
+    const approvalMatch = Boolean(res.requires_human_approval) === Boolean(sc.expected_approval);
+
+    if (agentMatch && approvalMatch) {
+      passed++;
+      log(`  [PASS] ${colors.green}✓${colors.reset} [${sc.id}] ${sc.description} ➔ ${colors.bold}${res.agent_id}${colors.reset} (conf: ${Math.round(res.confidence * 100)}%)`);
+    } else {
+      failed++;
+      log(`  [FAIL] ${colors.red}✗${colors.reset} [${sc.id}] ${sc.description}`);
+      log(`         Esperado: agent=${sc.expected_agent}, approval=${sc.expected_approval}`);
+      log(`         Obtenido: agent=${res.agent_id}, approval=${res.requires_human_approval}`);
+    }
+  }
+
+  const pct = Math.round((passed / scenarios.length) * 100);
+  console.log('');
+  if (failed === 0) {
+    log(`✅ Suite de evaluación sintética completada con éxito: ${passed}/${scenarios.length} escenarios superados (${pct}%).`, colors.green);
+    
+    // Registrar comprobante de evidencia si existe .evidence/
+    const evidenceDir = path.join(targetDir, '.evidence');
+    if (fs.existsSync(evidenceDir)) {
+      const evRecord = {
+        evidence_id: "EV-002-evals-routing",
+        task_id: "TASK-003",
+        feature_id: "005-v2-phase4-decision-adapters",
+        runner_agent: "tester",
+        command: "npm run test:evals",
+        exit_code: 0,
+        status: "passed",
+        summary: `Evaluación sintética de enrutamiento: ${passed}/${scenarios.length} escenarios superados (100%)`,
+        log_artifact: ".evals/scenarios/routing-scenarios.json",
+        timestamp: new Date().toISOString()
+      };
+      try {
+        fs.writeFileSync(path.join(evidenceDir, 'EV-002-evals-routing.json'), JSON.stringify(evRecord, null, 2), 'utf8');
+        log(`   [+] Comprobante de evidencia generado en: .evidence/EV-002-evals-routing.json`, colors.gray);
+      } catch (_) {}
+    }
+    console.log('');
+  } else {
+    log(`❌ Fallos en la suite de evaluación sintética: ${failed} escenarios no cumplieron las aserciones.`, colors.red);
+    process.exit(1);
+  }
+}
+
+// ==========================================
 // Comando: Crear Feature (create)
 // ==========================================
 function cmdCreate(targetDir, featureName) {
@@ -883,6 +995,8 @@ Comandos:
   registry [list|val]    Consulta ('list') o valida ('validate') el catálogo de agentes
   handoff [list|val]     Lista ('list') o valida ('validate') traspasos entre agentes
   evidence [list|ver]    Lista ('list') o audita ('verify') comprobantes de ejecución
+  route <descripción>    Enruta una tarea al agente idóneo mediante la capa de decisión
+  eval                   Ejecuta la suite de evaluación sintética de agentes (.evals/)
   install-skill          Instala la skill speckit-sdd en Antigravity (~/.gemini/config)
   version                Muestra la versión instalada
 
@@ -901,6 +1015,8 @@ Ejemplos:
   npx elite-speckit registry validate             # Valida registro contra esquema JSON
   npx elite-speckit handoff validate              # Valida protocolo de handoffs
   npx elite-speckit evidence verify               # Audita comprobantes de ejecución
+  npx elite-speckit route "escribir tests"        # Enruta tarea a agente idóneo
+  npx elite-speckit eval                          # Ejecuta suite sintética (.evals)
   npx elite-speckit install-skill                 # Instala skill en Antigravity
 `);
     process.exit(0);
@@ -935,6 +1051,18 @@ Ejemplos:
     const subAction = rawArgs[1] || 'verify';
     const targetDir = rawArgs[2] ? path.resolve(rawArgs[2]) : process.cwd();
     cmdEvidence(targetDir, subAction);
+    return;
+  }
+
+  if (command === 'route' || command === 'decide') {
+    const query = rawArgs.slice(1).join(' ');
+    await cmdRoute(process.cwd(), query);
+    return;
+  }
+
+  if (command === 'eval' || command === 'evals') {
+    const targetDir = rawArgs[1] ? path.resolve(rawArgs[1]) : process.cwd();
+    await cmdEval(targetDir);
     return;
   }
 

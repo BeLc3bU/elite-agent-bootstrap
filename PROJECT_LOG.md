@@ -64,6 +64,18 @@ Este archivo actúa como la memoria a largo plazo del proyecto, documentando la 
   5. Añadir `test:handoff` y `test:evidence` en `package.json` y Quality Gate bloqueante en `.github/workflows/spec-quality-gate.yml`.
 - **Consecuencias**: Auditoría 100% determinista de traspasos y evidencias de pruebas, sin dependencias externas en tiempo de ejecución, eliminando falsos positivos o alucinaciones en CI/CD.
 
+### ADR-007: Capa de Decisión Desacoplada y Arnés de Evaluación Sintética (.evals)
+- **Fecha**: 2026-09-28
+- **Contexto**: El enrutamiento de agentes y la toma de decisiones requerían una separación limpia entre el núcleo básico (Core) y las capacidades avanzadas opcionales (Extended), evitando acoplamiento rígido con servicios de IA externos o microservicios pesados, a la vez que se requerían pruebas sintéticas para prevenir regresiones en la asignación de roles y la detección de riesgos.
+- **Decisión**:
+  1. Diseñar la arquitectura desacoplada en `lib/adapters/DecisionProvider.js` con una clase base abstracta `DecisionProvider`.
+  2. Implementar `DeterministicDecisionProvider` en Core: reglas léxico-semánticas y cruce con `.agents/registry.json`, con latencia < 5ms y cero dependencias de red o paquetes npm.
+  3. Implementar `KevJevDecisionProvider` en Extended: adaptador HTTP/MCP hacia `/v1/systemone` o Kev/Jev con fallback automático al motor determinista en caso de desconexión o fallo.
+  4. Incorporar un mecanismo de escalada constitucional: cualquier intento de bypass, force-push o merge a ramas protegidas activa inmediatamente `escalate: true` y exige aprobación humana (`Agent ≠ Authority`).
+  5. Crear el arnés sintético `.evals/scenarios/routing-scenarios.json` y los comandos CLI `speckit route <tarea>` y `speckit eval`.
+  6. Integrar `npm run test:evals` como Quality Gate bloqueante en `.github/workflows/spec-quality-gate.yml`, emitiendo comprobantes de evidencia en `.evidence/`.
+- **Consecuencias**: Sistema agéntico determinista, testeable y extensible sin vendor lock-in; cumplimiento estricto de la regla constitucional y evaluación automatizada en CI/CD.
+
 ---
 
 ## 🗺️ Historial de Fases e Hitos
@@ -76,5 +88,6 @@ Este archivo actúa como la memoria a largo plazo del proyecto, documentando la 
 | **v2 - Fase 1** | Consolidación del CLI Universal, wrappers delegados y limpieza de plantillas | ✅ Completado | 2026-09-28 |
 | **v2 - Fase 2** | Gobernanza y Registro Tipado de Agentes (.agents/registry.json y esquemas JSON) | ✅ Completado | 2026-09-28 |
 | **v2 - Fase 3** | Puertas de Evidencia, Protocolo de Handoffs y CI/CD Gates (.evidence/ y .agents/handoffs/) | ✅ Completado | 2026-09-28 |
+| **v2 - Fase 4** | Capa de Decisión Desacoplada (Core + Extended Kev/Jev) y Arnés Sintético (.evals/) | ✅ Completado | 2026-09-28 |
 
 

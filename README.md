@@ -16,7 +16,7 @@ Garantiza calidad profesional, elimina el "vibe coding" y permite portar todo el
 * **⚡ Capa de Decisión Tipada (Kev / Jev Integration)**: Integración con la arquitectura de modelos de decisión System 1 de Jared Palmer y la API `/v1/systemone` (compatible con el MCP `jev-classifier`). Permite clasificaciones booleanas (`noul`), de opción múltiple (`choice`) y scoring a coste cero y latencia mínima.
 * **🛠️ Skill Global de Antigravity (`speckit-sdd`)**: Habilidad modular lista para instalar en `~/.gemini/config/skills/` que enseña a los agentes de Antigravity a orquestar las fases de Spec Kit de forma nativa.
 * **🔄 Portabilidad Universal (CLI, One-Liners y Scripts)**:
-  - CLI distribuible vía `npx` y `npm` con comandos `registry`, `handoff`, `evidence`, `create`, `verify`.
+  - CLI distribuible vía `npx` y `npm` con comandos `registry`, `handoff`, `evidence`, `route`, `eval`, `create`, `verify`.
   - Instalador de 1 clic para Antigravity (`scripts\install-sdd.bat` / `.ps1`).
   - One-liners para PowerShell y Bash con garantía **Zero-Overwrite**.
 * **🔄 Loop Engineering & TDD**: Bucles iterativos cerrados (RED -> GREEN -> REFACTOR) que resuelven fallos de compilación, linters y tests de forma autónoma antes de entregar el control al usuario.
@@ -49,6 +49,10 @@ elite-agent-bootstrap-main/
 │   ├── registry.json               # Catálogo formal de agentes, roles y permisos
 │   └── handoffs/                   # Protocolo formal de traspaso de tareas
 ├── .evidence/                      # Registro inmutable de comprobantes de ejecución
+├── .evals/                         # Arnés de evaluación sintética de agentes
+│   └── scenarios/                  # Casos de prueba de enrutamiento y guardrails
+├── lib/adapters/                   # Capa de decisión desacoplada (Core + Extended)
+│   └── DecisionProvider.js         # Motor determinista y adaptador Kev/Jev
 ├── schemas/                        # Esquemas JSON de validación (Draft-07)
 │   ├── agent.schema.json
 │   ├── registry.schema.json

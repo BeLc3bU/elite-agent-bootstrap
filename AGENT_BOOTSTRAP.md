@@ -114,6 +114,10 @@ mi-proyecto/
 │   ├── registry.json                 # Catálogo formal de agentes, roles y permisos
 │   └── handoffs/                     # Protocolo formal de traspaso de tareas
 ├── .evidence/                        # Registro inmutable de comprobantes de ejecución
+├── .evals/                           # Arnés de evaluación sintética de agentes
+│   └── scenarios/                    # Casos de prueba de enrutamiento y guardrails
+├── lib/adapters/                     # Capa de decisión desacoplada (Core + Extended)
+│   └── DecisionProvider.js           # Motor determinista y adaptador Kev/Jev
 ├── schemas/                          # Esquemas JSON de validación
 │   ├── agent.schema.json
 │   ├── registry.schema.json

@@ -32,12 +32,15 @@
     "test:verify": "node bin/cli.js verify",
     "test:registry": "node bin/cli.js registry validate",
     "test:handoff": "node bin/cli.js handoff validate",
-    "test:evidence": "node bin/cli.js evidence verify"
+    "test:evidence": "node bin/cli.js evidence verify",
+    "test:evals": "node bin/cli.js eval"
   },
   "files": [
     "bin",
+    "lib",
     ".agents",
     ".evidence",
+    ".evals",
     "schemas",
     ".specify",
     ".github/prompts",

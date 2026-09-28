@@ -1,0 +1,12 @@
+{
+  "evidence_id": "EV-002-evals-routing",
+  "task_id": "TASK-003",
+  "feature_id": "005-v2-phase4-decision-adapters",
+  "runner_agent": "tester",
+  "command": "npm run test:evals",
+  "exit_code": 0,
+  "status": "passed",
+  "summary": "Evaluación sintética de enrutamiento: 10/10 escenarios superados (100%)",
+  "log_artifact": ".evals/scenarios/routing-scenarios.json",
+  "timestamp": "2026-09-28T17:24:05.299Z"
+}
