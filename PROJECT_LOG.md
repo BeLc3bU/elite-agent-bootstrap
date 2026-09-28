@@ -53,6 +53,17 @@ Este archivo actúa como la memoria a largo plazo del proyecto, documentando la 
   5. Incorporar la validación automática del registro en `.github/workflows/spec-quality-gate.yml`.
 - **Consecuencias**: Gobernanza determinista, tipado estricto de permisos y capacidades, prevención de excesiva agencia y compatibilidad universal con cualquier editor.
 
+### ADR-006: Protocolo de Handoffs Tipados y Sistema de Evidencias Reproducibles
+- **Fecha**: 2026-09-28
+- **Contexto**: Las transiciones entre agentes en sistemas multiagente sufrían pérdida de contexto y falta de contratos claros. Adicionalmente, el cumplimiento de la regla constitucional "Evidencia antes de Afirmaciones" requería un mecanismo de auditoría inmutable e independiente del modelo para verificar la ejecución real de comandos y pruebas.
+- **Decisión**:
+  1. Formalizar esquemas JSON Schema Draft-07: `schemas/handoff.schema.json` y `schemas/evidence.schema.json`.
+  2. Implementar almacenamiento de traspasos en `.agents/handoffs/` con identificadores unívocos (`HO-XXX-*`) y comprobación cruzada contra `.agents/registry.json`.
+  3. Implementar almacenamiento de evidencias en `.evidence/` con identificadores (`EV-XXX-*`), comandos, código de salida y estados (`passed`, `failed`, `skipped`).
+  4. Incorporar comandos nativos en `bin/cli.js`: `speckit handoff validate|list` y `speckit evidence verify|list`.
+  5. Añadir `test:handoff` y `test:evidence` en `package.json` y Quality Gate bloqueante en `.github/workflows/spec-quality-gate.yml`.
+- **Consecuencias**: Auditoría 100% determinista de traspasos y evidencias de pruebas, sin dependencias externas en tiempo de ejecución, eliminando falsos positivos o alucinaciones en CI/CD.
+
 ---
 
 ## 🗺️ Historial de Fases e Hitos
@@ -64,5 +75,6 @@ Este archivo actúa como la memoria a largo plazo del proyecto, documentando la 
 | **Fase 3** | Subcomandos de gestión (create/verify), limpieza de legado y despliegue | ✅ Completado | 2026-08-16 |
 | **v2 - Fase 1** | Consolidación del CLI Universal, wrappers delegados y limpieza de plantillas | ✅ Completado | 2026-09-28 |
 | **v2 - Fase 2** | Gobernanza y Registro Tipado de Agentes (.agents/registry.json y esquemas JSON) | ✅ Completado | 2026-09-28 |
+| **v2 - Fase 3** | Puertas de Evidencia, Protocolo de Handoffs y CI/CD Gates (.evidence/ y .agents/handoffs/) | ✅ Completado | 2026-09-28 |
 
 

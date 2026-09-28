@@ -47,3 +47,9 @@ jobs:
 
       - name: Validar Registro de Agentes y Gobernanza
         run: node bin/cli.js registry validate
+
+      - name: Validar Protocolo de Handoffs de Agentes
+        run: node bin/cli.js handoff validate
+
+      - name: Auditar Sistema de Evidencias Reproducibles
+        run: node bin/cli.js evidence verify

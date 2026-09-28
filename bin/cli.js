@@ -331,6 +331,225 @@ function cmdRegistry(targetDir, subAction = 'list') {
 }
 
 // ==========================================
+// Comandos de Handoffs entre Agentes (handoff)
+// ==========================================
+function validateHandoffs(targetDir) {
+  const handoffsDir = path.join(targetDir, '.agents', 'handoffs');
+  if (!fs.existsSync(handoffsDir)) {
+    return [];
+  }
+
+  let knownAgents = new Set();
+  const registryPath = path.join(targetDir, '.agents', 'registry.json');
+  if (fs.existsSync(registryPath)) {
+    try {
+      const reg = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+      if (Array.isArray(reg.agents)) {
+        reg.agents.forEach(a => knownAgents.add(a.id));
+      }
+    } catch (_) {}
+  }
+
+  const files = fs.readdirSync(handoffsDir).filter(f => f.endsWith('.json'));
+  const handoffs = [];
+
+  const requiredProps = [
+    'handoff_id', 'from', 'to', 'task_id', 'objective', 'context',
+    'inputs', 'constraints', 'completed', 'decisions', 'artifacts',
+    'evidence', 'risks', 'next_action', 'required_approval', 'timestamp'
+  ];
+
+  for (const file of files) {
+    const filePath = path.join(handoffsDir, file);
+    let h;
+    try {
+      h = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    } catch (err) {
+      throw new Error(`Sintaxis JSON inválida en handoff '${file}': ${err.message}`);
+    }
+
+    for (const prop of requiredProps) {
+      if (h[prop] === undefined || h[prop] === null) {
+        throw new Error(`Handoff '${file}' carece de la propiedad requerida '${prop}'.`);
+      }
+    }
+
+    if (!/^HO-[0-9]{3}-[a-z0-9-]+$/.test(h.handoff_id)) {
+      throw new Error(`Handoff '${file}' tiene un ID inválido: '${h.handoff_id}'. Formato requerido: HO-XXX-descripcion`);
+    }
+
+    if (knownAgents.size > 0) {
+      if (!knownAgents.has(h.from)) {
+        throw new Error(`Handoff '${file}': Agente emisor '${h.from}' no existe en .agents/registry.json.`);
+      }
+      if (!knownAgents.has(h.to)) {
+        throw new Error(`Handoff '${file}': Agente receptor '${h.to}' no existe en .agents/registry.json.`);
+      }
+    }
+
+    handoffs.push(h);
+  }
+
+  return handoffs;
+}
+
+function cmdHandoff(targetDir, subAction = 'list') {
+  printBanner();
+  const handoffsDir = path.join(targetDir, '.agents', 'handoffs');
+
+  if (subAction === 'validate') {
+    log(`\n🔍 Validando protocolo de handoffs en: ${colors.bold}${handoffsDir}${colors.reset}\n`, colors.cyan);
+    try {
+      const handoffs = validateHandoffs(targetDir);
+      log(`✅ Protocolo de traspasos válido: ${handoffs.length} handoffs auditados sin violaciones.`, colors.green);
+      console.log('');
+    } catch (err) {
+      log(`❌ Error en validación de handoffs: ${err.message}\n`, colors.red);
+      process.exit(1);
+    }
+    return;
+  }
+
+  // Por defecto: 'list'
+  log(`\n🤝 Traspasos Registrados entre Agentes (Handoffs):\n`, colors.cyan);
+  try {
+    const handoffs = validateHandoffs(targetDir);
+    if (handoffs.length === 0) {
+      log(`[INFO] No hay traspasos registrados aún en '.agents/handoffs/'.`, colors.gray);
+      console.log('');
+      return;
+    }
+
+    log(`| ID | De (From) | Para (To) | Tarea | Aprobación | Timestamp |`, colors.yellow);
+    log(`|---|---|---|---|---|---|`, colors.gray);
+    for (const h of handoffs) {
+      const reqAppr = h.required_approval ? '🔒 Sí' : '⚡ No';
+      const timeStr = h.timestamp ? h.timestamp.split('T')[0] : 'N/A';
+      log(`| ${colors.bold}${h.handoff_id.padEnd(30)}${colors.reset} | ${h.from.padEnd(14)} | ${h.to.padEnd(14)} | ${h.task_id.padEnd(10)} | ${reqAppr.padEnd(10)} | ${timeStr} |`);
+    }
+    console.log('');
+  } catch (err) {
+    log(`❌ Error al listar handoffs: ${err.message}\n`, colors.red);
+    process.exit(1);
+  }
+}
+
+// ==========================================
+// Comandos del Sistema de Evidencias (evidence)
+// ==========================================
+function validateEvidences(targetDir) {
+  const evidenceDir = path.join(targetDir, '.evidence');
+  if (!fs.existsSync(evidenceDir)) {
+    return [];
+  }
+
+  let knownAgents = new Set();
+  const registryPath = path.join(targetDir, '.agents', 'registry.json');
+  if (fs.existsSync(registryPath)) {
+    try {
+      const reg = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+      if (Array.isArray(reg.agents)) {
+        reg.agents.forEach(a => knownAgents.add(a.id));
+      }
+    } catch (_) {}
+  }
+
+  function getJsonFiles(dir) {
+    let results = [];
+    const list = fs.readdirSync(dir, { withFileTypes: true });
+    for (const item of list) {
+      const fullPath = path.join(dir, item.name);
+      if (item.isDirectory()) {
+        results = results.concat(getJsonFiles(fullPath));
+      } else if (item.name.endsWith('.json')) {
+        results.push(fullPath);
+      }
+    }
+    return results;
+  }
+
+  const files = getJsonFiles(evidenceDir);
+  const evidences = [];
+
+  const requiredProps = [
+    'evidence_id', 'task_id', 'feature_id', 'runner_agent',
+    'command', 'exit_code', 'status', 'summary', 'timestamp'
+  ];
+
+  for (const filePath of files) {
+    const relName = path.relative(evidenceDir, filePath);
+    let ev;
+    try {
+      ev = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    } catch (err) {
+      throw new Error(`Sintaxis JSON inválida en evidencia '${relName}': ${err.message}`);
+    }
+
+    for (const prop of requiredProps) {
+      if (ev[prop] === undefined || ev[prop] === null) {
+        throw new Error(`Evidencia '${relName}' carece de la propiedad requerida '${prop}'.`);
+      }
+    }
+
+    if (!['passed', 'failed', 'skipped'].includes(ev.status)) {
+      throw new Error(`Evidencia '${relName}' tiene un status no válido: '${ev.status}'.`);
+    }
+
+    if (ev.status === 'passed' && ev.exit_code !== 0) {
+      throw new Error(`Evidencia '${relName}' inconsistente: status='passed' pero exit_code=${ev.exit_code} (debe ser 0).`);
+    }
+
+    if (knownAgents.size > 0 && !knownAgents.has(ev.runner_agent)) {
+      throw new Error(`Evidencia '${relName}': El agente ejecutor '${ev.runner_agent}' no existe en .agents/registry.json.`);
+    }
+
+    evidences.push(ev);
+  }
+
+  return evidences;
+}
+
+function cmdEvidence(targetDir, subAction = 'verify') {
+  printBanner();
+  const evidenceDir = path.join(targetDir, '.evidence');
+
+  if (subAction === 'verify' || subAction === 'validate') {
+    log(`\n🔍 Auditando comprobantes de evidencia en: ${colors.bold}${evidenceDir}${colors.reset}\n`, colors.cyan);
+    try {
+      const evidences = validateEvidences(targetDir);
+      log(`✅ Sistema de evidencias verificado: ${evidences.length} comprobantes inmutables válidos.`, colors.green);
+      console.log('');
+    } catch (err) {
+      log(`❌ Error de verificación de evidencias: ${err.message}\n`, colors.red);
+      process.exit(1);
+    }
+    return;
+  }
+
+  // 'list'
+  log(`\n🛡️ Registro de Evidencias Reproducibles (.evidence):\n`, colors.cyan);
+  try {
+    const evidences = validateEvidences(targetDir);
+    if (evidences.length === 0) {
+      log(`[INFO] No hay comprobantes registrados aún en '.evidence/'.`, colors.gray);
+      console.log('');
+      return;
+    }
+
+    log(`| ID | Tarea | Feature | Agente | Estado | Exit | Comando |`, colors.yellow);
+    log(`|---|---|---|---|---|---|---|`, colors.gray);
+    for (const ev of evidences) {
+      const stColor = ev.status === 'passed' ? colors.green + 'passed' : colors.red + ev.status;
+      log(`| ${colors.bold}${ev.evidence_id.padEnd(24)}${colors.reset} | ${ev.task_id.padEnd(10)} | ${ev.feature_id.padEnd(28)} | ${ev.runner_agent.padEnd(12)} | ${stColor.padEnd(16)}${colors.reset} | ${String(ev.exit_code).padEnd(4)} | ${ev.command} |`);
+    }
+    console.log('');
+  } catch (err) {
+    log(`❌ Error al listar evidencias: ${err.message}\n`, colors.red);
+    process.exit(1);
+  }
+}
+
+// ==========================================
 // Comando: Crear Feature (create)
 // ==========================================
 function cmdCreate(targetDir, featureName) {
@@ -662,6 +881,8 @@ Comandos:
   create <nombre>        Crea una nueva especificación numerada en specs/
   verify                 Comprueba el estado y avance de todas las especificaciones
   registry [list|val]    Consulta ('list') o valida ('validate') el catálogo de agentes
+  handoff [list|val]     Lista ('list') o valida ('validate') traspasos entre agentes
+  evidence [list|ver]    Lista ('list') o audita ('verify') comprobantes de ejecución
   install-skill          Instala la skill speckit-sdd en Antigravity (~/.gemini/config)
   version                Muestra la versión instalada
 
@@ -678,6 +899,8 @@ Ejemplos:
   npx elite-speckit verify                        # Valida avance de tareas
   npx elite-speckit registry                      # Lista catálogo oficial de agentes
   npx elite-speckit registry validate             # Valida registro contra esquema JSON
+  npx elite-speckit handoff validate              # Valida protocolo de handoffs
+  npx elite-speckit evidence verify               # Audita comprobantes de ejecución
   npx elite-speckit install-skill                 # Instala skill en Antigravity
 `);
     process.exit(0);
@@ -698,6 +921,20 @@ Ejemplos:
     const subAction = rawArgs[1] || 'list';
     const targetDir = rawArgs[2] ? path.resolve(rawArgs[2]) : process.cwd();
     cmdRegistry(targetDir, subAction);
+    return;
+  }
+
+  if (command === 'handoff' || command === 'handoffs') {
+    const subAction = rawArgs[1] || 'list';
+    const targetDir = rawArgs[2] ? path.resolve(rawArgs[2]) : process.cwd();
+    cmdHandoff(targetDir, subAction);
+    return;
+  }
+
+  if (command === 'evidence' || command === 'evidences') {
+    const subAction = rawArgs[1] || 'verify';
+    const targetDir = rawArgs[2] ? path.resolve(rawArgs[2]) : process.cwd();
+    cmdEvidence(targetDir, subAction);
     return;
   }
 

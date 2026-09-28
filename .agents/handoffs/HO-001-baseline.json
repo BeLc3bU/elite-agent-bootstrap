@@ -1,0 +1,40 @@
+{
+  "handoff_id": "HO-001-baseline-to-implementer",
+  "from": "spec-agent",
+  "to": "implementer",
+  "task_id": "SPEC-001",
+  "objective": "Traspasar especificación de la línea base del ecosistema SDD para implementación de plantillas y CLI",
+  "context": "Línea base inicial del repositorio configurada con Spec Kit y modelos de decisión Kev.",
+  "inputs": [
+    "specs/001-template-baseline/spec.md",
+    ".specify/memory/constitution.md"
+  ],
+  "constraints": [
+    "100% en español",
+    "Cero dependencias externas en CLI",
+    "Compatibilidad multiplataforma Windows y Unix"
+  ],
+  "completed": [
+    "Redacción de historias de usuario y criterios de aceptación",
+    "Aprobación del plan técnico base"
+  ],
+  "decisions": [
+    "Uso de GitHub Spec Kit oficial como metodología estándar",
+    "Integración de Skill global para Antigravity"
+  ],
+  "artifacts": [
+    "specs/001-template-baseline/spec.md",
+    "specs/001-template-baseline/plan.md",
+    "specs/001-template-baseline/tasks.md"
+  ],
+  "evidence": [
+    ".evidence/README.md"
+  ],
+  "unresolved": [],
+  "risks": [
+    "Riesgo bajo: compatibilidad de rutas en entornos Windows resuelta mediante módulo path"
+  ],
+  "next_action": "Ejecutar la suite de tareas atómicas descritas en tasks.md",
+  "required_approval": false,
+  "timestamp": "2026-09-28T16:00:00Z"
+}

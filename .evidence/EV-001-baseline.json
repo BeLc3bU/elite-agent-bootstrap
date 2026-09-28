@@ -1,0 +1,12 @@
+{
+  "evidence_id": "EV-001-baseline-tests",
+  "task_id": "TASK-001",
+  "feature_id": "001-template-baseline",
+  "runner_agent": "tester",
+  "command": "npm run test:verify",
+  "exit_code": 0,
+  "status": "passed",
+  "summary": "Verificación formal de estructura y directrices constitucionales",
+  "log_artifact": "specs/001-template-baseline/tasks.md",
+  "timestamp": "2026-09-28T16:30:00Z"
+}

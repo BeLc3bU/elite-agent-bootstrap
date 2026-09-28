@@ -111,10 +111,14 @@ Si el repositorio ya cuenta con código o el usuario pide integrar Spec-Kit en u
 ```
 mi-proyecto/
 ├── .agents/                          # Gobernanza y Registro Tipado de Agentes
-│   └── registry.json                 # Catálogo formal de agentes, roles y permisos
+│   ├── registry.json                 # Catálogo formal de agentes, roles y permisos
+│   └── handoffs/                     # Protocolo formal de traspaso de tareas
+├── .evidence/                        # Registro inmutable de comprobantes de ejecución
 ├── schemas/                          # Esquemas JSON de validación
 │   ├── agent.schema.json
-│   └── registry.schema.json
+│   ├── registry.schema.json
+│   ├── handoff.schema.json
+│   └── evidence.schema.json
 ├── .specify/                         # Infraestructura y runtime de Spec Kit
 │   ├── memory/
 │   │   └── constitution.md           # Leyes innegociables y principios de arquitectura

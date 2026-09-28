@@ -30,11 +30,14 @@
     "start": "node bin/cli.js",
     "speckit": "node bin/cli.js",
     "test:verify": "node bin/cli.js verify",
-    "test:registry": "node bin/cli.js registry validate"
+    "test:registry": "node bin/cli.js registry validate",
+    "test:handoff": "node bin/cli.js handoff validate",
+    "test:evidence": "node bin/cli.js evidence verify"
   },
   "files": [
     "bin",
     ".agents",
+    ".evidence",
     "schemas",
     ".specify",
     ".github/prompts",

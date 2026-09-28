@@ -9,11 +9,14 @@ Garantiza calidad profesional, elimina el "vibe coding" y permite portar todo el
 ## 🚀 Características Principales
 
 * **📐 Spec-Driven Development (GitHub Spec Kit)**: Metodología formal y gobernable. Cada cambio pasa obligatoriamente por el ciclo `Specify` (qué/por qué) ➔ `Clarify` ➔ `Plan` (arquitectura técnica) ➔ `Tasks` (desglose atómico) ➔ `Implement` (TDD) ➔ `Converge` (verificación total) dentro de `.specify/` y `specs/`.
+* **👥 Gobernanza y Catálogo Tipado de Agentes (`.agents/registry.json`)**: Definición formal de permisos, herramientas, archivos restringidos y niveles de riesgo con el principio innegociable `Agent ≠ Authority`.
+* **🤝 Protocolo de Traspasos Tipados (Handoff Protocol)**: Contrato estructurado en `.agents/handoffs/` que transfiere tareas preservando contexto, decisiones tomadas, artefactos y riesgos sin pérdida de información.
+* **🛡️ Sistema de Evidencias Reproducibles (`.evidence/`)**: Registro inmutable de comprobantes de ejecución, comandos y códigos de retorno que garantiza la política constitucional "Evidencia antes de Afirmaciones".
 * **🏛️ Gobernanza Constitucional (`constitution.md`)**: Cada proyecto cuenta con un archivo rector que define sus leyes innegociables de arquitectura, costes, calidad y dependencias, impidiendo alucinaciones del modelo.
 * **⚡ Capa de Decisión Tipada (Kev / Jev Integration)**: Integración con la arquitectura de modelos de decisión System 1 de Jared Palmer y la API `/v1/systemone` (compatible con el MCP `jev-classifier`). Permite clasificaciones booleanas (`noul`), de opción múltiple (`choice`) y scoring a coste cero y latencia mínima.
 * **🛠️ Skill Global de Antigravity (`speckit-sdd`)**: Habilidad modular lista para instalar en `~/.gemini/config/skills/` que enseña a los agentes de Antigravity a orquestar las fases de Spec Kit de forma nativa.
 * **🔄 Portabilidad Universal (CLI, One-Liners y Scripts)**:
-  - CLI distribuible vía `npx` y `npm`.
+  - CLI distribuible vía `npx` y `npm` con comandos `registry`, `handoff`, `evidence`, `create`, `verify`.
   - Instalador de 1 clic para Antigravity (`scripts\install-sdd.bat` / `.ps1`).
   - One-liners para PowerShell y Bash con garantía **Zero-Overwrite**.
 * **🔄 Loop Engineering & TDD**: Bucles iterativos cerrados (RED -> GREEN -> REFACTOR) que resuelven fallos de compilación, linters y tests de forma autónoma antes de entregar el control al usuario.
@@ -42,6 +45,15 @@ Una vez integrado en tu editor o asistente de IA (Antigravity, Cursor, Claude Co
 
 ```text
 elite-agent-bootstrap-main/
+├── .agents/                        # Gobernanza y Registro Tipado de Agentes
+│   ├── registry.json               # Catálogo formal de agentes, roles y permisos
+│   └── handoffs/                   # Protocolo formal de traspaso de tareas
+├── .evidence/                      # Registro inmutable de comprobantes de ejecución
+├── schemas/                        # Esquemas JSON de validación (Draft-07)
+│   ├── agent.schema.json
+│   ├── registry.schema.json
+│   ├── handoff.schema.json
+│   └── evidence.schema.json
 ├── .github/
 │   ├── prompts/                    # Prompts integrados para Copilot Chat / VSCode
 │   │   ├── speckit.constitution.prompt.md
@@ -53,24 +65,23 @@ elite-agent-bootstrap-main/
 │   │   └── speckit.converge.prompt.md
 │   └── workflows/
 │       ├── release-please.yml       # Release automatizada con changelogs en español
-│       └── spec-quality-gate.yml    # Verificación CI/CD de tests, lint y specs
+│       └── spec-quality-gate.yml    # Verificación CI/CD de tests, lint, specs y agentes
 ├── .specify/                       # Directorio de control de Spec-Kit
 │   ├── memory/
-│   │   ├── constitution.md         # Principios inmutables del repositorio
-│   │   └── constitution-template.md# Plantilla inicial de gobernanza
-│   ├── templates/                  # Plantillas oficiales en español
-│   │   ├── spec-template.md / spec.md
-│   │   ├── plan-template.md / plan.md
-│   │   ├── tasks-template.md / tasks.md
-│   │   ├── clarify-template.md
-│   │   └── checklist-template.md
+│   │   └── constitution.md         # Principios inmutables del repositorio
+│   ├── templates/                  # Plantillas oficiales en español (canónicas)
+│   │   ├── spec.md
+│   │   ├── plan.md
+│   │   ├── tasks.md
+│   │   ├── clarify.md
+│   │   └── checklist.md
 │   └── scripts/                    # Scripts de automatización local
 │       ├── create-feature.ps1 / .sh
 │       └── verify-spec.ps1 / .sh
 ├── skills/                         # Habilidades exportables de Antigravity
 │   └── speckit-sdd/
 │       └── SKILL.md                # Definición oficial de la skill SDD
-├── scripts/                        # Scripts de integración y portabilidad
+├── scripts/                        # Wrappers de conveniencia para bin/cli.js
 │   ├── install-sdd.bat / .ps1      # Instalador de la skill Antigravity en ~/.gemini/config/
 │   ├── init-project-sdd.bat / .ps1 # Inicializador local de proyecto
 │   ├── integrate-speckit.ps1 / .sh # Integrador CLI multiplataforma
@@ -82,10 +93,10 @@ elite-agent-bootstrap-main/
 ├── docs/                           # Guías técnicas de arquitectura
 │   └── kev-decision-guide.md       # Guía de modelos de decisión tipada Kev / Jev
 ├── bin/
-│   └── cli.js                      # CLI ejecutable con npx o npm global
+│   └── cli.js                      # CLI Universal sin dependencias externas
 ├── AGENT_BOOTSTRAP.md              # El Mega-Prompt maestro para la IA
 ├── PROJECT_LOG.md                  # Memoria técnica y Architectural Decision Records (ADRs)
-├── AGENTS.md                       # Arnés de control de agentes (máx. 500 líneas)
+├── AGENTS.md                       # Arnés de control y catálogo de gobernanza
 └── README.md                       # Este manual de referencia
 ```
 

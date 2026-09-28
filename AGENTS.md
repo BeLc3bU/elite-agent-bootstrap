@@ -12,6 +12,10 @@ Este repositorio es el estándar de ingeniería y gobernanza para **Spec-Driven 
 | `speckit verify` (o `node bin/cli.js verify`) | Verificar estado y tareas de todas las especificaciones |
 | `speckit registry validate` | Validar formalmente el registro de agentes contra JSON Schema |
 | `speckit registry list` | Mostrar el catálogo oficial de agentes, permisos y niveles de riesgo |
+| `speckit handoff validate` | Validar el protocolo formal de traspaso de tareas entre agentes |
+| `speckit handoff list` | Listar el registro histórico de traspasos (handoffs) |
+| `speckit evidence verify` | Auditar y verificar los comprobantes de ejecución inmutables |
+| `speckit evidence list` | Listar el catálogo de comprobantes de evidencia registrados |
 | `speckit install-skill` | Instalar la skill global `speckit-sdd` en Antigravity |
 | `npm run test:verify` | Ejecución automatizada de la suite de validación de specs |
 | `git status` | Verificar estado de git y ramas |
@@ -20,7 +24,9 @@ Este repositorio es el estándar de ingeniería y gobernanza para **Spec-Driven 
 
 ## 🏗️ Rutas y Estructura del Sistema
 - **Catálogo de Agentes y Gobernanza**: `.agents/registry.json`
-- **Esquemas JSON de Validación**: `schemas/agent.schema.json`, `schemas/registry.schema.json`
+- **Protocolo de Traspasos (Handoffs)**: `.agents/handoffs/`
+- **Registro de Evidencias Reproducibles**: `.evidence/`
+- **Esquemas JSON de Validación**: `schemas/agent.schema.json`, `schemas/registry.schema.json`, `schemas/handoff.schema.json`, `schemas/evidence.schema.json`
 - **Configuración Spec-Kit**: `.specify/`
 - **Constitución Inmutable**: `.specify/memory/constitution.md`
 - **Plantillas SDD Canónicas**: `.specify/templates/`
