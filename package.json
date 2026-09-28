@@ -29,7 +29,7 @@
   "scripts": {
     "start": "node bin/cli.js",
     "speckit": "node bin/cli.js",
-    "test:verify": "powershell ./.specify/scripts/verify-spec.ps1"
+    "test:verify": "node bin/cli.js verify"
   },
   "files": [
     "bin",

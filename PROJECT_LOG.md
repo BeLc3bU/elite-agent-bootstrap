@@ -31,6 +31,17 @@ Este archivo actúa como la memoria a largo plazo del proyecto, documentando la 
   3. Soporte para instalador remoto one-liner (`install.ps1` e `install.sh`).
 - **Consecuencias**: Repositorio 100% limpio y experiencia de usuario fluida multiplataforma.
 
+### ADR-004: Consolidación del CLI Universal y Limpieza de Deuda Técnica
+- **Fecha**: 2026-09-28
+- **Contexto**: Dispersión operativa generada por 12 scripts de shell en Bash/PowerShell/Batch con lógica duplicada y redundancia en plantillas markdown (`*-template.md`).
+- **Decisión**:
+  1. Integrar el comando `install-skill` directamente en `bin/cli.js` de forma multiplataforma y sin dependencias externas.
+  2. Reducir los scripts en `scripts/` y `.specify/scripts/` a wrappers transparentes que delegan en `bin/cli.js`.
+  3. Consolidar `.specify/templates/` en archivos canónicos (`spec.md`, `plan.md`, `tasks.md`, `clarify.md`, `checklist.md`) eliminando los duplicados `*-template.md`.
+  4. Universalizar la configuración recomendada en `docs/kev-decision-guide.md` eliminando paths locales hardcodeados.
+  5. Actualizar `package.json` para ejecutar `node bin/cli.js verify` de forma 100% agnóstica de plataforma.
+- **Consecuencias**: Mantenimiento simplificado (DRY), cero dependencias adicionales, paridad multiplataforma total y reducción de la superficie de error.
+
 ---
 
 ## 🗺️ Historial de Fases e Hitos
@@ -40,5 +51,6 @@ Este archivo actúa como la memoria a largo plazo del proyecto, documentando la 
 | **Fase 1** | Refactorización de la plantilla base e integración de Spec-Kit | ✅ Completado | 2026-08-16 |
 | **Fase 2** | CLI Universal distribuible, plantillas scaffold y protección Zero-Overwrite | ✅ Completado | 2026-08-16 |
 | **Fase 3** | Subcomandos de gestión (create/verify), limpieza de legado y despliegue | ✅ Completado | 2026-08-16 |
+| **v2 - Fase 1** | Consolidación del CLI Universal, wrappers delegados y limpieza de plantillas | ✅ Completado | 2026-09-28 |
 
 

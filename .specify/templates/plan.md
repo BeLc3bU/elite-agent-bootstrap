@@ -1,45 +1,70 @@
-# Plan Técnico: [NOMBRE DE LA CARACTERÍSTICA]
+# 📐 Plan de Implementación Técnica: [NOMBRE_FEATURE]
 
-- **Especificación asociada:** `specs/{{NNN}}-{{NOMBRE_FEATURE}}/spec.md`
-- **Estado:** `PROPOSED` | `ACCEPTED` | `SUPERSEDED`
+**Feature Ref**: `[ID_FEATURE]` (enlace a `spec.md`)  
+**Estado**: `[Propuesto | Aprobado | En Desarrollo | Completado]`  
+**Arquitecto/Líder Técnico**: `[NOMBRE_DEL_ROL]`  
+**Fecha de Aprobación**: `[YYYY-MM-DD]`
 
 ---
 
-## 1. Visión General de la Arquitectura
-Explicación técnica de la solución: cómo encaja en el sistema existente, qué módulos interactúan y qué patrones de diseño se aplican.
+## 🏛️ 1. Arquitectura de la Solución
 
+### Diagrama de Flujo / Componentes
+```mermaid
+graph TD
+    UI[Frontend / Componente UI] --> Controller[Controlador / Handler]
+    Controller --> Service[Servicio de Negocio]
+    Service --> Repo[Capa de Datos / Repositorio]
+    Repo --> DB[(Base de Datos / Storage)]
 ```
-[Diagrama de flujo o texto explicativo de componentes]
+
+### Descripción de Componentes
+- **Componente 1**: `[Ruta / Archivo]` - [Propósito y responsabilidades]
+- **Componente 2**: `[Ruta / Archivo]` - [Propósito y responsabilidades]
+- **Componente 3**: `[Ruta / Archivo]` - [Propósito y responsabilidades]
+
+---
+
+## 📦 2. Modelos de Datos y Contratos (Schemas / Interfaces)
+
+```typescript
+// Ejemplo de interfaces o tipos TypeScript / Schemas Zod / Pydantic / Entidades
+export interface [NombreModelo] {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 ```
 
 ---
 
-## 2. Archivos Impactados
-Lista exhaustiva de archivos que serán creados, modificados o eliminados:
-- **Nuevos:** `ruta/al/nuevo_archivo.py`
-- **Modificados:** `ruta/al/archivo_existente.py` (Líneas aproximadas o funciones)
-- **Eliminados / Deprecados:** `ruta/al/antiguo.py`
+## 🌐 3. Endpoints de API / Contratos de Servicio (Si aplica)
+
+| Método | Ruta | Parámetros / Body | Respuesta Exitosa | Errores Posibles |
+|---|---|---|---|---|
+| `POST` | `/api/v1/...` | `{ ... }` | `201 Created` | `400 Bad Request`, `409 Conflict` |
+| `GET` | `/api/v1/...` | `?filtro=...` | `200 OK` | `404 Not Found` |
 
 ---
 
-## 3. Modelo de Datos y Contratos de Interfaz
-- **Esquema de Base de Datos:** (Migraciones, tablas SQLite, índices o cambios de columnas).
-- **Contratos de Funciones / APIs:** Firmas exactas de métodos públicos, parámetros y tipos de retorno esperados.
-- **Capa de Decisión (si aplica):** Preguntas y contratos para Kev/Jev (`noul`, `choice`, `score`).
+## 🛠️ 4. Estrategia de Testing (TDD & Guardrails)
+
+1. **Pruebas Unitarias**:
+   - `[Archivo de test]`: Validar funciones puras y lógica de negocio.
+2. **Pruebas de Integración**:
+   - `[Archivo de test]`: Validar interacción entre capas, endpoints y persistencia.
+3. **Pruebas E2E / UI (Si aplica)**:
+   - Validar flujos de usuario completos y capturar evidencias visuales.
 
 ---
 
-## 4. Dependencias Nuevas (YAGNI)
-- Lista de nuevas librerías indispensables (justificar por qué no se puede resolver con la biblioteca estándar).
+## 🛡️ 5. Consideraciones de Seguridad y Rendimiento
+
+- **Seguridad**: [Validación de entradas, control de acceso, prevención de inyecciones / XSS].
+- **Rendimiento**: [Indexación de BD, paginación, lazy loading, gestión de memoria].
 
 ---
 
-## 5. Estrategia de Pruebas y Validación
-- **Tests Unitarios:** Qué módulos y funciones tendrán pruebas dedicadas en `tests/`.
-- **Tests de Integración:** Flujos de extremo a extremo a validar.
-- **Comandos de Verificación:** Comandos exactos a ejecutar durante el desarrollo.
-
----
-
-## 6. Riesgos y Plan de Reversión (Rollback)
-- Qué podría fallar en entornos reales y cómo revertir el cambio sin pérdida de datos.
+## 📋 6. Dependencias y Paquetes Nuevos
+*Listar si se requieren nuevas librerías y justificación:*
+- `[nombre-paquete@version]`: [Justificación técnica]

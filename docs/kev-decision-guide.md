@@ -59,10 +59,10 @@ Antigravity integra esta capa de decisión a través del servidor MCP **`jev-cla
 
 ```json
 "jev-classifier": {
-  "command": "node.exe",
-  "args": [".../jev-classifier/dist/cli.js", "mcp", "--global", "--client", "antigravity"],
+  "command": "node",
+  "args": ["/path/to/jev-classifier/dist/cli.js", "mcp", "--global", "--client", "antigravity"],
   "env": {
-    "JEV_CONFIG_HOME": "C:\\Users\\...\\AppData\\Roaming\\jev-classifier",
+    "JEV_CONFIG_HOME": "${HOME}/.jev-classifier",
     "JEV_STUB": "1"
   }
 }

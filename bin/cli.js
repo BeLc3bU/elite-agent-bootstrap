@@ -8,6 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
+const os = require('os');
 
 // ==========================================
 // Colores y Formato en Terminal
@@ -259,21 +260,27 @@ function cmdCreate(targetDir, featureName) {
   const dateStr = new Date().toISOString().split('T')[0];
 
   const files = [
-    { src: 'spec-template.md', dest: 'spec.md' },
-    { src: 'plan-template.md', dest: 'plan.md' },
-    { src: 'tasks-template.md', dest: 'tasks.md' },
-    { src: 'clarify-template.md', dest: 'clarify.md' },
-    { src: 'checklist-template.md', dest: 'checklist.md' }
+    { src: 'spec.md', fallback: 'spec-template.md', dest: 'spec.md' },
+    { src: 'plan.md', fallback: 'plan-template.md', dest: 'plan.md' },
+    { src: 'tasks.md', fallback: 'tasks-template.md', dest: 'tasks.md' },
+    { src: 'clarify.md', fallback: 'clarify-template.md', dest: 'clarify.md' },
+    { src: 'checklist.md', fallback: 'checklist-template.md', dest: 'checklist.md' }
   ];
 
   for (const f of files) {
-    const srcPath = path.join(actualTemplatesDir, f.src);
+    let srcPath = path.join(actualTemplatesDir, f.src);
+    if (!fs.existsSync(srcPath) && f.fallback) {
+      srcPath = path.join(actualTemplatesDir, f.fallback);
+    }
     if (fs.existsSync(srcPath)) {
       let content = fs.readFileSync(srcPath, 'utf8');
       content = content
         .replace(/\[NOMBRE_FEATURE\]/g, cleanName)
         .replace(/\[ID_FEATURE\]/g, paddedId)
-        .replace(/\[YYYY-MM-DD\]/g, dateStr);
+        .replace(/\[YYYY-MM-DD\]/g, dateStr)
+        .replace(/\{\{NOMBRE_FEATURE\}\}/g, cleanName)
+        .replace(/\{\{NNN\}\}/g, paddedId)
+        .replace(/\{\{FECHA\}\}/g, dateStr);
       fs.writeFileSync(path.join(featureDir, f.dest), content, 'utf8');
     }
   }
@@ -460,6 +467,63 @@ ${colors.yellow}Comandos disponibles en tu editor / IA:${colors.reset}
 ${colors.yellow}Comandos CLI disponibles en la terminal:${colors.reset}
   👉 ${colors.bold}speckit create <nombre>${colors.reset} - Crea una nueva spec con plantillas
   👉 ${colors.bold}speckit verify${colors.reset}          - Comprueba el estado de todas las specs
+  👉 ${colors.bold}speckit install-skill${colors.reset}   - Instala la skill speckit-sdd en Antigravity
+`);
+}
+
+// ==========================================
+// Comando: Instalar Skill en Antigravity (install-skill)
+// ==========================================
+function cmdInstallSkill() {
+  printBanner();
+  log(`\n🚀 Instalando Skill Global de Antigravity (speckit-sdd)...\n`, colors.cyan);
+
+  const skillSource = path.join(ROOT_DIR, 'skills', 'speckit-sdd', 'SKILL.md');
+  if (!fs.existsSync(skillSource)) {
+    log(`[-] No se encontró la skill en: ${skillSource}`, colors.red);
+    process.exit(1);
+  }
+
+  const geminiConfigDir = path.join(os.homedir(), '.gemini', 'config');
+  const targetSkillsDir = path.join(geminiConfigDir, 'skills', 'speckit-sdd');
+
+  log(`1. Verificando directorio global de Antigravity (~/.gemini/config)...`, colors.yellow);
+  ensureDirSync(targetSkillsDir);
+
+  log(`2. Copiando archivo de Skill (SKILL.md)...`, colors.yellow);
+  fs.copyFileSync(skillSource, path.join(targetSkillsDir, 'SKILL.md'));
+  log(`   [OK] Skill instalada en: ${targetSkillsDir}`, colors.green);
+
+  log(`3. Configurando directrices globales en GEMINI.md...`, colors.yellow);
+  const globalRulesFile = path.join(geminiConfigDir, 'GEMINI.md');
+  const ruleBlock = `
+## Metodología Spec-Driven Development (GitHub Spec Kit)
+- **Detección automática:** Si el espacio de trabajo actual contiene una carpeta .specify/ o specs/, el agente entrará automáticamente en modo **Spec-Driven Development (SDD)** estricto.
+- **Lectura Constitucional:** Es obligatorio leer .specify/memory/constitution.md antes de proponer cambios de arquitectura o código.
+- **Prohibición de Vibe Coding:** No escribir ni modificar código de producción sin contar con la especificación aprobada en specs/NNN-<feature>/ (spec.md, plan.md, tasks.md).
+- **Activación de Skill:** Usar la skill speckit-sdd para orquestar las fases: specify -> plan -> tasks -> implement -> converge.
+- **Decisiones Tipadas (Kev/Jev):** Priorizar modelos de decisión tipada (Kev / /v1/systemone / jev-classifier) para clasificaciones categóricas o scoring.
+`;
+
+  if (fs.existsSync(globalRulesFile)) {
+    const currentContent = fs.readFileSync(globalRulesFile, 'utf8');
+    if (!currentContent.includes('speckit-sdd')) {
+      fs.appendFileSync(globalRulesFile, '\n' + ruleBlock, 'utf8');
+      log(`   [OK] Directrices SDD agregadas a: ${globalRulesFile}`, colors.green);
+    } else {
+      log(`   [OK] Las directrices SDD ya estaban presentes en: ${globalRulesFile}`, colors.green);
+    }
+  } else {
+    fs.writeFileSync(globalRulesFile, '# Reglas Globales de Antigravity\n' + ruleBlock, 'utf8');
+    log(`   [OK] Archivo GEMINI.md creado con directrices SDD en: ${globalRulesFile}`, colors.green);
+  }
+
+  log(`
+${colors.green}${colors.bold}=======================================================
+✅ Instalación completada con éxito.
+Cualquier sesión de Antigravity en este ordenador
+cuenta ahora con la skill 'speckit-sdd' activa.
+=======================================================${colors.reset}
 `);
 }
 
@@ -481,6 +545,7 @@ Comandos:
   init [directorio]      Inicializa o integra Spec-Kit en un proyecto (por defecto)
   create <nombre>        Crea una nueva especificación numerada en specs/
   verify                 Comprueba el estado y avance de todas las especificaciones
+  install-skill          Instala la skill speckit-sdd en Antigravity (~/.gemini/config)
   version                Muestra la versión instalada
 
 Opciones de 'init':
@@ -494,6 +559,7 @@ Ejemplos:
   npx elite-speckit init                          # Asistente interactivo
   npx elite-speckit create auth-jwt               # Crea specs/001-auth-jwt/
   npx elite-speckit verify                        # Valida avance de tareas
+  npx elite-speckit install-skill                 # Instala skill en Antigravity
 `);
     process.exit(0);
   }
@@ -502,6 +568,11 @@ Ejemplos:
     const pkg = require('../package.json');
     log(`v${pkg.version}`);
     process.exit(0);
+  }
+
+  if (command === 'install-skill' || command === 'install') {
+    cmdInstallSkill();
+    return;
   }
 
   if (command === 'verify' || command === 'check') {

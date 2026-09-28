@@ -1,31 +1,54 @@
-# Tareas de Implementación: [NOMBRE DE LA CARACTERÍSTICA]
+# 📝 Lista de Tareas Accionables: [NOMBRE_FEATURE]
 
-- **Especificación:** `specs/{{NNN}}-{{NOMBRE_FEATURE}}/spec.md`
-- **Plan Técnico:** `specs/{{NNN}}-{{NOMBRE_FEATURE}}/plan.md`
-
----
-
-## Reglas de Ejecución:
-1. Las tareas deben ejecutarse en estricto orden secuencial.
-2. Cada tarea debe finalizar con la ejecución de su **Comando de Verificación**. No se marca `[x]` si el comando falla.
-3. Se recomienda realizar commits atómicos al completar cada tarea o grupo lógico.
+**Feature Ref**: `[ID_FEATURE]` (enlace a `spec.md` y `plan.md`)  
+**Progreso Total**: `[0 / N tareas completadas] (0%)`  
+**Última Actualización**: `[YYYY-MM-DD]`
 
 ---
 
-### Tareas:
+## 🚦 Fases de Implementación
 
-- [ ] **Tarea 1: [Nombre del componente o acción atómica]**
-  - **Archivos:** `crear/modificar ruta/al/archivo.ext`
-  - **Descripción:** Qué cambios mínimos se realizan.
-  - **Comando de Verificación:** `pytest tests/test_modulo.py -v` (o comando equivalente)
-  - **Resultado Esperado:** PASS (0 errores).
+### 🔹 Fase 1: Configuración, Modelos y Contratos Base
+- [ ] **`[TASK-001]`**: Crear interfaces, tipos y esquemas de validación.
+  - **Archivos**: `src/types/...`, `src/schemas/...`
+  - **Dependencias**: Ninguna
+  - **Criterio de Verificación**: `npm run typecheck` pasa sin errores.
 
-- [ ] **Tarea 2: [Nombre del componente o acción atómica]**
-  - **Archivos:** `crear/modificar ruta/al/archivo.ext`
-  - **Descripción:** Qué cambios mínimos se realizan.
-  - **Comando de Verificación:** `pytest tests/test_modulo.py -v`
-  - **Resultado Esperado:** PASS.
+- [ ] **`[TASK-002]`**: Escribir pruebas unitarias iniciales (TDD Red-Green).
+  - **Archivos**: `tests/unit/...`
+  - **Dependencias**: `TASK-001`
+  - **Criterio de Verificación**: Las pruebas fallan por la razón esperada antes de implementar.
 
-- [ ] **Tarea 3: Verificación Integral y Suite Completa**
-  - **Comando de Verificación:** `pytest` y linters del proyecto.
-  - **Resultado Esperado:** Toda la suite en verde.
+---
+
+### 🔹 Fase 2: Implementación de Lógica de Negocio y Servicios
+- [ ] **`[TASK-003]`**: Implementar servicio principal y reglas de negocio.
+  - **Archivos**: `src/services/...`
+  - **Dependencias**: `TASK-001`, `TASK-002`
+  - **Criterio de Verificación**: Las pruebas unitarias pasan (`npm test`).
+
+- [ ] **`[TASK-004]`**: Implementar adaptadores de datos / repositorio.
+  - **Archivos**: `src/repositories/...` o `src/api/...`
+  - **Dependencias**: `TASK-003`
+  - **Criterio de Verificación**: Pruebas de integración superadas.
+
+---
+
+### 🔹 Fase 3: Integración de UI / Capa de Presentación (Si aplica)
+- [ ] **`[TASK-005]`**: Crear componentes visuales e interactivos.
+  - **Archivos**: `src/components/...`
+  - **Dependencias**: `TASK-003`
+  - **Criterio de Verificación**: Renderizado correcto, accesibilidad y captura de pantalla de prueba.
+
+---
+
+### 🔹 Fase 4: QA, Convergencia y Guardrails Finales
+- [ ] **`[TASK-006]`**: Ejecutar suite completa de calidad (`lint`, `test`, `typecheck`, `build`).
+  - **Archivos**: N/A
+  - **Dependencias**: Todas las anteriores
+  - **Criterio de Verificación**: 0 errores en todos los checks.
+
+- [ ] **`[TASK-007]`**: Actualizar documentación (`PROJECT_LOG.md`, `README.md` si aplica) y preparar PR.
+  - **Archivos**: `PROJECT_LOG.md`, `specs/...`
+  - **Dependencias**: `TASK-006`
+  - **Criterio de Verificación**: PR creado con descripción detallada en Español y changelog listo.
