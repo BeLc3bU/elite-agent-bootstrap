@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/BeLc3bU/elite-agent-bootstrap/compare/v1.1.0...v1.2.0) (2026-09-28)
+
+
+### Features
+
+* integracion universal de elite-agent-bootstrap v2 en antigravity local y global ([4414bc1](https://github.com/BeLc3bU/elite-agent-bootstrap/commit/4414bc1b355cd5a64d9c5910a9a8a8fc1d849f9d))
+
 ## [1.1.0](https://github.com/BeLc3bU/elite-agent-bootstrap/compare/v1.0.0...v1.1.0) (2026-09-28)
 
 
