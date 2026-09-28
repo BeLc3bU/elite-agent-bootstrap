@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.0](https://github.com/BeLc3bU/elite-agent-bootstrap/compare/v1.0.0...v1.1.0) (2026-09-28)
+
+
+### Features
+
+* capa de decision desacoplada, arnes de evaluacion sintetica y calidad v2 ([9533f1f](https://github.com/BeLc3bU/elite-agent-bootstrap/commit/9533f1f9f2befdc885fb9232568bece14046e92d))
+* protocolo de handoffs tipados, sistema de evidencias inmutables y verificacion en CI ([e77ba12](https://github.com/BeLc3bU/elite-agent-bootstrap/commit/e77ba12c31cc96b15ecad31993bcdc9a0c372619))
+* registro tipado de agentes (.agents/registry.json), esquemas de gobernanza y validacion en CI ([128e6e0](https://github.com/BeLc3bU/elite-agent-bootstrap/commit/128e6e03157a9e267129eb87d8e191780773e037))
+
 ## 1.0.0 (2026-09-28)
 
 
