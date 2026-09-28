@@ -215,6 +215,122 @@ function cmdVerify(targetDir) {
 }
 
 // ==========================================
+// Comandos de Registro de Agentes (registry)
+// ==========================================
+function validateAgentRegistry(targetDir) {
+  const registryPath = path.join(targetDir, '.agents', 'registry.json');
+  if (!fs.existsSync(registryPath)) {
+    throw new Error(`No se encontró el archivo de registro en: ${registryPath}`);
+  }
+
+  let registry;
+  try {
+    registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+  } catch (err) {
+    throw new Error(`Sintaxis JSON inválida en ${registryPath}: ${err.message}`);
+  }
+
+  const requiredRoot = ['version', 'project_name', 'governance_source', 'agents'];
+  for (const field of requiredRoot) {
+    if (!registry[field]) {
+      throw new Error(`Falta el campo requerido '${field}' en la raíz del registro.`);
+    }
+  }
+
+  if (!Array.isArray(registry.agents) || registry.agents.length === 0) {
+    throw new Error(`El campo 'agents' debe ser un array no vacío.`);
+  }
+
+  const validRoles = [
+    'orchestrator', 'spec-agent', 'implementer', 'tester',
+    'security-agent', 'reviewer', 'optimization-agent', 'custom'
+  ];
+  const validRisks = ['low', 'medium', 'high', 'critical'];
+
+  const requiredAgentProps = [
+    'id', 'name', 'description', 'role', 'capabilities',
+    'allowed_files', 'forbidden_files', 'risk_level',
+    'requires_human_approval', 'can_modify_code', 'can_modify_specs',
+    'can_modify_governance', 'can_commit', 'can_merge'
+  ];
+
+  const agentIds = new Set();
+
+  for (const agent of registry.agents) {
+    for (const prop of requiredAgentProps) {
+      if (agent[prop] === undefined || agent[prop] === null) {
+        throw new Error(`Agente '${agent.id || 'desconocido'}' carece de la propiedad requerida '${prop}'.`);
+      }
+    }
+
+    if (agentIds.has(agent.id)) {
+      throw new Error(`ID de agente duplicado detectado: '${agent.id}'.`);
+    }
+    agentIds.add(agent.id);
+
+    if (!validRoles.includes(agent.role)) {
+      throw new Error(`Agente '${agent.id}' tiene un rol no válido: '${agent.role}'. Válidos: ${validRoles.join(', ')}`);
+    }
+
+    if (!validRisks.includes(agent.risk_level)) {
+      throw new Error(`Agente '${agent.id}' tiene un risk_level no válido: '${agent.risk_level}'. Válidos: ${validRisks.join(', ')}`);
+    }
+
+    // Regla de Oro de Seguridad: can_modify_governance requiere riesgo crítico y aprobación humana
+    if (agent.can_modify_governance && (!agent.requires_human_approval || agent.risk_level !== 'critical')) {
+      throw new Error(`Violación de Gobernanza en '${agent.id}': can_modify_governance solo se permite con risk_level='critical' y requires_human_approval=true.`);
+    }
+
+    // Regla de Oro de Seguridad: Separación de Funciones (Implementer no puede hacer merge)
+    if (agent.role === 'implementer' && agent.can_merge) {
+      throw new Error(`Violación de Seguridad en '${agent.id}': El implementador no puede tener permiso de merge directo (can_merge=false).`);
+    }
+  }
+
+  return registry;
+}
+
+function cmdRegistry(targetDir, subAction = 'list') {
+  printBanner();
+  const registryPath = path.join(targetDir, '.agents', 'registry.json');
+
+  if (subAction === 'validate') {
+    log(`\n🔍 Validando registro de agentes en: ${colors.bold}${registryPath}${colors.reset}\n`, colors.cyan);
+    try {
+      const reg = validateAgentRegistry(targetDir);
+      log(`✅ Registro de gobernanza válido (v${reg.version}): ${reg.agents.length} agentes auditados sin violaciones.`, colors.green);
+      log(`   Proyecto: ${reg.project_name} | Gobernanza: ${reg.governance_source}\n`, colors.gray);
+    } catch (err) {
+      log(`❌ Error de validación: ${err.message}\n`, colors.red);
+      process.exit(1);
+    }
+    return;
+  }
+
+  // Por defecto: 'list'
+  log(`\n📋 Catálogo Oficial de Agentes Registrados:\n`, colors.cyan);
+  try {
+    const reg = validateAgentRegistry(targetDir);
+    log(`Proyecto: ${colors.bold}${reg.project_name}${colors.reset} (v${reg.version}) | Gobernanza: ${reg.governance_source}\n`);
+
+    log(`| ID | Rol | Riesgo | Código | Specs | Aprob. Humana | Commit | Merge |`, colors.yellow);
+    log(`|---|---|---|---|---|---|---|---|`, colors.gray);
+    for (const a of reg.agents) {
+      const modCode = a.can_modify_code ? '✅' : '❌';
+      const modSpecs = a.can_modify_specs ? '✅' : '❌';
+      const reqHuman = a.requires_human_approval ? '🔒 Sí' : '⚡ No';
+      const canCommit = a.can_commit ? '✅' : '❌';
+      const canMerge = a.can_merge ? '✅' : '❌';
+      log(`| ${colors.bold}${a.id.padEnd(18)}${colors.reset} | ${a.role.padEnd(16)} | ${a.risk_level.padEnd(8)} | ${modCode}     | ${modSpecs}     | ${reqHuman.padEnd(13)} | ${canCommit}      | ${canMerge}     |`);
+    }
+    console.log('');
+  } catch (err) {
+    log(`❌ Error al leer el catálogo de agentes: ${err.message}\n`, colors.red);
+    process.exit(1);
+  }
+}
+
+// ==========================================
 // Comando: Crear Feature (create)
 // ==========================================
 function cmdCreate(targetDir, featureName) {
@@ -545,6 +661,7 @@ Comandos:
   init [directorio]      Inicializa o integra Spec-Kit en un proyecto (por defecto)
   create <nombre>        Crea una nueva especificación numerada en specs/
   verify                 Comprueba el estado y avance de todas las especificaciones
+  registry [list|val]    Consulta ('list') o valida ('validate') el catálogo de agentes
   install-skill          Instala la skill speckit-sdd en Antigravity (~/.gemini/config)
   version                Muestra la versión instalada
 
@@ -559,6 +676,8 @@ Ejemplos:
   npx elite-speckit init                          # Asistente interactivo
   npx elite-speckit create auth-jwt               # Crea specs/001-auth-jwt/
   npx elite-speckit verify                        # Valida avance de tareas
+  npx elite-speckit registry                      # Lista catálogo oficial de agentes
+  npx elite-speckit registry validate             # Valida registro contra esquema JSON
   npx elite-speckit install-skill                 # Instala skill en Antigravity
 `);
     process.exit(0);
@@ -572,6 +691,13 @@ Ejemplos:
 
   if (command === 'install-skill' || command === 'install') {
     cmdInstallSkill();
+    return;
+  }
+
+  if (command === 'registry' || command === 'agents') {
+    const subAction = rawArgs[1] || 'list';
+    const targetDir = rawArgs[2] ? path.resolve(rawArgs[2]) : process.cwd();
+    cmdRegistry(targetDir, subAction);
     return;
   }
 

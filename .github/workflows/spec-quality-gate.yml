@@ -44,3 +44,6 @@ jobs:
             chmod +x ./.specify/scripts/verify-spec.sh
             ./.specify/scripts/verify-spec.sh
           fi
+
+      - name: Validar Registro de Agentes y Gobernanza
+        run: node bin/cli.js registry validate

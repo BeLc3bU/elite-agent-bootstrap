@@ -29,15 +29,17 @@
   "scripts": {
     "start": "node bin/cli.js",
     "speckit": "node bin/cli.js",
-    "test:verify": "node bin/cli.js verify"
+    "test:verify": "node bin/cli.js verify",
+    "test:registry": "node bin/cli.js registry validate"
   },
   "files": [
     "bin",
+    ".agents",
+    "schemas",
     ".specify",
     ".github/prompts",
     "specs",
     "scripts",
-    "README.md",
-    "AGENTS.template.md"
+    "README.md"
   ]
 }

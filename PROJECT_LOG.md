@@ -42,6 +42,17 @@ Este archivo actúa como la memoria a largo plazo del proyecto, documentando la 
   5. Actualizar `package.json` para ejecutar `node bin/cli.js verify` de forma 100% agnóstica de plataforma.
 - **Consecuencias**: Mantenimiento simplificado (DRY), cero dependencias adicionales, paridad multiplataforma total y reducción de la superficie de error.
 
+### ADR-005: Registro Tipado de Agentes y Matriz de Separación de Autoridad
+- **Fecha**: 2026-09-28
+- **Contexto**: Los agentes estaban descritos únicamente como tablas informativas en Markdown, sin esquemas formales, sin límites de rutas y sin controles programáticos de permisos o niveles de riesgo (OWASP for Agentic AI).
+- **Decisión**:
+  1. Diseñar `schemas/agent.schema.json` y `schemas/registry.schema.json` (JSON Schema Draft-07).
+  2. Implementar `.agents/registry.json` con los 7 agentes canónicos (`orchestrator`, `spec-agent`, `implementer`, `tester`, `security-agent`, `reviewer`, `optimization-agent`).
+  3. Establecer la regla innegociable de separación de autoridad: `Agent ≠ Authority`. Ningún agente puede auto-aprobarse ni realizar merge directo sin aprobación humana.
+  4. Implementar `speckit registry validate` y `speckit registry list` en `bin/cli.js` con validador estructural nativo en Node.js (cero dependencias externas).
+  5. Incorporar la validación automática del registro en `.github/workflows/spec-quality-gate.yml`.
+- **Consecuencias**: Gobernanza determinista, tipado estricto de permisos y capacidades, prevención de excesiva agencia y compatibilidad universal con cualquier editor.
+
 ---
 
 ## 🗺️ Historial de Fases e Hitos
@@ -52,5 +63,6 @@ Este archivo actúa como la memoria a largo plazo del proyecto, documentando la 
 | **Fase 2** | CLI Universal distribuible, plantillas scaffold y protección Zero-Overwrite | ✅ Completado | 2026-08-16 |
 | **Fase 3** | Subcomandos de gestión (create/verify), limpieza de legado y despliegue | ✅ Completado | 2026-08-16 |
 | **v2 - Fase 1** | Consolidación del CLI Universal, wrappers delegados y limpieza de plantillas | ✅ Completado | 2026-09-28 |
+| **v2 - Fase 2** | Gobernanza y Registro Tipado de Agentes (.agents/registry.json y esquemas JSON) | ✅ Completado | 2026-09-28 |
 
 

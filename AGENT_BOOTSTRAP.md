@@ -44,8 +44,11 @@ Analiza el entorno y hazle al usuario las siguientes 4 preguntas clave:
 #### Paso 1.2: Inicialización de la Constitución y Gobernanza
 Genera:
 - `.specify/memory/constitution.md`: Principios inmutables del proyecto basados en la plantilla.
+- `.agents/registry.json`: Registro formal y tipado de agentes, permisos y roles según `schemas/registry.schema.json`.
 - `AGENTS.md`: Mapa de comandos, subagentes y guardrails (máximo 500 líneas).
 - `.cursorrules` / `GEMINI.md` / `CLAUDE.md`: Reglas específicas para el editor.
+
+> 🛡️ **Regla de Autoridad (Agent ≠ Authority)**: Ningún agente puede auto-aprobar su propio código ni realizar merges directos. La autoridad de seguridad reside en las políticas y la validación humana.
 
 #### Paso 1.3: Guía del Ciclo Spec-Kit (Feature por Feature)
 Guía al usuario a través del ciclo SDD:
@@ -107,18 +110,20 @@ Si el repositorio ya cuenta con código o el usuario pide integrar Spec-Kit en u
 ## 🏗️ Estructura de Artefactos SDD (Estándar GitHub Spec Kit)
 ```
 mi-proyecto/
+├── .agents/                          # Gobernanza y Registro Tipado de Agentes
+│   └── registry.json                 # Catálogo formal de agentes, roles y permisos
+├── schemas/                          # Esquemas JSON de validación
+│   ├── agent.schema.json
+│   └── registry.schema.json
 ├── .specify/                         # Infraestructura y runtime de Spec Kit
 │   ├── memory/
 │   │   └── constitution.md           # Leyes innegociables y principios de arquitectura
-│   ├── templates/                    # Plantillas oficiales en español
-│   │   ├── spec-template.md / spec.md
-│   │   ├── plan-template.md / plan.md
-│   │   ├── tasks-template.md / tasks.md
-│   │   ├── clarify-template.md
-│   │   └── checklist-template.md
-│   └── scripts/                      # Automatizaciones de scripts locales
-│       ├── create-feature.ps1 / .sh
-│       └── verify-spec.ps1 / .sh
+│   └── templates/                    # Plantillas oficiales canónicas
+│       ├── spec.md
+│       ├── plan.md
+│       ├── tasks.md
+│       ├── clarify.md
+│       └── checklist.md
 ├── specs/                            # Historial y registro de características
 │   ├── README.md
 │   └── 001-nombre-feature/
@@ -127,13 +132,10 @@ mi-proyecto/
 │       └── tasks.md
 ├── skills/                           # Habilidades de agente
 │   └── speckit-sdd/                  # Skill nativa de Antigravity
-├── scripts/                          # Herramientas de integración y portabilidad
-│   ├── install-sdd.bat / .ps1        # Instalador universal de skill Antigravity
-│   └── integrate-speckit.ps1 / .sh   # Integrador CLI con protección zero-overwrite
-├── docs/                             # Guías técnicas (ej. kev-decision-guide.md)
-├── PROJECT_LOG.md                    # ADRs y memoria técnica
-├── AGENTS.md                         # Arnés de control de agentes (máx. 500 líneas)
-├── tests/                            # Suites de pruebas automatizadas
+├── docs/                             # Guías técnicas y documentación de arquitectura
+├── PROJECT_LOG.md                    # Registro de Decisiones de Arquitectura (ADRs)
+├── AGENTS.md                         # Arnés de control de agentes (máx. 300 líneas)
+├── bin/                              # CLI Universal sin dependencias
 └── src/                              # Código fuente del proyecto
 ```
 
