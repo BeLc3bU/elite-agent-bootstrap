@@ -933,37 +933,47 @@ function cmdInstallSkill() {
 
   const geminiConfigDir = path.join(os.homedir(), '.gemini', 'config');
   const targetSkillsDir = path.join(geminiConfigDir, 'skills', 'speckit-sdd');
+  const antigravitySkillsDir = path.join(os.homedir(), '.gemini', 'antigravity', 'skills', 'speckit-sdd');
 
   log(`1. Verificando directorio global de Antigravity (~/.gemini/config)...`, colors.yellow);
   ensureDirSync(targetSkillsDir);
+  ensureDirSync(antigravitySkillsDir);
 
-  log(`2. Copiando archivo de Skill (SKILL.md)...`, colors.yellow);
+  log(`2. Copiando archivo de Skill (SKILL.md) en directorios globales...`, colors.yellow);
   fs.copyFileSync(skillSource, path.join(targetSkillsDir, 'SKILL.md'));
+  fs.copyFileSync(skillSource, path.join(antigravitySkillsDir, 'SKILL.md'));
   log(`   [OK] Skill instalada en: ${targetSkillsDir}`, colors.green);
+  log(`   [OK] Skill instalada en: ${antigravitySkillsDir}`, colors.green);
 
   log(`3. Configurando directrices globales en GEMINI.md...`, colors.yellow);
   const globalRulesFile = path.join(geminiConfigDir, 'GEMINI.md');
   const ruleBlock = `
-## Metodología Spec-Driven Development (GitHub Spec Kit)
-- **Detección automática:** Si el espacio de trabajo actual contiene una carpeta .specify/ o specs/, el agente entrará automáticamente en modo **Spec-Driven Development (SDD)** estricto.
-- **Lectura Constitucional:** Es obligatorio leer .specify/memory/constitution.md antes de proponer cambios de arquitectura o código.
-- **Prohibición de Vibe Coding:** No escribir ni modificar código de producción sin contar con la especificación aprobada en specs/NNN-<feature>/ (spec.md, plan.md, tasks.md).
-- **Activación de Skill:** Usar la skill speckit-sdd para orquestar las fases: specify -> plan -> tasks -> implement -> converge.
-- **Decisiones Tipadas (Kev/Jev):** Priorizar modelos de decisión tipada (Kev / /v1/systemone / jev-classifier) para clasificaciones categóricas o scoring.
+## Metodología Spec-Driven Development & Elite Agent v2 (GitHub Spec Kit)
+- **Detección y Bootstrapping:** Si el espacio de trabajo actual contiene \`.specify/\`, \`specs/\` o \`.agents/registry.json\`, el agente entrará automáticamente en modo **Elite Agent Bootstrap v2 (SDD)**. Si no los contiene y el usuario solicita inicializar gobernanza o arrancar un proyecto, ejecutar o sugerir: \`npx --yes github:BeLc3bU/elite-agent-bootstrap init\`.
+- **Lectura Constitucional:** Es obligatorio leer \`.specify/memory/constitution.md\` antes de proponer cambios de arquitectura o código.
+- **Separación de Autoridad (Agent ≠ Authority):** Ningún agente puede auto-aprobarse ni realizar merge directo sin aprobación humana. Consultar \`.agents/registry.json\` para roles, permisos y restricciones de rutas.
+- **Prohibición de Vibe Coding:** No escribir ni modificar código de producción sin contar con la especificación aprobada en \`specs/NNN-<feature>/\` (\`spec.md\`, \`plan.md\`, \`tasks.md\`).
+- **Protocolo de Traspasos y Evidencias:** Traspasos documentados en \`.agents/handoffs/\` y comprobantes de ejecución en \`.evidence/\`. No marcar \`[x]\` sin comprobante de verificación exitoso.
+- **Enrutamiento y Decisiones:** Usar \`speckit route "<tarea>"\` o la capa de decisión (\`lib/adapters/DecisionProvider.js\` / Kev / Jev) para clasificar y asignar roles.
+- **Activación de Skill:** Usar la skill \`speckit-sdd\` para orquestar las fases: specify -> plan -> tasks -> implement -> converge.
 `;
 
+  let currentContent = '';
   if (fs.existsSync(globalRulesFile)) {
-    const currentContent = fs.readFileSync(globalRulesFile, 'utf8');
-    if (!currentContent.includes('speckit-sdd')) {
-      fs.appendFileSync(globalRulesFile, '\n' + ruleBlock, 'utf8');
-      log(`   [OK] Directrices SDD agregadas a: ${globalRulesFile}`, colors.green);
-    } else {
-      log(`   [OK] Las directrices SDD ya estaban presentes en: ${globalRulesFile}`, colors.green);
-    }
-  } else {
-    fs.writeFileSync(globalRulesFile, '# Reglas Globales de Antigravity\n' + ruleBlock, 'utf8');
-    log(`   [OK] Archivo GEMINI.md creado con directrices SDD en: ${globalRulesFile}`, colors.green);
+    currentContent = fs.readFileSync(globalRulesFile, 'utf8');
   }
+
+  // Limpiar bloque antiguo si existía
+  if (currentContent.includes('## Metodología Spec-Driven Development')) {
+    currentContent = currentContent.replace(/## Metodología Spec-Driven Development[\s\S]*?(?=\n## |\n# |$)/g, '').trim();
+  }
+
+  const finalContent = currentContent
+    ? currentContent + '\n' + ruleBlock.trim() + '\n'
+    : '# Reglas Globales de Antigravity\n' + ruleBlock.trim() + '\n';
+
+  fs.writeFileSync(globalRulesFile, finalContent, 'utf8');
+  log(`   [OK] Directrices SDD v2 actualizadas en: ${globalRulesFile}`, colors.green);
 
   log(`
 ${colors.green}${colors.bold}=======================================================

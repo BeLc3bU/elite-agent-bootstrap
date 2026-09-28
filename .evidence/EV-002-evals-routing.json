@@ -8,5 +8,5 @@
   "status": "passed",
   "summary": "Evaluación sintética de enrutamiento: 10/10 escenarios superados (100%)",
   "log_artifact": ".evals/scenarios/routing-scenarios.json",
-  "timestamp": "2026-09-28T17:24:05.299Z"
+  "timestamp": "2026-09-28T17:30:01.250Z"
 }
