@@ -1189,9 +1189,14 @@ async function cmdInit(options) {
   ensureDirSync(path.join(targetAgentsDir, 'handoffs'));
   ensureDirSync(path.join(targetAgentsDir, 'mcp'));
   const srcMcpTemplate = path.join(ROOT_DIR, '.agents', 'mcp', 'mcp_config.template.json');
+  const srcMcpReadme = path.join(ROOT_DIR, '.agents', 'mcp', 'README.md');
   if (fs.existsSync(srcMcpTemplate)) {
     fs.copyFileSync(srcMcpTemplate, path.join(targetAgentsDir, 'mcp', 'mcp_config.template.json'));
   }
+  if (fs.existsSync(srcMcpReadme)) {
+    fs.copyFileSync(srcMcpReadme, path.join(targetAgentsDir, 'mcp', 'README.md'));
+  }
+  log('  [+] Aprovisionado Pack de Servidores MCP en .agents/mcp/', colors.green);
 
   const srcSkillsDir = path.join(ROOT_DIR, 'skills');
   if (fs.existsSync(srcSkillsDir)) {
