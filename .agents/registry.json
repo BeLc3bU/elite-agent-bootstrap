@@ -1,7 +1,7 @@
 {
-  "version": "2.1.0",
+  "version": "2.2.0",
   "project_name": "elite-agent-bootstrap",
-  "description": "Registro oficial y catálogo de gobernanza de agentes de IA para Elite Agent Bootstrap v2 (con soporte para memoria persistente)",
+  "description": "Registro oficial y catálogo de gobernanza de agentes de IA para Elite Agent Bootstrap v2 (con soporte para memoria persistente y Starter Pack de Skills)",
   "governance_source": ".specify/memory/constitution.md",
   "default_decision_provider": "deterministic",
   "agents": [
@@ -24,7 +24,9 @@
         "speckit-cli"
       ],
       "skills": [
-        "speckit-sdd"
+        "speckit-sdd",
+        "find-skills",
+        "grill-me"
       ],
       "inputs": [
         "user_request",
@@ -75,7 +77,9 @@
         "context7-mcp"
       ],
       "skills": [
-        "speckit-sdd"
+        "speckit-sdd",
+        "grill-me",
+        "find-skills"
       ],
       "inputs": [
         "requirements",
@@ -132,7 +136,10 @@
         "linter"
       ],
       "skills": [
-        "speckit-sdd"
+        "speckit-sdd",
+        "frontend-design",
+        "web-design-guidelines",
+        "systematic-debugging"
       ],
       "inputs": [
         "tasks.md",
@@ -189,7 +196,9 @@
         "playwright"
       ],
       "skills": [
-        "speckit-sdd"
+        "speckit-sdd",
+        "systematic-debugging",
+        "web-design-guidelines"
       ],
       "inputs": [
         "spec.md",
@@ -245,7 +254,8 @@
         "secret-scanner"
       ],
       "skills": [
-        "speckit-sdd"
+        "speckit-sdd",
+        "systematic-debugging"
       ],
       "inputs": [
         "source_code",
@@ -294,7 +304,10 @@
         "gh-cli"
       ],
       "skills": [
-        "speckit-sdd"
+        "speckit-sdd",
+        "web-design-guidelines",
+        "frontend-design",
+        "grill-me"
       ],
       "inputs": [
         "spec.md",
@@ -345,7 +358,8 @@
         "lighthouse"
       ],
       "skills": [
-        "speckit-sdd"
+        "speckit-sdd",
+        "web-design-guidelines"
       ],
       "inputs": [
         "build_artifacts"

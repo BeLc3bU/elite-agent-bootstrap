@@ -1,0 +1,12 @@
+{
+  "evidence_id": "EV-004-skills-starter-pack",
+  "task_id": "TASK-007",
+  "feature_id": "007-skills-starter-pack",
+  "runner_agent": "tester",
+  "command": "node bin/cli.js install-skills-pack",
+  "exit_code": 0,
+  "status": "passed",
+  "summary": "Instalación y aprovisionamiento exitoso del Starter Pack de 5 skills (skills.sh) en proyecto (.agents/skills) y Antigravity global (~/.gemini/config/skills)",
+  "log_artifact": "skills/",
+  "timestamp": "2026-10-01T11:32:00.000Z"
+}

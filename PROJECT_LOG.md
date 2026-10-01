@@ -88,6 +88,21 @@ Este archivo actúa como la memoria a largo plazo del proyecto, documentando la 
   5. Crear la regla de Antigravity `.agents/rules/memory-protocol.md` e integrar `test:memory` en `package.json` y `.github/workflows/spec-quality-gate.yml`.
 - **Consecuencias**: Reducción drástica del gasto de contexto mediante carga bajo demanda, memoria auditable y versionada en Git, cero dependencia de bases de datos vectoriales externas y preservación de la autoridad de la Constitución y las especificaciones.
 
+### ADR-009: Integración del Starter Pack de Habilidades (skills.sh)
+- **Fecha**: 2026-10-01
+- **Contexto**: Para maximizar la eficacia de los agentes de IA en el marco Spec-Driven Development (SDD), se identificó la necesidad de equipar a los agentes con habilidades estandarizadas del ecosistema abierto skills.sh para interrogación rigurosa de planes, desarrollo frontend sin patrones genéricos, auditoría de interfaces y depuración científica sin parches a ciegas.
+- **Decisión**:
+  1. Empaquetar de forma canónica las 5 skills fundamentales en `skills/` y `.agents/skills/`:
+     - `find-skills` (Vercel Labs): descubrimiento de nuevas capacidades.
+     - `grill-me` (Matt Pocock): interrogatorio sistemático de planes y diseño antes de codificar.
+     - `frontend-design` (Anthropic): diseño de interfaces pulidas de calidad de producción.
+     - `web-design-guidelines` (Vercel Labs): auditoría de accesibilidad, UX y directrices web.
+     - `systematic-debugging` (Jesse Vincent / obra): proceso estricto de depuración en 4 fases.
+  2. Implementar el comando nativo `agent install-skills-pack` (y alias directo `install-skills-pack`) en `bin/cli.js` para aprovisionar las skills local y globalmente en Antigravity (`~/.gemini/config/skills/`).
+  3. Actualizar `.agents/registry.json` a v2.2.0 mapeando las habilidades a los roles correspondientes (`orchestrator`, `spec-agent`, `implementer`, `tester`, `reviewer`, etc.).
+  4. Emitir comprobante inmutable de evidencia en `.evidence/EV-004-skills-starter-pack.json`.
+- **Consecuencias**: Mayor calidad en fases de especificación e implementación, consistencia metodológica entre sesiones y disponibilidad inmediata offline de las mejores herramientas del ecosistema agéntico.
+
 ---
 
 ## 🗺️ Historial de Fases e Hitos
@@ -102,6 +117,7 @@ Este archivo actúa como la memoria a largo plazo del proyecto, documentando la 
 | **v2 - Fase 3** | Puertas de Evidencia, Protocolo de Handoffs y CI/CD Gates (.evidence/ y .agents/handoffs/) | ✅ Completado | 2026-09-28 |
 | **v2 - Fase 4** | Capa de Decisión Desacoplada (Core + Extended Kev/Jev) y Arnés Sintético (.evals/) | ✅ Completado | 2026-09-28 |
 | **v2 - Fase 5** | Sistema Nativo de Memoria Persistente de Agentes (MEMORY.md + .agents/memory/) | ✅ Completado | 2026-10-01 |
+| **v2 - Fase 6** | Integración del Starter Pack de Skills (skills.sh) y comando install-skills-pack | ✅ Completado | 2026-10-01 |
 
 
 

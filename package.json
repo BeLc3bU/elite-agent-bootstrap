@@ -50,7 +50,9 @@
     "test:evals": "node bin/cli.js eval",
     "test:memory": "node bin/cli.js memory validate",
     "sync": "node bin/cli.js sync",
-    "push": "node bin/cli.js sync"
+    "push": "node bin/cli.js sync",
+    "install-skills-pack": "node bin/cli.js install-skills-pack",
+    "skills-pack": "node bin/cli.js install-skills-pack"
   },
   "files": [
     "bin",
@@ -62,6 +64,7 @@
     ".specify",
     ".github/prompts",
     "specs",
+    "skills",
     "scripts",
     "README.md",
     "MEMORY.md"

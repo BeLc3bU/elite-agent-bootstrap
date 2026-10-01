@@ -1182,6 +1182,40 @@ async function cmdInit(options) {
     log(`  [+] Configurado workflow: .github/workflows/release-please.yml`, colors.green);
   }
 
+  // 9. Aprovisionar agentes, memoria y Starter Pack de skills en proyectos
+  const targetAgentsDir = path.join(targetDir, '.agents');
+  ensureDirSync(path.join(targetAgentsDir, 'skills'));
+  ensureDirSync(path.join(targetAgentsDir, 'memory'));
+  ensureDirSync(path.join(targetAgentsDir, 'handoffs'));
+
+  const srcSkillsDir = path.join(ROOT_DIR, 'skills');
+  if (fs.existsSync(srcSkillsDir)) {
+    const starterSkills = ['find-skills', 'grill-me', 'frontend-design', 'web-design-guidelines', 'systematic-debugging', 'speckit-sdd'];
+    starterSkills.forEach(s => {
+      const srcFile = path.join(srcSkillsDir, s, 'SKILL.md');
+      if (fs.existsSync(srcFile)) {
+        const destDir = path.join(targetAgentsDir, 'skills', s);
+        ensureDirSync(destDir);
+        fs.copyFileSync(srcFile, path.join(destDir, 'SKILL.md'));
+      }
+    });
+    log(`  [+] Aprovisionado Starter Pack de Skills en .agents/skills/`, colors.green);
+  }
+
+  const srcRegistry = path.join(ROOT_DIR, '.agents', 'registry.json');
+  const targetRegistry = path.join(targetAgentsDir, 'registry.json');
+  if (fs.existsSync(srcRegistry) && (!fs.existsSync(targetRegistry) || options.force)) {
+    fs.copyFileSync(srcRegistry, targetRegistry);
+    log(`  [+] Configurado registro de gobernanza v2.2.0: .agents/registry.json`, colors.green);
+  }
+
+  const srcMemory = path.join(ROOT_DIR, 'MEMORY.md');
+  const targetMemory = path.join(targetDir, 'MEMORY.md');
+  if (fs.existsSync(srcMemory) && !fs.existsSync(targetMemory)) {
+    fs.copyFileSync(srcMemory, targetMemory);
+    log(`  [+] Inicializado sistema de memoria: MEMORY.md`, colors.green);
+  }
+
   log(`
 ${colors.green}${colors.bold}=======================================================
 🎉 ¡Spec-Kit integrado con éxito en modo ${chosenMode.toUpperCase()}!
@@ -1199,6 +1233,72 @@ ${colors.yellow}Comandos CLI disponibles en la terminal:${colors.reset}
   👉 ${colors.bold}agent create <nombre>${colors.reset} - Crea una nueva spec con plantillas
   👉 ${colors.bold}agent verify${colors.reset}          - Comprueba el estado de todas las specs
   👉 ${colors.bold}agent install-skill${colors.reset}   - Instala la skill speckit-sdd en Antigravity
+`);
+}
+
+// ==========================================
+// Comando: Instalar Starter Pack de Skills (install-skills-pack / pack)
+// ==========================================
+function cmdInstallSkillsPack(options = {}) {
+  printBanner();
+  log('\n🚀 Instalando Starter Pack de Skills (skills.sh) en Antigravity y Proyecto...\n', colors.cyan);
+
+  const starterSkills = [
+    'find-skills',
+    'grill-me',
+    'frontend-design',
+    'web-design-guidelines',
+    'systematic-debugging'
+  ];
+
+  const geminiConfigDir = path.join(os.homedir(), '.gemini', 'config');
+  const antigravityDir = path.join(os.homedir(), '.gemini', 'antigravity');
+  const projectAgentsSkillsDir = path.join(process.cwd(), '.agents', 'skills');
+
+  log('1. Aprovisionando habilidades en el proyecto local (.agents/skills/)...', colors.yellow);
+  ensureDirSync(projectAgentsSkillsDir);
+
+  starterSkills.forEach(skillName => {
+    const srcPath = path.join(ROOT_DIR, 'skills', skillName, 'SKILL.md');
+    if (!fs.existsSync(srcPath)) {
+      log('   [-] No se encontró origen para skill: ' + skillName, colors.red);
+      return;
+    }
+
+    const localSkillDir = path.join(projectAgentsSkillsDir, skillName);
+    ensureDirSync(localSkillDir);
+    fs.copyFileSync(srcPath, path.join(localSkillDir, 'SKILL.md'));
+    log('   [OK] Proyecto: .agents/skills/' + skillName + '/SKILL.md', colors.green);
+  });
+
+  log('\n2. Aprovisionando habilidades globales en Antigravity (~/.gemini/config y ~/.gemini/antigravity)...', colors.yellow);
+
+  starterSkills.forEach(skillName => {
+    const srcPath = path.join(ROOT_DIR, 'skills', skillName, 'SKILL.md');
+    if (!fs.existsSync(srcPath)) return;
+
+    // Config global 1: ~/.gemini/config/skills/<skill>/SKILL.md
+    const targetGlobalDir1 = path.join(geminiConfigDir, 'skills', skillName);
+    ensureDirSync(targetGlobalDir1);
+    fs.copyFileSync(srcPath, path.join(targetGlobalDir1, 'SKILL.md'));
+
+    // Config global 2: ~/.gemini/antigravity/skills/<skill>/SKILL.md
+    const targetGlobalDir2 = path.join(antigravityDir, 'skills', skillName);
+    ensureDirSync(targetGlobalDir2);
+    fs.copyFileSync(srcPath, path.join(targetGlobalDir2, 'SKILL.md'));
+
+    log('   [OK] Global Antigravity: ' + skillName, colors.green);
+  });
+
+  log(`
+${colors.green}${colors.bold}=======================================================
+✅ Starter Pack de Skills instalado con éxito:
+   • find-skills (Vercel Labs)
+   • grill-me (Matt Pocock)
+   • frontend-design (Anthropic)
+   • web-design-guidelines (Vercel Labs)
+   • systematic-debugging (Jesse Vincent / obra)
+=======================================================${colors.reset}
 `);
 }
 
@@ -1370,6 +1470,7 @@ Comandos:
   eval                   Ejecuta la suite de evaluación sintética de agentes (.evals/)
   sync [mensaje]         Audita, commitea y sube los cambios a GitHub (push)
   install-skill          Instala la skill speckit-sdd en Antigravity (~/.gemini/config)
+  install-skills-pack    Instala el Starter Pack de 5 skills (skills.sh) local y global
   version                Muestra la versión instalada
 
 Opciones de 'init':
@@ -1403,6 +1504,11 @@ Ejemplos:
   if (command === 'sync' || command === 'push') {
     const commitMsg = rawArgs.slice(1).join(' ');
     await cmdSync(process.cwd(), commitMsg);
+    return;
+  }
+
+  if (command === 'install-skills-pack' || command === 'pack' || command === 'skills-pack') {
+    cmdInstallSkillsPack();
     return;
   }
 
