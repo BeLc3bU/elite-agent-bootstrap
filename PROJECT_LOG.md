@@ -103,6 +103,23 @@ Este archivo actúa como la memoria a largo plazo del proyecto, documentando la 
   4. Emitir comprobante inmutable de evidencia en `.evidence/EV-004-skills-starter-pack.json`.
 - **Consecuencias**: Mayor calidad en fases de especificación e implementación, consistencia metodológica entre sesiones y disponibilidad inmediata offline de las mejores herramientas del ecosistema agéntico.
 
+### ADR-010: Integración del Pack de Servidores MCP Esenciales (Model Context Protocol)
+- **Fecha**: 2026-10-01
+- **Contexto**: Para potenciar a los agentes con capacidades en tiempo real (inspección en vivo de navegador web, consulta de documentación de librerías, manipulación de repositorios Git, conversión fiel de diseño Figma a código y gestión de base de datos Postgres), se requería empaquetar e integrar los 5 servidores MCP esenciales de la industria respetando las configuraciones preexistentes del usuario.
+- **Decisión**:
+  1. Diseñar el catálogo y plantilla canónica en `.agents/mcp/`: `mcp_config.template.json` y `README.md`.
+  2. Implementar en `bin/cli.js` el comando `cmdInstallMcpPack` (`agent install-mcp-pack` / alias `install-mcp-pack`), con soporte de copia de respaldo `.bak` y fusión no destructiva (*deep merge*) sobre `~/.gemini/config/mcp_config.json` para no alterar claves existentes (ej. `CONTEXT7_API_KEY` o `jev-classifier`).
+  3. Los 5 servidores esenciales configurados son:
+     - `chrome-devtools` (Google): automatización, consola, red y capturas visuales.
+     - `context7` (Upstash): documentación oficial de SDKs y librerías en tiempo real.
+     - `github` (GitHub): gestión de repositorios, branches, issues y pull requests.
+     - `figma` (Figma): extracción de componentes y diseño a código.
+     - `supabase` (Supabase): gestión de base de datos Postgres, SQL y backend.
+  4. Actualizar `.agents/registry.json` a v2.3.0 asociando las herramientas MCP a los roles pertinentes según menor privilegio.
+  5. Asegurar que `cmdInit` aprovisione automáticamente `.agents/mcp/` en proyectos existentes y futuros.
+  6. Emitir comprobante inmutable de evidencia en `.evidence/EV-005-mcp-starter-pack.json`.
+- **Consecuencias**: Acceso unificado y seguro a herramientas MCP líderes en Antigravity, erradicación de alucinaciones en librerías y diseño, y preservación íntegra de credenciales preexistentes.
+
 ---
 
 ## 🗺️ Historial de Fases e Hitos
@@ -118,6 +135,7 @@ Este archivo actúa como la memoria a largo plazo del proyecto, documentando la 
 | **v2 - Fase 4** | Capa de Decisión Desacoplada (Core + Extended Kev/Jev) y Arnés Sintético (.evals/) | ✅ Completado | 2026-09-28 |
 | **v2 - Fase 5** | Sistema Nativo de Memoria Persistente de Agentes (MEMORY.md + .agents/memory/) | ✅ Completado | 2026-10-01 |
 | **v2 - Fase 6** | Integración del Starter Pack de Skills (skills.sh) y comando install-skills-pack | ✅ Completado | 2026-10-01 |
+| **v2 - Fase 7** | Integración del Pack de Servidores MCP Esenciales y comando install-mcp-pack | ✅ Completado | 2026-10-01 |
 
 
 

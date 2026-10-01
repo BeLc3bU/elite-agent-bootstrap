@@ -52,7 +52,9 @@
     "sync": "node bin/cli.js sync",
     "push": "node bin/cli.js sync",
     "install-skills-pack": "node bin/cli.js install-skills-pack",
-    "skills-pack": "node bin/cli.js install-skills-pack"
+    "skills-pack": "node bin/cli.js install-skills-pack",
+    "install-mcp-pack": "node bin/cli.js install-mcp-pack",
+    "mcp-pack": "node bin/cli.js install-mcp-pack"
   },
   "files": [
     "bin",

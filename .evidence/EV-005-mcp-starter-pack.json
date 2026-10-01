@@ -1,0 +1,12 @@
+{
+  "evidence_id": "EV-005-mcp-starter-pack",
+  "task_id": "TASK-007",
+  "feature_id": "008-mcp-starter-pack",
+  "runner_agent": "tester",
+  "command": "node bin/cli.js install-mcp-pack",
+  "exit_code": 0,
+  "status": "passed",
+  "summary": "Fusión no destructiva y aprovisionamiento exitoso del Pack de Servidores MCP esenciales en Antigravity (~/.gemini/config/mcp_config.json) y proyecto local (.agents/mcp)",
+  "log_artifact": ".agents/mcp/mcp_config.template.json",
+  "timestamp": "2026-10-01T11:43:00.000Z"
+}

@@ -1,7 +1,7 @@
 {
-  "version": "2.2.0",
+  "version": "2.3.0",
   "project_name": "elite-agent-bootstrap",
-  "description": "Registro oficial y catálogo de gobernanza de agentes de IA para Elite Agent Bootstrap v2 (con soporte para memoria persistente y Starter Pack de Skills)",
+  "description": "Registro oficial y catálogo de gobernanza de agentes de IA para Elite Agent Bootstrap v2 (con soporte para memoria persistente, Starter Pack de Skills y MCPs esenciales)",
   "governance_source": ".specify/memory/constitution.md",
   "default_decision_provider": "deterministic",
   "agents": [
@@ -21,7 +21,9 @@
       ],
       "tools": [
         "git",
-        "speckit-cli"
+        "speckit-cli",
+        "github-mcp",
+        "context7-mcp"
       ],
       "skills": [
         "speckit-sdd",
@@ -74,7 +76,8 @@
       ],
       "tools": [
         "speckit-cli",
-        "context7-mcp"
+        "context7-mcp",
+        "figma-mcp"
       ],
       "skills": [
         "speckit-sdd",
@@ -133,7 +136,11 @@
       "tools": [
         "terminal",
         "editor-tools",
-        "linter"
+        "linter",
+        "chrome-devtools-mcp",
+        "supabase-mcp",
+        "figma-mcp",
+        "context7-mcp"
       ],
       "skills": [
         "speckit-sdd",
@@ -193,7 +200,9 @@
         "vitest",
         "jest",
         "pytest",
-        "playwright"
+        "playwright",
+        "chrome-devtools-mcp",
+        "supabase-mcp"
       ],
       "skills": [
         "speckit-sdd",
@@ -251,7 +260,8 @@
       "tools": [
         "git",
         "npm-audit",
-        "secret-scanner"
+        "secret-scanner",
+        "github-mcp"
       ],
       "skills": [
         "speckit-sdd",
@@ -301,7 +311,9 @@
       ],
       "tools": [
         "git",
-        "gh-cli"
+        "gh-cli",
+        "github-mcp",
+        "chrome-devtools-mcp"
       ],
       "skills": [
         "speckit-sdd",
@@ -355,7 +367,8 @@
       ],
       "tools": [
         "bundle-analyzer",
-        "lighthouse"
+        "lighthouse",
+        "chrome-devtools-mcp"
       ],
       "skills": [
         "speckit-sdd",

@@ -1187,6 +1187,11 @@ async function cmdInit(options) {
   ensureDirSync(path.join(targetAgentsDir, 'skills'));
   ensureDirSync(path.join(targetAgentsDir, 'memory'));
   ensureDirSync(path.join(targetAgentsDir, 'handoffs'));
+  ensureDirSync(path.join(targetAgentsDir, 'mcp'));
+  const srcMcpTemplate = path.join(ROOT_DIR, '.agents', 'mcp', 'mcp_config.template.json');
+  if (fs.existsSync(srcMcpTemplate)) {
+    fs.copyFileSync(srcMcpTemplate, path.join(targetAgentsDir, 'mcp', 'mcp_config.template.json'));
+  }
 
   const srcSkillsDir = path.join(ROOT_DIR, 'skills');
   if (fs.existsSync(srcSkillsDir)) {
@@ -1233,6 +1238,111 @@ ${colors.yellow}Comandos CLI disponibles en la terminal:${colors.reset}
   👉 ${colors.bold}agent create <nombre>${colors.reset} - Crea una nueva spec con plantillas
   👉 ${colors.bold}agent verify${colors.reset}          - Comprueba el estado de todas las specs
   👉 ${colors.bold}agent install-skill${colors.reset}   - Instala la skill speckit-sdd en Antigravity
+`);
+}
+
+// ==========================================
+// Comando: Instalar Pack de Servidores MCP Esenciales (install-mcp-pack / mcp-pack)
+// ==========================================
+function cmdInstallMcpPack(options = {}) {
+  printBanner();
+  log('\n🔌 Instalando Pack de Servidores MCP Esenciales en Antigravity y Proyecto...\n', colors.cyan);
+
+  const geminiConfigDir = path.join(os.homedir(), '.gemini', 'config');
+  const mcpConfigFile = path.join(geminiConfigDir, 'mcp_config.json');
+  const projectMcpDir = path.join(process.cwd(), '.agents', 'mcp');
+
+  // 1. Aprovisionar plantilla y documentación local en el proyecto
+  log('1. Aprovisionando catálogo y plantillas en el proyecto local (.agents/mcp/)...', colors.yellow);
+  ensureDirSync(projectMcpDir);
+
+  const templateSrc = path.join(ROOT_DIR, '.agents', 'mcp', 'mcp_config.template.json');
+  const readmeSrc = path.join(ROOT_DIR, '.agents', 'mcp', 'README.md');
+
+  if (fs.existsSync(templateSrc)) {
+    fs.copyFileSync(templateSrc, path.join(projectMcpDir, 'mcp_config.template.json'));
+    log('   [OK] Plantilla: .agents/mcp/mcp_config.template.json', colors.green);
+  }
+  if (fs.existsSync(readmeSrc)) {
+    fs.copyFileSync(readmeSrc, path.join(projectMcpDir, 'README.md'));
+    log('   [OK] Documentación: .agents/mcp/README.md', colors.green);
+  }
+
+  // 2. Fusión no destructiva en ~/.gemini/config/mcp_config.json
+  log('\n2. Configurando servidores globales en Antigravity (~/.gemini/config/mcp_config.json)...', colors.yellow);
+  ensureDirSync(geminiConfigDir);
+
+  let currentConfig = { mcpServers: {} };
+  if (fs.existsSync(mcpConfigFile)) {
+    try {
+      backupFile(mcpConfigFile);
+      currentConfig = JSON.parse(fs.readFileSync(mcpConfigFile, 'utf8'));
+      if (!currentConfig.mcpServers) currentConfig.mcpServers = {};
+    } catch (e) {
+      log('   [-] Archivo existente no es JSON válido. Creando respaldo y reinicializando...', colors.red);
+      currentConfig = { mcpServers: {} };
+    }
+  }
+
+  const essentialServers = {
+    'chrome-devtools': {
+      command: 'npx',
+      args: ['-y', 'chrome-devtools-mcp@latest']
+    },
+    'context7': {
+      serverUrl: 'https://mcp.context7.com/mcp',
+      headers: {
+        CONTEXT7_API_KEY: '${CONTEXT7_API_KEY}'
+      }
+    },
+    'github': {
+      command: 'npx',
+      args: ['-y', '@modelcontextprotocol/server-github'],
+      env: {
+        GITHUB_PERSONAL_ACCESS_TOKEN: '${GITHUB_PERSONAL_ACCESS_TOKEN}'
+      }
+    },
+    'figma': {
+      command: 'npx',
+      args: ['-y', 'figma-developer-mcp'],
+      env: {
+        FIGMA_ACCESS_TOKEN: '${FIGMA_ACCESS_TOKEN}'
+      }
+    },
+    'supabase': {
+      serverUrl: 'https://mcp.supabase.com/mcp',
+      headers: {
+        Authorization: 'Bearer ${SUPABASE_ACCESS_TOKEN}'
+      }
+    }
+  };
+
+  let addedCount = 0;
+  let preservedCount = 0;
+
+  for (const [key, serverDef] of Object.entries(essentialServers)) {
+    if (currentConfig.mcpServers[key]) {
+      preservedCount++;
+      log('   [PRESERVADO] Servidor \'' + key + '\' ya existe con configuración propia.', colors.gray);
+    } else {
+      currentConfig.mcpServers[key] = serverDef;
+      addedCount++;
+      log('   [AÑADIDO] Servidor \'' + key + '\' integrado.', colors.green);
+    }
+  }
+
+  fs.writeFileSync(mcpConfigFile, JSON.stringify(currentConfig, null, 2) + '\n', 'utf8');
+
+  log(`
+${colors.green}${colors.bold}=======================================================
+✅ Pack de Servidores MCP instalado con éxito:
+   • chrome-devtools (Google)
+   • context7 (Upstash)
+   • github (GitHub)
+   • figma (Figma)
+   • supabase (Supabase)
+   Servidores añadidos: ${addedCount} | Preservados intactos: ${preservedCount}
+=======================================================${colors.reset}
 `);
 }
 
@@ -1471,6 +1581,7 @@ Comandos:
   sync [mensaje]         Audita, commitea y sube los cambios a GitHub (push)
   install-skill          Instala la skill speckit-sdd en Antigravity (~/.gemini/config)
   install-skills-pack    Instala el Starter Pack de 5 skills (skills.sh) local y global
+  install-mcp-pack       Instala y fusiona el pack de 5 MCPs esenciales en Antigravity
   version                Muestra la versión instalada
 
 Opciones de 'init':
@@ -1504,6 +1615,11 @@ Ejemplos:
   if (command === 'sync' || command === 'push') {
     const commitMsg = rawArgs.slice(1).join(' ');
     await cmdSync(process.cwd(), commitMsg);
+    return;
+  }
+
+  if (command === 'install-mcp-pack' || command === 'mcp-pack' || command === 'mcp') {
+    cmdInstallMcpPack();
     return;
   }
 
