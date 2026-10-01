@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.3.0](https://github.com/BeLc3bU/elite-agent-bootstrap/compare/v1.2.0...v1.3.0) (2026-10-01)
+
+
+### Features
+
+* integración de memoria persistente v2, alias directos y comando sync ([6fe503d](https://github.com/BeLc3bU/elite-agent-bootstrap/commit/6fe503d92be6645e5895d5eeede99b500599ab70))
+* integración del Pack de Servidores MCP Esenciales (DevTools, Context7, GitHub, Figma, Supabase) ([66a288d](https://github.com/BeLc3bU/elite-agent-bootstrap/commit/66a288db1101b4448aa5322bfdbccb461698d748))
+* integración del Starter Pack de skills (skills.sh) y aprovisionamiento universal ([9f1d780](https://github.com/BeLc3bU/elite-agent-bootstrap/commit/9f1d780ea65013bfa86d3ae6a658642cae0b443e))
+* soporte completo de aprovisionamiento MCP y skills para proyectos existentes y futuros ([07ae758](https://github.com/BeLc3bU/elite-agent-bootstrap/commit/07ae758f66c470bd4fba7426945e9f1799d95e78))
+
 ## [1.2.0](https://github.com/BeLc3bU/elite-agent-bootstrap/compare/v1.1.0...v1.2.0) (2026-09-28)
 
 
