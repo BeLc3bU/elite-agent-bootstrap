@@ -45,6 +45,7 @@ Analiza el entorno y hazle al usuario las siguientes 4 preguntas clave:
 Genera:
 - `.specify/memory/constitution.md`: Principios inmutables del proyecto basados en la plantilla.
 - `.agents/registry.json`: Registro formal y tipado de agentes, permisos y roles según `schemas/registry.schema.json`.
+- `MEMORY.md` y `.agents/memory/`: Memoria persistente del repositorio estructurada por capas (decisions, patterns, lessons, context) con divulgación progresiva.
 - `AGENTS.md`: Mapa de comandos, subagentes y guardrails (máximo 500 líneas).
 - `.cursorrules` / `GEMINI.md` / `CLAUDE.md`: Reglas específicas para el editor.
 

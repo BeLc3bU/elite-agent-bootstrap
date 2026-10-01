@@ -28,25 +28,25 @@ Su propósito es erradicar el "vibe coding" y estructurar el ciclo completo de d
 
 ```mermaid
 flowchart LR
-    A["1. /speckit.specify\n(Rol: spec-agent)"] --> B["2. /speckit.plan\n(Rol: spec-agent)"]
-    B --> C["3. /speckit.tasks\n(Rol: orchestrator)"]
-    C --> D["4. /speckit.implement\n(Roles: implementer + tester)"]
-    D --> E["5. /speckit.converge\n(Roles: reviewer + security-agent)"]
+    A["1. /specify (o /speckit.specify)\n(Rol: spec-agent)"] --> B["2. /plan (o /speckit.plan)\n(Rol: spec-agent)"]
+    B --> C["3. /tasks (o /speckit.tasks)\n(Rol: orchestrator)"]
+    C --> D["4. /implement (o /speckit.implement)\n(Roles: implementer + tester)"]
+    D --> E["5. /converge (o /speckit.converge)\n(Roles: reviewer + security-agent)"]
 ```
 
 ---
 
-### Fase 1: `/speckit.specify <nombre-feature>` (spec-agent)
+### Fase 1: `/specify (o /speckit.specify) <nombre-feature>` (spec-agent)
 * **Objetivo:** Definir qué se va a construir y cuáles son sus criterios de aceptación (Given-When-Then), sin detalles de implementación.
 * **Acciones:**
   1. Localizar el siguiente número correlativo en `specs/` (ej. `006-nuevo-modulo`).
   2. Crear el directorio `specs/NNN-<nombre-feature>/` usando la plantilla canónica `.specify/templates/spec.md`.
-  3. Formular preguntas breves de aclaración (`/speckit.clarify`) si existen ambigüedades.
+  3. Formular preguntas breves de aclaración (`/clarify (o /speckit.clarify)`) si existen ambigüedades.
   4. Presentar el `spec.md` y **DETENERSE**. Esperar la aprobación explícita del usuario.
 
 ---
 
-### Fase 2: `/speckit.plan` (spec-agent / architect)
+### Fase 2: `/plan (o /speckit.plan)` (spec-agent / architect)
 * **Objetivo:** Trazar el plano arquitectónico y técnico basándose en el `spec.md` aprobado.
 * **Acciones:**
   1. Cargar el `spec.md` y `.specify/memory/constitution.md`.
@@ -57,7 +57,7 @@ flowchart LR
 
 ---
 
-### Fase 3: `/speckit.tasks` (orchestrator / spec-agent)
+### Fase 3: `/tasks (o /speckit.tasks)` (orchestrator / spec-agent)
 * **Objetivo:** Descomponer el plan técnico en tareas de trabajo atómicas e independientes.
 * **Acciones:**
   1. Generar `specs/NNN-<nombre-feature>/tasks.md` a partir de `.specify/templates/tasks.md`.
@@ -70,7 +70,7 @@ flowchart LR
 
 ---
 
-### Fase 4: `/speckit.implement` (implementer + tester)
+### Fase 4: `/implement (o /speckit.implement)` (implementer + tester)
 * **Objetivo:** Escribir el código siguiendo Test-Driven Development (TDD).
 * **Acciones:**
   1. Tomar la siguiente tarea pendiente en `tasks.md`.
@@ -84,15 +84,15 @@ flowchart LR
 
 ---
 
-### Fase 5: `/speckit.converge` (reviewer + security-agent)
+### Fase 5: `/converge (o /speckit.converge)` (reviewer + security-agent)
 * **Objetivo:** Validar la integridad final del sistema, auditar seguridad y cerrar la especificación.
 * **Acciones:**
   1. Ejecutar la suite completa de pruebas y validaciones:
-     - `speckit verify` (100% de tareas).
-     - `speckit registry validate` (Gobernanza íntegra).
-     - `speckit handoff validate` (Traspasos válidos).
-     - `speckit evidence verify` (Comprobantes auditados).
-     - `speckit eval` (Evaluación sintética superada).
+     - `gent verify` (100% de tareas).
+     - `gent registry validate` (Gobernanza íntegra).
+     - `gent handoff validate` (Traspasos válidos).
+     - `gent evidence verify` (Comprobantes auditados).
+     - `gent eval` (Evaluación sintética superada).
   2. Completar `specs/NNN-<nombre-feature>/checklist.md`.
   3. Registrar Architectural Decision Record (ADR) en `PROJECT_LOG.md`.
   4. Notificar al usuario para la revisión y aprobación humana final previa al merge.
@@ -114,14 +114,14 @@ Si te encuentras en un proyecto que aún no cuenta con la infraestructura de Spe
 ## 🛠️ Comandos CLI Disponibles
 | Comando | Descripción |
 |---|---|
-| `speckit verify` | Valida el progreso de todas las specs activas |
-| `speckit registry validate` | Valida el catálogo formal de agentes contra JSON Schema |
-| `speckit registry list` | Lista los roles, permisos y niveles de riesgo de los agentes |
-| `speckit handoff validate` | Valida el protocolo formal de traspaso entre agentes |
-| `speckit handoff list` | Lista los traspasos históricos registrados |
-| `speckit evidence verify` | Audita que ninguna tarea completada carezca de comprobante exitoso |
-| `speckit evidence list` | Lista los comprobantes de ejecución inmutables |
-| `speckit route "<tarea>"` | Enruta la tarea al agente idóneo mediante la capa de decisión |
-| `speckit eval` | Ejecuta la batería de evaluación sintética de agentes (.evals/) |
-| `speckit create <nombre>` | Crea una nueva especificación numerada en `specs/` |
-| `speckit install-skill` | Instala o actualiza esta skill globalmente en Antigravity |
+| `gent verify` | Valida el progreso de todas las specs activas |
+| `gent registry validate` | Valida el catálogo formal de agentes contra JSON Schema |
+| `gent registry list` | Lista los roles, permisos y niveles de riesgo de los agentes |
+| `gent handoff validate` | Valida el protocolo formal de traspaso entre agentes |
+| `gent handoff list` | Lista los traspasos históricos registrados |
+| `gent evidence verify` | Audita que ninguna tarea completada carezca de comprobante exitoso |
+| `gent evidence list` | Lista los comprobantes de ejecución inmutables |
+| `gent route "<tarea>"` | Enruta la tarea al agente idóneo mediante la capa de decisión |
+| `gent eval` | Ejecuta la batería de evaluación sintética de agentes (.evals/) |
+| `gent create <nombre>` | Crea una nueva especificación numerada en `specs/` |
+| `gent install-skill` | Instala o actualiza esta skill globalmente en Antigravity |

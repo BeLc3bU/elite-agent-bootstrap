@@ -54,5 +54,8 @@ jobs:
       - name: Auditar Sistema de Evidencias Reproducibles
         run: node bin/cli.js evidence verify
 
+      - name: Validar Sistema de Memoria Persistente de Agentes
+        run: node bin/cli.js memory validate
+
       - name: Ejecutar Evaluación Sintética de Enrutamiento y Seguridad (.evals)
         run: node bin/cli.js eval

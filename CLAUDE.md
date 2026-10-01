@@ -17,5 +17,6 @@
 - **Lint**: `npm run lint` / `ruff check .` / `cargo clippy`
 - **Tipos**: `npm run typecheck`
 - **Tests**: `npm test` / `pytest` / `cargo test`
+- **Memoria Persistente**: Consultar `MEMORY.md` y `.agents/memory/` para contexto operativo y patrones. Validar con `node bin/cli.js memory validate`.
 - **Crear Spec**: `powershell .\.specify\scripts\create-feature.ps1 -FeatureId "XXX" -FeatureName "nombre"` o `./.specify/scripts/create-feature.sh XXX nombre`
-- **Verificar Specs**: `powershell .\.specify\scripts\verify-spec.ps1` o `./.specify/scripts/verify-spec.sh`
+- **Verificar Specs**: `powershell .\.specify\scripts\verify-spec.ps1` o `node bin/cli.js verify`

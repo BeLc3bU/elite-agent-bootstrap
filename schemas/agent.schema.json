@@ -125,6 +125,16 @@
     "can_merge": {
       "type": "boolean",
       "description": "Permiso para fusionar Pull Requests o ramas protegidas (Normalmente false)"
+    },
+    "can_read_memory": {
+      "type": "boolean",
+      "default": true,
+      "description": "Permiso para consultar el índice y las memorias persistentes del repositorio"
+    },
+    "can_write_memory": {
+      "type": "boolean",
+      "default": false,
+      "description": "Permiso para registrar, proponer o editar entradas de memoria persistente"
     }
   },
   "additionalProperties": false

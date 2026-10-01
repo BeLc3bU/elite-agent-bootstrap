@@ -1,20 +1,23 @@
 {
-  "version": "2.0.0",
+  "version": "2.1.0",
   "project_name": "elite-agent-bootstrap",
-  "description": "Registro oficial y catálogo de gobernanza de agentes de IA para Elite Agent Bootstrap v2",
+  "description": "Registro oficial y catálogo de gobernanza de agentes de IA para Elite Agent Bootstrap v2 (con soporte para memoria persistente)",
   "governance_source": ".specify/memory/constitution.md",
   "default_decision_provider": "deterministic",
   "agents": [
     {
       "id": "orchestrator",
       "name": "Orquestador Principal",
-      "description": "Coordina el flujo de trabajo SDD, asigna tareas entre agentes y gestiona el estado global del proyecto.",
+      "description": "Coordina el flujo de trabajo SDD, asigna tareas entre agentes y gestiona el estado global y memoria del proyecto.",
       "role": "orchestrator",
       "capabilities": [
         "routing",
         "state-management",
         "task-dispatching",
-        "phase-coordination"
+        "phase-coordination",
+        "memory-read",
+        "memory-write",
+        "memory-maintenance"
       ],
       "tools": [
         "git",
@@ -34,7 +37,8 @@
       "allowed_files": [
         ".agents/**",
         "PROJECT_LOG.md",
-        "README.md"
+        "README.md",
+        "MEMORY.md"
       ],
       "forbidden_files": [
         "src/**",
@@ -49,18 +53,22 @@
       "can_modify_specs": true,
       "can_modify_governance": false,
       "can_commit": true,
-      "can_merge": false
+      "can_merge": false,
+      "can_read_memory": true,
+      "can_write_memory": true
     },
     {
       "id": "spec-agent",
       "name": "Especialista en Especificaciones (SpecAgent)",
-      "description": "Redacta, audita y mantiene especificaciones funcionales (spec.md), planes técnicos (plan.md) y listas de tareas (tasks.md).",
+      "description": "Redacta, audita y mantiene especificaciones funcionales (spec.md), planes técnicos (plan.md), listas de tareas (tasks.md) y decisiones operativas.",
       "role": "spec-agent",
       "capabilities": [
         "requirements-analysis",
         "bdd-specifications",
         "architecture-planning",
-        "task-breakdown"
+        "task-breakdown",
+        "memory-read",
+        "memory-write"
       ],
       "tools": [
         "speckit-cli",
@@ -80,7 +88,10 @@
       ],
       "allowed_files": [
         "specs/**",
-        ".specify/templates/**"
+        ".specify/templates/**",
+        "MEMORY.md",
+        ".agents/memory/decisions.md",
+        ".agents/memory/context.md"
       ],
       "forbidden_files": [
         "src/**",
@@ -98,18 +109,22 @@
       "can_modify_specs": true,
       "can_modify_governance": false,
       "can_commit": true,
-      "can_merge": false
+      "can_merge": false,
+      "can_read_memory": true,
+      "can_write_memory": true
     },
     {
       "id": "implementer",
       "name": "Ingeniero de Implementación (Implementer)",
-      "description": "Desarrolla código de producción guiado por tareas específicas en tasks.md siguiendo metodología TDD.",
+      "description": "Desarrolla código de producción guiado por tareas específicas en tasks.md siguiendo metodología TDD y registra patrones y lecciones de código.",
       "role": "implementer",
       "capabilities": [
         "code-generation",
         "refactoring",
         "tdd-cycle",
-        "dependency-wiring"
+        "dependency-wiring",
+        "memory-read",
+        "memory-write"
       ],
       "tools": [
         "terminal",
@@ -131,7 +146,9 @@
         "src/**",
         "app/**",
         "lib/**",
-        "bin/**"
+        "bin/**",
+        ".agents/memory/patterns.md",
+        ".agents/memory/lessons.md"
       ],
       "forbidden_files": [
         ".specify/memory/constitution.md",
@@ -148,18 +165,22 @@
       "can_modify_specs": false,
       "can_modify_governance": false,
       "can_commit": true,
-      "can_merge": false
+      "can_merge": false,
+      "can_read_memory": true,
+      "can_write_memory": true
     },
     {
       "id": "tester",
       "name": "Ingeniero de Pruebas y QA (TestingAgent)",
-      "description": "Diseña y ejecuta pruebas unitarias, de integración y end-to-end, asegurando la cobertura y el ciclo RED-GREEN.",
+      "description": "Diseña y ejecuta pruebas unitarias, de integración y end-to-end, asegurando la cobertura y el ciclo RED-GREEN, y persiste lecciones de testing.",
       "role": "tester",
       "capabilities": [
         "unit-testing",
         "integration-testing",
         "test-coverage",
-        "regression-testing"
+        "regression-testing",
+        "memory-read",
+        "memory-write"
       ],
       "tools": [
         "vitest",
@@ -182,7 +203,9 @@
         "tests/**",
         "spec/**",
         "**/*.test.*",
-        "**/*.spec.*"
+        "**/*.spec.*",
+        ".agents/memory/lessons.md",
+        ".agents/memory/patterns.md"
       ],
       "forbidden_files": [
         "src/**",
@@ -199,18 +222,22 @@
       "can_modify_specs": false,
       "can_modify_governance": false,
       "can_commit": true,
-      "can_merge": false
+      "can_merge": false,
+      "can_read_memory": true,
+      "can_write_memory": true
     },
     {
       "id": "security-agent",
       "name": "Auditor de Seguridad y Políticas (SecurityAgent)",
-      "description": "Audita el código contra vulnerabilidades OWASP para agentes, inyección de prompts, exposición de secretos y licencias.",
+      "description": "Audita el código contra vulnerabilidades OWASP para agentes, inyección de prompts, exposición de secretos y licencias, registrando lecciones de seguridad.",
       "role": "security-agent",
       "capabilities": [
         "owasp-audit",
         "secret-scanning",
         "dependency-vulnerability-check",
-        "least-privilege-audit"
+        "least-privilege-audit",
+        "memory-read",
+        "memory-write"
       ],
       "tools": [
         "git",
@@ -229,7 +256,8 @@
       ],
       "allowed_files": [
         ".evidence/**",
-        "docs/security/**"
+        "docs/security/**",
+        ".agents/memory/lessons.md"
       ],
       "forbidden_files": [
         "src/**",
@@ -246,17 +274,20 @@
       "can_modify_specs": false,
       "can_modify_governance": false,
       "can_commit": false,
-      "can_merge": false
+      "can_merge": false,
+      "can_read_memory": true,
+      "can_write_memory": true
     },
     {
       "id": "reviewer",
       "name": "Revisor Técnico y Puerta de Calidad (ReviewerAgent)",
-      "description": "Evalúa de forma independiente las soluciones generadas contra la especificación y los criterios de aceptación antes del cierre de feature.",
+      "description": "Evalúa de forma independiente las soluciones generadas contra la especificación y criterios de aceptación, validando promociones de memoria.",
       "role": "reviewer",
       "capabilities": [
         "code-review",
         "acceptance-criteria-verification",
-        "compliance-check"
+        "compliance-check",
+        "memory-read"
       ],
       "tools": [
         "git",
@@ -279,7 +310,8 @@
       ],
       "forbidden_files": [
         "src/**",
-        ".specify/memory/constitution.md"
+        ".specify/memory/constitution.md",
+        ".agents/memory/**"
       ],
       "dependencies": [
         "tester",
@@ -292,17 +324,21 @@
       "can_modify_specs": false,
       "can_modify_governance": false,
       "can_commit": false,
-      "can_merge": false
+      "can_merge": false,
+      "can_read_memory": true,
+      "can_write_memory": false
     },
     {
       "id": "optimization-agent",
       "name": "Especialista en Optimización y Rendimiento (OptimizationAgent)",
-      "description": "Analiza el tamaño de los artefactos de compilación, latencias, cuellos de botella y eficiencia de memoria.",
+      "description": "Analiza el tamaño de los artefactos de compilación, latencias, cuellos de botella y eficiencia de memoria, registrando patrones de optimización.",
       "role": "optimization-agent",
       "capabilities": [
         "bundle-analysis",
         "performance-profiling",
-        "memory-leak-detection"
+        "memory-leak-detection",
+        "memory-read",
+        "memory-write"
       ],
       "tools": [
         "bundle-analyzer",
@@ -319,7 +355,9 @@
       ],
       "allowed_files": [
         ".evidence/**",
-        "docs/performance/**"
+        "docs/performance/**",
+        ".agents/memory/patterns.md",
+        ".agents/memory/lessons.md"
       ],
       "forbidden_files": [
         "src/**",
@@ -335,7 +373,9 @@
       "can_modify_specs": false,
       "can_modify_governance": false,
       "can_commit": false,
-      "can_merge": false
+      "can_merge": false,
+      "can_read_memory": true,
+      "can_write_memory": true
     }
   ]
 }

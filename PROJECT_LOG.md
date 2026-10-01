@@ -76,6 +76,18 @@ Este archivo actúa como la memoria a largo plazo del proyecto, documentando la 
   6. Integrar `npm run test:evals` como Quality Gate bloqueante en `.github/workflows/spec-quality-gate.yml`, emitiendo comprobantes de evidencia en `.evidence/`.
 - **Consecuencias**: Sistema agéntico determinista, testeable y extensible sin vendor lock-in; cumplimiento estricto de la regla constitucional y evaluación automatizada en CI/CD.
 
+### ADR-008: Sistema Nativo de Memoria Persistente de Agentes (Persistent Agent Memory)
+- **Fecha**: 2026-10-01
+- **Contexto**: Los agentes en sesiones independientes perdían contexto de patrones de código, decisiones operativas y lecciones aprendidas previas, provocando repetición de investigaciones o errores. Se requería un sistema de memoria inspirado conceptualmente en agentes avanzados (Claude Code, Antigravity) pero integrado de forma nativa con Spec-Driven Development, gobernanza de agentes y divulgación progresiva (*Progressive Disclosure*).
+- **Decisión**:
+  1. Diseñar un índice raíz canónico `MEMORY.md` compacto (<150 líneas) y desacoplar memorias especializadas en `.agents/memory/`: `decisions.md` (operativas no-ADR), `patterns.md` (diseño y código), `lessons.md` (errores resueltos), `context.md` (entorno) y `archive/` (trazabilidad histórica de memorias retiradas).
+  2. Establecer la jerarquía normativa estricta:
+     $$\text{Constitución} > \text{Especificación (specs/)} > \text{Reglas (AGENTS/GEMINI)} > \text{ADR (PROJECT_LOG)} > \text{Memoria} > \text{Contexto de Chat}$$
+  3. Formalizar el esquema JSON Schema Draft-07 en `schemas/memory.schema.json` e incorporar capacidades (`memory-read`, `memory-write`, `memory-maintenance`) y permisos segmentados en `.agents/registry.json`.
+  4. Implementar los comandos CLI en `bin/cli.js`: `speckit memory list`, `validate`, `search`, `show`, `archive` con validación estructural nativa en Node.js sin dependencias externas.
+  5. Crear la regla de Antigravity `.agents/rules/memory-protocol.md` e integrar `test:memory` en `package.json` y `.github/workflows/spec-quality-gate.yml`.
+- **Consecuencias**: Reducción drástica del gasto de contexto mediante carga bajo demanda, memoria auditable y versionada en Git, cero dependencia de bases de datos vectoriales externas y preservación de la autoridad de la Constitución y las especificaciones.
+
 ---
 
 ## 🗺️ Historial de Fases e Hitos
@@ -89,5 +101,7 @@ Este archivo actúa como la memoria a largo plazo del proyecto, documentando la 
 | **v2 - Fase 2** | Gobernanza y Registro Tipado de Agentes (.agents/registry.json y esquemas JSON) | ✅ Completado | 2026-09-28 |
 | **v2 - Fase 3** | Puertas de Evidencia, Protocolo de Handoffs y CI/CD Gates (.evidence/ y .agents/handoffs/) | ✅ Completado | 2026-09-28 |
 | **v2 - Fase 4** | Capa de Decisión Desacoplada (Core + Extended Kev/Jev) y Arnés Sintético (.evals/) | ✅ Completado | 2026-09-28 |
+| **v2 - Fase 5** | Sistema Nativo de Memoria Persistente de Agentes (MEMORY.md + .agents/memory/) | ✅ Completado | 2026-10-01 |
+
 
 

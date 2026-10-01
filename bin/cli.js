@@ -9,6 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 const os = require('os');
+const { execSync } = require('child_process');
 
 // ==========================================
 // Colores y Formato en Terminal
@@ -177,7 +178,7 @@ function cmdVerify(targetDir) {
     .filter(e => e.isDirectory());
 
   if (entries.length === 0) {
-    log(`[INFO] No hay especificaciones creadas aún en 'specs/'. Usa 'speckit create <nombre>'`, colors.gray);
+    log(`[INFO] No hay especificaciones creadas aún en 'specs/'. Usa 'agent create <nombre>'`, colors.gray);
     return;
   }
 
@@ -550,13 +551,296 @@ function cmdEvidence(targetDir, subAction = 'verify') {
 }
 
 // ==========================================
+// Comandos del Sistema de Memoria (memory)
+// ==========================================
+function validateMemory(targetDir) {
+  const memoryRoot = path.join(targetDir, 'MEMORY.md');
+  const memoryDir = path.join(targetDir, '.agents', 'memory');
+
+  if (!fs.existsSync(memoryRoot)) {
+    throw new Error(`No se encontró el índice canónico 'MEMORY.md' en: ${memoryRoot}`);
+  }
+
+  if (!fs.existsSync(memoryDir)) {
+    throw new Error(`No se encontró el directorio de memorias modulares '.agents/memory' en: ${memoryDir}`);
+  }
+
+  let knownAgents = new Set();
+  const registryPath = path.join(targetDir, '.agents', 'registry.json');
+  if (fs.existsSync(registryPath)) {
+    try {
+      const reg = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+      if (Array.isArray(reg.agents)) {
+        reg.agents.forEach(a => knownAgents.add(a.id));
+      }
+    } catch (_) {}
+  }
+
+  const files = fs.readdirSync(memoryDir, { withFileTypes: true })
+    .filter(e => !e.isDirectory() && e.name.endsWith('.md'))
+    .map(e => e.name);
+
+  const entries = [];
+  const knownIds = new Set();
+  const validTypes = ['pattern', 'decision', 'lesson', 'context'];
+  const validStatuses = ['active', 'stale', 'archived'];
+  const validConfidences = ['high', 'medium', 'low'];
+
+  for (const fileName of files) {
+    const fullPath = path.join(memoryDir, fileName);
+    const content = fs.readFileSync(fullPath, 'utf8');
+
+    // Parsear bloques de memoria: cada entrada empieza con ### MEM-...
+    const sections = content.split(/\n(?=###\s+MEM-)/);
+
+    for (const section of sections) {
+      if (!section.trim().startsWith('### MEM-')) continue;
+
+      const headerMatch = section.match(/^###\s+MEM-([0-9]{3})(?::\s*|\s+)([^\n]+)/);
+      if (!headerMatch) {
+        throw new Error(`Encabezado de memoria inválido en '${fileName}'. Formato esperado: '### MEM-XXX: Título'`);
+      }
+
+      const shortId = `MEM-${headerMatch[1]}`;
+      const title = headerMatch[2].trim();
+
+      const idMatch = section.match(/- \*\*ID\*\*:\s*`?([a-zA-Z0-9_-]+)`?/);
+      const typeMatch = section.match(/- \*\*Tipo\*\*:\s*`?([a-zA-Z0-9_-]+)`?/);
+      const statusMatch = section.match(/- \*\*Estado\*\*:\s*`?([a-zA-Z0-9_-]+)`?/);
+      const confMatch = section.match(/- \*\*Confianza\*\*:\s*`?([a-zA-Z0-9_-]+)`?/);
+      const dateMatch = section.match(/- \*\*Fecha\*\*:\s*`?([0-9]{4}-[0-9]{2}-[0-9]{2})`?/);
+      const sourceMatch = section.match(/- \*\*Fuente\*\*:\s*`?([^\n`]+)`?/);
+      const authorMatch = section.match(/- \*\*Autor\*\*:\s*`?([a-zA-Z0-9_-]+)`?/);
+      const summaryMatch = section.match(/- \*\*Resumen\*\*:\s*([^\n]+)/);
+
+      const memId = idMatch ? idMatch[1].trim() : shortId;
+
+      if (!/^MEM-[0-9]{3}(-[a-z0-9-]+)?$/.test(memId)) {
+        throw new Error(`ID de memoria inválido en '${fileName}': '${memId}'. Formato: MEM-XXX o MEM-XXX-slug`);
+      }
+
+      if (knownIds.has(memId)) {
+        throw new Error(`ID de memoria duplicado detectado: '${memId}' en '${fileName}'.`);
+      }
+      knownIds.add(memId);
+
+      const memType = typeMatch ? typeMatch[1].trim() : '';
+      if (!validTypes.includes(memType)) {
+        throw new Error(`Memoria '${memId}' en '${fileName}' tiene un tipo inválido: '${memType}'. Válidos: ${validTypes.join(', ')}`);
+      }
+
+      const memStatus = statusMatch ? statusMatch[1].trim() : 'active';
+      if (!validStatuses.includes(memStatus)) {
+        throw new Error(`Memoria '${memId}' en '${fileName}' tiene un estado inválido: '${memStatus}'. Válidos: ${validStatuses.join(', ')}`);
+      }
+
+      const memConf = confMatch ? confMatch[1].trim() : 'medium';
+      if (!validConfidences.includes(memConf)) {
+        throw new Error(`Memoria '${memId}' en '${fileName}' tiene una confianza inválida: '${memConf}'. Válidos: ${validConfidences.join(', ')}`);
+      }
+
+      if (!summaryMatch || summaryMatch[1].trim().length < 10) {
+        throw new Error(`Memoria '${memId}' en '${fileName}' requiere un resumen descriptivo (- **Resumen**: ...) de al menos 10 caracteres.`);
+      }
+
+      if (authorMatch && knownAgents.size > 0 && !knownAgents.has(authorMatch[1].trim())) {
+        throw new Error(`Memoria '${memId}' en '${fileName}': El autor '${authorMatch[1].trim()}' no existe en .agents/registry.json.`);
+      }
+
+      let details = '';
+      const detailsIndex = section.indexOf('- **Detalles**:');
+      if (detailsIndex !== -1) {
+        details = section.slice(detailsIndex + '- **Detalles**:'.length).trim();
+      }
+
+      entries.push({
+        id: memId,
+        short_id: shortId,
+        title,
+        type: memType,
+        status: memStatus,
+        confidence: memConf,
+        created: dateMatch ? dateMatch[1].trim() : '',
+        source: sourceMatch ? sourceMatch[1].trim() : '',
+        author_agent: authorMatch ? authorMatch[1].trim() : '',
+        summary: summaryMatch[1].trim(),
+        details,
+        file: fileName,
+        rawSection: section
+      });
+    }
+  }
+
+  return entries;
+}
+
+function cmdMemory(targetDir, subAction = 'list', rawArgs = []) {
+  printBanner();
+  const memoryDir = path.join(targetDir, '.agents', 'memory');
+
+  if (subAction === 'validate' || subAction === 'verify') {
+    log(`\n🔍 Validando sistema de memoria persistente en: ${colors.bold}${memoryDir}${colors.reset}\n`, colors.cyan);
+    try {
+      const entries = validateMemory(targetDir);
+      const activeCount = entries.filter(e => e.status === 'active').length;
+      log(`✅ Sistema de memoria persistente verificado: ${entries.length} memorias auditadas (${activeCount} activas) sin violaciones.`, colors.green);
+      log(`   Índice raíz: MEMORY.md | Directorio modular: .agents/memory/\n`, colors.gray);
+    } catch (err) {
+      log(`❌ Error de validación de memoria: ${err.message}\n`, colors.red);
+      process.exit(1);
+    }
+    return;
+  }
+
+  if (subAction === 'list' || subAction === 'ls') {
+    log(`\n🧠 Memorias Persistentes Registradas (.agents/memory):\n`, colors.cyan);
+    try {
+      const entries = validateMemory(targetDir);
+      if (entries.length === 0) {
+        log(`[INFO] No hay memorias registradas aún en '.agents/memory/'.`, colors.gray);
+        console.log('');
+        return;
+      }
+
+      log(`| ID | Tipo | Estado | Confianza | Archivo | Título |`, colors.yellow);
+      log(`|---|---|---|---|---|---|`, colors.gray);
+      for (const m of entries) {
+        const stColor = m.status === 'active' ? colors.green + m.status : colors.yellow + m.status;
+        const typeColor = colors.cyan + m.type.padEnd(8) + colors.reset;
+        log(`| ${colors.bold}${m.short_id.padEnd(8)}${colors.reset} | ${typeColor} | ${stColor.padEnd(16)}${colors.reset} | ${m.confidence.padEnd(9)} | ${m.file.padEnd(14)} | ${m.title} |`);
+      }
+      console.log('');
+    } catch (err) {
+      log(`❌ Error al listar memorias: ${err.message}\n`, colors.red);
+      process.exit(1);
+    }
+    return;
+  }
+
+  if (subAction === 'search' || subAction === 'find') {
+    const query = rawArgs.slice(2).join(' ').toLowerCase();
+    if (!query) {
+      log(`[-] Error: Debes especificar un término de búsqueda.`, colors.red);
+      log(`    Ejemplo: agent memory search "powershell"`, colors.yellow);
+      return;
+    }
+
+    log(`\n🔍 Buscando memorias con término: "${query}"...\n`, colors.cyan);
+    try {
+      const entries = validateMemory(targetDir);
+      const matches = entries.filter(m => 
+        m.id.toLowerCase().includes(query) ||
+        m.title.toLowerCase().includes(query) ||
+        m.summary.toLowerCase().includes(query) ||
+        m.details.toLowerCase().includes(query)
+      );
+
+      if (matches.length === 0) {
+        log(`[INFO] No se encontraron memorias que coincidan con "${query}".`, colors.gray);
+        console.log('');
+        return;
+      }
+
+      log(`Se encontraron ${matches.length} coincidencias:\n`, colors.green);
+      for (const m of matches) {
+        log(`• [${colors.bold}${m.short_id}${colors.reset}] ${colors.yellow}${m.title}${colors.reset} (${m.type} - ${m.status})`);
+        log(`  Archivo: .agents/memory/${m.file}`);
+        log(`  Resumen: ${m.summary}\n`);
+      }
+    } catch (err) {
+      log(`❌ Error al buscar memorias: ${err.message}\n`, colors.red);
+      process.exit(1);
+    }
+    return;
+  }
+
+  if (subAction === 'show') {
+    const targetId = rawArgs[2];
+    if (!targetId) {
+      log(`[-] Error: Debes especificar el ID de la memoria a consultar.`, colors.red);
+      log(`    Ejemplo: agent memory show MEM-001`, colors.yellow);
+      return;
+    }
+
+    try {
+      const entries = validateMemory(targetDir);
+      const match = entries.find(m => m.short_id.toLowerCase() === targetId.toLowerCase() || m.id.toLowerCase() === targetId.toLowerCase());
+      if (!match) {
+        log(`[-] No se encontró ninguna memoria con ID '${targetId}'.`, colors.red);
+        return;
+      }
+
+      log(`\n📋 Detalle de Memoria [${colors.bold}${match.short_id}${colors.reset}]:\n`, colors.cyan);
+      log(`• Título:      ${colors.bold}${match.title}${colors.reset}`);
+      log(`• ID Canónico: ${match.id}`);
+      log(`• Tipo:        ${match.type}`);
+      log(`• Estado:      ${match.status}`);
+      log(`• Confianza:   ${match.confidence}`);
+      log(`• Fecha:       ${match.created || 'N/A'}`);
+      log(`• Autor:       ${match.author_agent || 'N/A'}`);
+      log(`• Fuente:      ${match.source || 'N/A'}`);
+      log(`• Archivo:     .agents/memory/${match.file}`);
+      log(`\n• Resumen:\n  ${match.summary}\n`);
+      if (match.details) {
+        log(`• Detalles Técnicos:\n  ${match.details.split('\n').join('\n  ')}\n`);
+      }
+    } catch (err) {
+      log(`❌ Error al mostrar memoria: ${err.message}\n`, colors.red);
+      process.exit(1);
+    }
+    return;
+  }
+
+  if (subAction === 'archive') {
+    const targetId = rawArgs[2];
+    if (!targetId) {
+      log(`[-] Error: Debes especificar el ID de la memoria a archivar.`, colors.red);
+      log(`    Ejemplo: agent memory archive MEM-001`, colors.yellow);
+      return;
+    }
+
+    try {
+      const entries = validateMemory(targetDir);
+      const match = entries.find(m => m.short_id.toLowerCase() === targetId.toLowerCase() || m.id.toLowerCase() === targetId.toLowerCase());
+      if (!match) {
+        log(`[-] No se encontró ninguna memoria con ID '${targetId}'.`, colors.red);
+        return;
+      }
+
+      const archiveDir = path.join(memoryDir, 'archive');
+      ensureDirSync(archiveDir);
+      const archiveFile = path.join(archiveDir, `${match.short_id.toLowerCase()}.md`);
+
+      const sourceFile = path.join(memoryDir, match.file);
+      let sourceContent = fs.readFileSync(sourceFile, 'utf8');
+
+      let archivedSection = match.rawSection.replace(/- \*\*Estado\*\*:\s*`?[a-zA-Z0-9_-]+`?/, `- **Estado**: archived\n- **Fecha Archivado**: ${new Date().toISOString().split('T')[0]}`);
+
+      fs.writeFileSync(archiveFile, `# Memoria Archivada: ${match.title}\n\n${archivedSection}\n`, 'utf8');
+      
+      sourceContent = sourceContent.replace(match.rawSection, archivedSection);
+      fs.writeFileSync(sourceFile, sourceContent, 'utf8');
+
+      log(`\n📦 Memoria [${match.short_id}] archivada con éxito.`, colors.green);
+      log(`   Preservada en: .agents/memory/archive/${match.short_id.toLowerCase()}.md\n`, colors.gray);
+    } catch (err) {
+      log(`❌ Error al archivar memoria: ${err.message}\n`, colors.red);
+      process.exit(1);
+    }
+    return;
+  }
+
+  log(`[-] Subacción desconocida para 'memory': '${subAction}'. Opciones: validate, list, search, show, archive`, colors.yellow);
+}
+
+// ==========================================
 // Comandos de Enrutamiento y Decisión (route)
 // ==========================================
 async function cmdRoute(targetDir, query) {
   printBanner();
   if (!query) {
     log(`[-] Error: Debes especificar una descripción de la tarea a enrutar.`, colors.red);
-    log(`    Ejemplo: speckit route "escribir pruebas unitarias con Jest"`, colors.yellow);
+    log(`    Ejemplo: agent route "escribir pruebas unitarias con Jest"`, colors.yellow);
     return;
   }
 
@@ -668,7 +952,7 @@ function cmdCreate(targetDir, featureName) {
   printBanner();
   if (!featureName) {
     log(`[-] Error: Debes especificar el nombre de la feature.`, colors.red);
-    log(`    Ejemplo: speckit create auth-login`, colors.yellow);
+    log(`    Ejemplo: agent create auth-login`, colors.yellow);
     return;
   }
 
@@ -904,17 +1188,17 @@ ${colors.green}${colors.bold}===================================================
 =======================================================${colors.reset}
 
 ${colors.yellow}Comandos disponibles en tu editor / IA:${colors.reset}
-  👉 ${colors.bold}/speckit.specify${colors.reset}   - Crear una nueva especificación formal
-  👉 ${colors.bold}/speckit.clarify${colors.reset}   - Resolver ambigüedades técnicas
-  👉 ${colors.bold}/speckit.plan${colors.reset}      - Diseñar arquitectura y contratos
-  👉 ${colors.bold}/speckit.tasks${colors.reset}     - Desglosar checklist de tareas atómicas
-  👉 ${colors.bold}/speckit.implement${colors.reset} - Desarrollar paso a paso con TDD
-  👉 ${colors.bold}/speckit.converge${colors.reset}  - Validar guardrails y preparar PR
+  👉 ${colors.bold}/specify (o /speckit.specify)${colors.reset}   - Crear una nueva especificación formal
+  👉 ${colors.bold}/clarify (o /speckit.clarify)${colors.reset}   - Resolver ambigüedades técnicas
+  👉 ${colors.bold}/plan (o /speckit.plan)${colors.reset}      - Diseñar arquitectura y contratos
+  👉 ${colors.bold}/tasks (o /speckit.tasks)${colors.reset}     - Desglosar checklist de tareas atómicas
+  👉 ${colors.bold}/implement (o /speckit.implement)${colors.reset} - Desarrollar paso a paso con TDD
+  👉 ${colors.bold}/converge (o /speckit.converge)${colors.reset}  - Validar guardrails y preparar PR
 
 ${colors.yellow}Comandos CLI disponibles en la terminal:${colors.reset}
-  👉 ${colors.bold}speckit create <nombre>${colors.reset} - Crea una nueva spec con plantillas
-  👉 ${colors.bold}speckit verify${colors.reset}          - Comprueba el estado de todas las specs
-  👉 ${colors.bold}speckit install-skill${colors.reset}   - Instala la skill speckit-sdd en Antigravity
+  👉 ${colors.bold}agent create <nombre>${colors.reset} - Crea una nueva spec con plantillas
+  👉 ${colors.bold}agent verify${colors.reset}          - Comprueba el estado de todas las specs
+  👉 ${colors.bold}agent install-skill${colors.reset}   - Instala la skill speckit-sdd en Antigravity
 `);
 }
 
@@ -954,7 +1238,7 @@ function cmdInstallSkill() {
 - **Separación de Autoridad (Agent ≠ Authority):** Ningún agente puede auto-aprobarse ni realizar merge directo sin aprobación humana. Consultar \`.agents/registry.json\` para roles, permisos y restricciones de rutas.
 - **Prohibición de Vibe Coding:** No escribir ni modificar código de producción sin contar con la especificación aprobada en \`specs/NNN-<feature>/\` (\`spec.md\`, \`plan.md\`, \`tasks.md\`).
 - **Protocolo de Traspasos y Evidencias:** Traspasos documentados en \`.agents/handoffs/\` y comprobantes de ejecución en \`.evidence/\`. No marcar \`[x]\` sin comprobante de verificación exitoso.
-- **Enrutamiento y Decisiones:** Usar \`speckit route "<tarea>"\` o la capa de decisión (\`lib/adapters/DecisionProvider.js\` / Kev / Jev) para clasificar y asignar roles.
+- **Enrutamiento y Decisiones:** Usar \`agent route "<tarea>"\` o la capa de decisión (\`lib/adapters/DecisionProvider.js\` / Kev / Jev) para clasificar y asignar roles.
 - **Activación de Skill:** Usar la skill \`speckit-sdd\` para orquestar las fases: specify -> plan -> tasks -> implement -> converge.
 `;
 
@@ -985,6 +1269,82 @@ cuenta ahora con la skill 'speckit-sdd' activa.
 }
 
 // ==========================================
+// Comando: Sincronizar / Actualizar en GitHub (sync / push)
+// ==========================================
+async function cmdSync(targetDir, commitMsg) {
+  printBanner();
+  log('\n🔄 Sincronizando repositorio con GitHub...\n', colors.cyan);
+
+  const gitDir = path.join(targetDir, '.git');
+  if (!fs.existsSync(gitDir)) {
+    log('❌ Error: No se encontró un repositorio Git en ' + targetDir, colors.red);
+    process.exit(1);
+  }
+
+  // 1. Verificar Quality Gates antes de subir
+  log('1. Ejecutando Quality Gates de especificaciones...', colors.yellow);
+  try {
+    cmdVerify(targetDir);
+    log('   [OK] Especificaciones verificadas correctamente.', colors.green);
+  } catch (e) {
+    log('❌ Falló la verificación de specs: ' + e.message, colors.red);
+    process.exit(1);
+  }
+
+  // 2. Comprobar estado de Git
+  log('\n2. Verificando estado del árbol de trabajo de Git...', colors.yellow);
+  let statusOutput = '';
+  try {
+    statusOutput = execSync('git status --porcelain', { cwd: targetDir, encoding: 'utf8' }).trim();
+  } catch (e) {
+    log('❌ Error al consultar git status: ' + e.message, colors.red);
+    process.exit(1);
+  }
+
+  if (!statusOutput) {
+    log('ℹ️ No hay cambios locales pendientes de commit.', colors.green);
+    log('3. Comprobando y enviando commits pendientes al remoto (git push)...', colors.yellow);
+    try {
+      execSync('git push', { cwd: targetDir, stdio: 'inherit' });
+      log('\n✅ Repositorio sincronizado exitosamente con GitHub.', colors.green);
+    } catch (e) {
+      log('❌ Error al hacer git push: ' + e.message, colors.red);
+      process.exit(1);
+    }
+    return;
+  }
+
+  log('   Cambios detectados:\n' + statusOutput.split('\n').map(l => '   ' + l).join('\n'), colors.gray);
+
+  // 3. Mensaje de commit
+  let finalMsg = commitMsg;
+  if (!finalMsg) {
+    finalMsg = await ask('\n💬 Introduce el mensaje de commit (dejar vacío para auto: "feat: actualización de specs y memoria"):');
+    if (!finalMsg) {
+      finalMsg = 'feat: actualización de especificaciones, memoria y gobernanza';
+    }
+  }
+
+  // 4. Agregar, commitear y pushear
+  log('\n3. Creando commit y enviando a GitHub...', colors.yellow);
+  try {
+    execSync('git add -A', { cwd: targetDir, stdio: 'inherit' });
+    log('   [OK] Archivos agregados (git add -A)', colors.green);
+
+    const safeMsg = finalMsg.replace(/"/g, '\"');
+    execSync('git commit -m "' + safeMsg + '"', { cwd: targetDir, stdio: 'inherit' });
+    log('   [OK] Commit creado con éxito', colors.green);
+
+    log('4. Subiendo cambios a GitHub (git push)...', colors.yellow);
+    execSync('git push', { cwd: targetDir, stdio: 'inherit' });
+    log('\n✅ Repositorio actualizado y subido exitosamente a GitHub.', colors.green);
+  } catch (e) {
+    log('\n❌ Error durante la sincronización Git: ' + e.message, colors.red);
+    process.exit(1);
+  }
+}
+
+// ==========================================
 // Enrutamiento Principal CLI
 // ==========================================
 async function main() {
@@ -995,7 +1355,7 @@ async function main() {
     printBanner();
     log(`
 Uso:
-  npx elite-speckit [comando] [opciones]
+  agent [comando] [opciones]
   speckit [comando] [opciones]
 
 Comandos:
@@ -1005,8 +1365,10 @@ Comandos:
   registry [list|val]    Consulta ('list') o valida ('validate') el catálogo de agentes
   handoff [list|val]     Lista ('list') o valida ('validate') traspasos entre agentes
   evidence [list|ver]    Lista ('list') o audita ('verify') comprobantes de ejecución
+  memory [list|val|...]  Gestiona la memoria persistente ('list', 'validate', 'search', 'show', 'archive')
   route <descripción>    Enruta una tarea al agente idóneo mediante la capa de decisión
   eval                   Ejecuta la suite de evaluación sintética de agentes (.evals/)
+  sync [mensaje]         Audita, commitea y sube los cambios a GitHub (push)
   install-skill          Instala la skill speckit-sdd en Antigravity (~/.gemini/config)
   version                Muestra la versión instalada
 
@@ -1018,16 +1380,16 @@ Opciones de 'init':
       --no-backup        No genera copias .bak
 
 Ejemplos:
-  npx elite-speckit init                          # Asistente interactivo
-  npx elite-speckit create auth-jwt               # Crea specs/001-auth-jwt/
-  npx elite-speckit verify                        # Valida avance de tareas
-  npx elite-speckit registry                      # Lista catálogo oficial de agentes
-  npx elite-speckit registry validate             # Valida registro contra esquema JSON
-  npx elite-speckit handoff validate              # Valida protocolo de handoffs
-  npx elite-speckit evidence verify               # Audita comprobantes de ejecución
-  npx elite-speckit route "escribir tests"        # Enruta tarea a agente idóneo
-  npx elite-speckit eval                          # Ejecuta suite sintética (.evals)
-  npx elite-speckit install-skill                 # Instala skill en Antigravity
+  agent init                          # Asistente interactivo
+  agent create auth-jwt               # Crea specs/001-auth-jwt/
+  agent verify                        # Valida avance de tareas
+  agent registry                      # Lista catálogo oficial de agentes
+  agent registry validate             # Valida registro contra esquema JSON
+  agent handoff validate              # Valida protocolo de handoffs
+  agent evidence verify               # Audita comprobantes de ejecución
+  agent route "escribir tests"        # Enruta tarea a agente idóneo
+  agent eval                          # Ejecuta suite sintética (.evals)
+  agent install-skill                 # Instala skill en Antigravity
 `);
     process.exit(0);
   }
@@ -1036,6 +1398,12 @@ Ejemplos:
     const pkg = require('../package.json');
     log(`v${pkg.version}`);
     process.exit(0);
+  }
+
+  if (command === 'sync' || command === 'push') {
+    const commitMsg = rawArgs.slice(1).join(' ');
+    await cmdSync(process.cwd(), commitMsg);
+    return;
   }
 
   if (command === 'install-skill' || command === 'install') {
@@ -1061,6 +1429,13 @@ Ejemplos:
     const subAction = rawArgs[1] || 'verify';
     const targetDir = rawArgs[2] ? path.resolve(rawArgs[2]) : process.cwd();
     cmdEvidence(targetDir, subAction);
+    return;
+  }
+
+  if (command === 'memory' || command === 'mem') {
+    const subAction = rawArgs[1] || 'list';
+    const targetDir = process.cwd();
+    cmdMemory(targetDir, subAction, rawArgs);
     return;
   }
 

@@ -5,7 +5,9 @@
   "main": "bin/cli.js",
   "bin": {
     "elite-speckit": "./bin/cli.js",
-    "speckit": "./bin/cli.js"
+    "speckit": "./bin/cli.js",
+    "agent": "./bin/cli.js",
+    "elite": "./bin/cli.js"
   },
   "keywords": [
     "spec-kit",
@@ -28,12 +30,27 @@
   },
   "scripts": {
     "start": "node bin/cli.js",
+    "agent": "node bin/cli.js",
     "speckit": "node bin/cli.js",
+    "init": "node bin/cli.js init",
+    "verify": "node bin/cli.js verify",
+    "create": "node bin/cli.js create",
+    "memory": "node bin/cli.js memory",
+    "registry": "node bin/cli.js registry",
+    "handoff": "node bin/cli.js handoff",
+    "evidence": "node bin/cli.js evidence",
+    "route": "node bin/cli.js route",
+    "eval": "node bin/cli.js eval",
+    "install-skill": "node bin/cli.js install-skill",
+    "skill": "node bin/cli.js install-skill",
     "test:verify": "node bin/cli.js verify",
     "test:registry": "node bin/cli.js registry validate",
     "test:handoff": "node bin/cli.js handoff validate",
     "test:evidence": "node bin/cli.js evidence verify",
-    "test:evals": "node bin/cli.js eval"
+    "test:evals": "node bin/cli.js eval",
+    "test:memory": "node bin/cli.js memory validate",
+    "sync": "node bin/cli.js sync",
+    "push": "node bin/cli.js sync"
   },
   "files": [
     "bin",
@@ -46,6 +63,7 @@
     ".github/prompts",
     "specs",
     "scripts",
-    "README.md"
+    "README.md",
+    "MEMORY.md"
   ]
 }

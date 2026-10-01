@@ -11,5 +11,9 @@ Este proyecto es el repositorio canónico de **Elite Agent Bootstrap v2** y est�
 4. **Protocolo de Traspasos y Evidencias**:
    - Registrar delegaciones en `.agents/handoffs/`.
    - Registrar comprobantes inmutables en `.evidence/` antes de marcar cualquier tarea con `[x]`.
-5. **Capa de Decisión y Enrutamiento**: Usar `speckit route "<tarea>"` para asignar el agente idóneo (`lib/adapters/DecisionProvider.js`).
-6. **Comprobación Continua**: Ejecutar `npm run test:verify`, `npm run test:registry`, `npm run test:handoff`, `npm run test:evidence` y `npm run test:evals` antes de proponer cambios.
+5. **Capa de Decisión y Enrutamiento**: Usar `agent route "<tarea>"` (o `speckit route`) para asignar el agente idóneo (`lib/adapters/DecisionProvider.js`).
+6. **Memoria Persistente (Progressive Disclosure)**:
+   - Consultar `MEMORY.md` y `.agents/memory/` sólo bajo demanda al iniciar una tarea.
+   - Jerarquía estricta: `Constitución > Spec > Reglas > ADR > Memoria > Chat`.
+   - Evaluar lecciones/patrones estables al concluir tareas y persistir vía `agent memory` (o `speckit memory`).
+7. **Comprobación Continua**: Ejecutar `npm run test:verify`, `npm run test:registry`, `npm run test:handoff`, `npm run test:evidence`, `npm run test:evals` y `npm run test:memory` antes de proponer cambios.
