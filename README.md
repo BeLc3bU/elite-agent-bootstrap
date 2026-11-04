@@ -8,7 +8,7 @@ Garantiza calidad profesional, elimina el "vibe coding" y permite portar todo el
 
 ## 🚀 Características Principales
 
-* **📐 Organic-Driven Development (ODD) � Gentle Shell**: Metodología formal y gobernable. Cada cambio pasa obligatoriamente por el ciclo `Specify` (qué/por qué) ➔ `Clarify` ➔ `Plan` (arquitectura técnica) ➔ `Tasks` (desglose atómico) ➔ `Implement` (TDD) ➔ `Converge` (verificación total) dentro de `.specify/` y `specs/`.
+* **📐 Organic-Driven Development (ODD) — Gentle Shell**: Metodología formal y gobernable. Cada cambio pasa obligatoriamente por el ciclo `Specify` (qué/por qué) ➔ `Clarify` ➔ `Plan` (arquitectura técnica) ➔ `Tasks` (desglose atómico) ➔ `Implement` (TDD) ➔ `Converge` (verificación total) dentro de `.specify/` y `specs/`.
 * **👥 Gobernanza y Catálogo Tipado de Agentes (`.agents/registry.json`)**: Definición formal de permisos, herramientas, archivos restringidos y niveles de riesgo con el principio innegociable `Agent ≠ Authority`.
 * **🤝 Protocolo de Traspasos Tipados (Handoff Protocol)**: Contrato estructurado en `.agents/handoffs/` que transfiere tareas preservando contexto, decisiones tomadas, artefactos y riesgos sin pérdida de información.
 * **🛡️ Sistema de Evidencias Reproducibles (`.evidence/`)**: Registro inmutable de comprobantes de ejecución, comandos y códigos de retorno que garantiza la política constitucional "Evidencia antes de Afirmaciones".
