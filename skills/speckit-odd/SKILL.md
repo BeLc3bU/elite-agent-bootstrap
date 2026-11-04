@@ -1,11 +1,11 @@
 ---
-name: speckit-sdd
-description: "Estándar oficial de Spec-Driven Development y Agent Engineering (elite-agent-bootstrap v2). Orquesta las 5 fases de especificación (specify, plan, tasks, implement, converge), catálogo de gobernanza (.agents/registry.json), protocolo de traspasos (.agents/handoffs/), evidencias reproducibles (.evidence/), enrutamiento con capa de decisión y evaluación sintética."
+name: speckit-odd
+description: "Estándar oficial de Organic-Driven Development y Agent Engineering (elite-agent-bootstrap v2). Orquesta las 5 fases de especificación (specify, plan, tasks, implement, converge), catálogo de gobernanza (.agents/registry.json), protocolo de traspasos (.agents/handoffs/), evidencias reproducibles (.evidence/), enrutamiento con capa de decisión y evaluación sintética."
 ---
 
-# 📐 Skill: Spec-Driven Development & Elite Agent v2 (GitHub Spec Kit Standard)
+# 📐 Skill: Organic-Driven Development & Elite Agent v2 (GitHub Spec Kit Standard)
 
-Esta habilidad dota al agente del estándar oficial **Spec-Driven Development (SDD)** de [github/spec-kit](https://github.com/github/spec-kit) y de la arquitectura de agentes gobernados de **elite-agent-bootstrap v2**. 
+Esta habilidad dota al agente del estándar oficial **Organic-Driven Development (ODD)** de [github/spec-kit](https://github.com/github/spec-kit) y de la arquitectura de agentes gobernados de **elite-agent-bootstrap v2**. 
 
 Su propósito es erradicar el "vibe coding" y estructurar el ciclo completo de diseño, implementación, verificación, traspasos de contexto y auditoría de agentes de IA con cero sobreingeniería.
 
@@ -24,7 +24,7 @@ Su propósito es erradicar el "vibe coding" y estructurar el ciclo completo de d
 
 ---
 
-## 🔄 El Ciclo de Desarrollo SDD en 5 Fases
+## 🔄 El Ciclo de Desarrollo ODD en 5 Fases
 
 ```mermaid
 flowchart LR

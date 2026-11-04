@@ -1,5 +1,5 @@
 # ==============================================================================
-# Script de Instalación: Antigravity Spec Kit (SDD)
+# Script de Instalación: Antigravity ODD (Gentle Shell)
 # Delega en el CLI universal de Node.js (bin/cli.js install-skill)
 # ==============================================================================
 $cliPath = Join-Path $PSScriptRoot "..\bin\cli.js"

@@ -74,7 +74,7 @@ Herramientas disponibles para el agente:
 
 ---
 
-## 4. Buenas Prácticas para Proyectos SDD
+## 4. Buenas Prácticas para Proyectos ODD
 
 1. **Separación de Responsabilidades:**
    - Usa LLMs generativos (Gemini Flash/Pro, Claude) para **redactar especificaciones**, **diseñar arquitectura** y **escribir código**.

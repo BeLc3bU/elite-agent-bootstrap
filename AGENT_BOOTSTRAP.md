@@ -87,7 +87,7 @@ Si el repositorio ya cuenta con código o el usuario pide integrar Spec-Kit en u
      ```
    - **Para Antigravity (Instalador Universal de Skill en 1 clic)**:
      ```cmd
-     scripts\install-sdd.bat
+     scripts\install-odd.bat
      ```
 2. El instalador aplica **Zero-Overwrite**: no sobreescribe `README.md` ni `AGENTS.md` existentes, genera `SPECKIT_GUIDE.md` y añade directrices no destructivas en logs y reglas.
 3. Genera la primera especificación en `specs/` para la siguiente tarea o refactorización que el usuario desee realizar.
@@ -140,7 +140,7 @@ mi-proyecto/
 │       ├── plan.md
 │       └── tasks.md
 ├── skills/                           # Habilidades de agente
-│   └── speckit-sdd/                  # Skill nativa de Antigravity
+│   └── speckit-odd/                  # Skill nativa de Antigravity
 ├── docs/                             # Guías técnicas y documentación de arquitectura
 ├── PROJECT_LOG.md                    # Registro de Decisiones de Arquitectura (ADRs)
 ├── AGENTS.md                         # Arnés de control de agentes (máx. 300 líneas)

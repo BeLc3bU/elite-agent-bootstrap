@@ -62,7 +62,7 @@
       "type": "array",
       "items": { "type": "string" },
       "default": [],
-      "description": "Skills instaladas o requeridas por el agente (ej. speckit-sdd)"
+      "description": "Skills instaladas o requeridas por el agente (ej. speckit-odd)"
     },
     "inputs": {
       "type": "array",

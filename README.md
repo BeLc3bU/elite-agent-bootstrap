@@ -8,17 +8,17 @@ Garantiza calidad profesional, elimina el "vibe coding" y permite portar todo el
 
 ## 🚀 Características Principales
 
-* **📐 Spec-Driven Development (GitHub Spec Kit)**: Metodología formal y gobernable. Cada cambio pasa obligatoriamente por el ciclo `Specify` (qué/por qué) ➔ `Clarify` ➔ `Plan` (arquitectura técnica) ➔ `Tasks` (desglose atómico) ➔ `Implement` (TDD) ➔ `Converge` (verificación total) dentro de `.specify/` y `specs/`.
+* **📐 Organic-Driven Development (ODD) � Gentle Shell**: Metodología formal y gobernable. Cada cambio pasa obligatoriamente por el ciclo `Specify` (qué/por qué) ➔ `Clarify` ➔ `Plan` (arquitectura técnica) ➔ `Tasks` (desglose atómico) ➔ `Implement` (TDD) ➔ `Converge` (verificación total) dentro de `.specify/` y `specs/`.
 * **👥 Gobernanza y Catálogo Tipado de Agentes (`.agents/registry.json`)**: Definición formal de permisos, herramientas, archivos restringidos y niveles de riesgo con el principio innegociable `Agent ≠ Authority`.
 * **🤝 Protocolo de Traspasos Tipados (Handoff Protocol)**: Contrato estructurado en `.agents/handoffs/` que transfiere tareas preservando contexto, decisiones tomadas, artefactos y riesgos sin pérdida de información.
 * **🛡️ Sistema de Evidencias Reproducibles (`.evidence/`)**: Registro inmutable de comprobantes de ejecución, comandos y códigos de retorno que garantiza la política constitucional "Evidencia antes de Afirmaciones".
 * **🧠 Memoria Persistente de Agentes (`MEMORY.md` y `.agents/memory/`)**: Arquitectura de memoria modular con divulgación progresiva (*Progressive Disclosure*). Los agentes recuerdan patrones, decisiones operativas y lecciones aprendidas entre sesiones respetando la jerarquía $\text{Constitución} > \text{Spec} > \text{Reglas} > \text{ADR} > \text{Memoria}$.
 * **🏛️ Gobernanza Constitucional (`constitution.md`)**: Cada proyecto cuenta con un archivo rector que define sus leyes innegociables de arquitectura, costes, calidad y dependencias, impidiendo alucinaciones del modelo.
 * **⚡ Capa de Decisión Tipada (Kev / Jev Integration)**: Integración con la arquitectura de modelos de decisión System 1 de Jared Palmer y la API `/v1/systemone` (compatible con el MCP `jev-classifier`). Permite clasificaciones booleanas (`noul`), de opción múltiple (`choice`) y scoring a coste cero y latencia mínima.
-* **🛠️ Skill Global de Antigravity (`speckit-sdd`)**: Habilidad modular lista para instalar en `~/.gemini/config/skills/` que enseña a los agentes de Antigravity a orquestar las fases de Spec Kit de forma nativa.
+* **🛠️ Skill Global de Antigravity (`speckit-odd`)**: Habilidad modular lista para instalar en `~/.gemini/config/skills/` que enseña a los agentes de Antigravity a orquestar las fases de Spec Kit de forma nativa.
 * **🔄 Portabilidad Universal (CLI, One-Liners y Scripts)**:
   - CLI distribuible vía `npx` y `npm` con comandos `registry`, `handoff`, `evidence`, `memory`, `route`, `eval`, `create`, `verify`.
-  - Instalador de 1 clic para Antigravity (`scripts\install-sdd.bat` / `.ps1`).
+  - Instalador de 1 clic para Antigravity (`scripts\install-odd.bat` / `.ps1`).
   - One-liners para PowerShell y Bash con garantía **Zero-Overwrite**.
 * **🔄 Loop Engineering & TDD**: Bucles iterativos cerrados (RED -> GREEN -> REFACTOR) que resuelven fallos de compilación, linters y tests de forma autónoma antes de entregar el control al usuario.
 * **👥 Higiene de Contexto y Subagentes**: Límite estricto de 500 líneas en el archivo de arnés (`AGENTS.md`) y particionamiento de memoria en `docs/`, `.agents/memory/` y `PROJECT_LOG.md` para evitar saturación de la ventana de contexto.
@@ -93,11 +93,11 @@ elite-agent-bootstrap-main/
 │       ├── create-feature.ps1 / .sh
 │       └── verify-spec.ps1 / .sh
 ├── skills/                         # Habilidades exportables de Antigravity
-│   └── speckit-sdd/
+│   └── speckit-odd/
 │       └── SKILL.md                # Definición oficial de la skill ODD
 ├── scripts/                        # Wrappers de conveniencia para bin/cli.js
-│   ├── install-sdd.bat / .ps1      # Instalador de la skill Antigravity en ~/.gemini/config/
-│   ├── init-project-sdd.bat / .ps1 # Inicializador local de proyecto
+│   ├── install-odd.bat / .ps1      # Instalador de la skill Antigravity en ~/.gemini/config/
+│   ├── init-project-odd.bat / .ps1 # Inicializador local de proyecto
 │   ├── integrate-speckit.ps1 / .sh # Integrador CLI multiplataforma
 │   └── install.ps1 / .sh           # Instaladores remotos one-liner
 ├── specs/                          # Directorio de especificaciones por feature
@@ -123,9 +123,9 @@ Para configurar cualquier ordenador nuevo con la skill global de Antigravity:
 1. Clona este repositorio en el equipo.
 2. Ejecuta haciendo doble clic en:
    ```cmd
-   scripts\install-sdd.bat
+   scripts\install-odd.bat
    ```
-3. La skill `speckit-sdd` y las reglas universales en `~/.gemini/config/GEMINI.md` quedarán listas para todas las sesiones.
+3. La skill `speckit-odd` y las reglas universales en `~/.gemini/config/GEMINI.md` quedarán listas para todas las sesiones.
 
 ---
 
@@ -193,7 +193,7 @@ Puedes invocar los comandos mediante `agent <comando>`, `speckit <comando>` o di
 | `agent evidence verify` | `evidence verify` | Audita y verifica la autenticidad de los comprobantes de ejecución |
 | `agent route "<tarea>"` | `route "<tarea>"` | Enruta una tarea hacia el agente idóneo mediante la capa de decisión |
 | `agent eval` | `eval-agent` | Ejecuta la suite de evaluación sintética de agentes (`.evals/`) |
-| `agent install-skill` | `install-skill` | Instala la skill global `speckit-sdd` en Antigravity (`~/.gemini/config/`) |
+| `agent install-skill` | `install-skill` | Instala la skill global `speckit-odd` en Antigravity (`~/.gemini/config/`) |
 | `agent version` | - | Muestra la versión actual del framework |
 
 ---

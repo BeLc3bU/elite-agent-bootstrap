@@ -1152,7 +1152,7 @@ async function cmdInit(options) {
   } else {
     const currentLog = fs.readFileSync(targetLog, 'utf8');
     if (!currentLog.includes(`[${dateStr}] - Integración de Spec-Kit`)) {
-      const appendEntry = `\n\n## [${dateStr}] - Integración de Spec-Kit (SDD)\n- **Evento**: Integración segura de Spec-Kit.\n- **Stack**: ${context.stack.name}\n- **Estado**: Guardrails y plantillas activadas sin alterar archivos existentes.\n`;
+      const appendEntry = `\n\n## [${dateStr}] - Integración de Spec-Kit (ODD)\n- **Evento**: Integración segura de Spec-Kit.\n- **Stack**: ${context.stack.name}\n- **Estado**: Guardrails y plantillas activadas sin alterar archivos existentes.\n`;
       fs.appendFileSync(targetLog, appendEntry, 'utf8');
       log(`  [+] Añadida nueva entrada de evento a PROJECT_LOG.md`, colors.green);
     }
@@ -1200,7 +1200,7 @@ async function cmdInit(options) {
 
   const srcSkillsDir = path.join(ROOT_DIR, 'skills');
   if (fs.existsSync(srcSkillsDir)) {
-    const starterSkills = ['find-skills', 'grill-me', 'frontend-design', 'web-design-guidelines', 'systematic-debugging', 'speckit-sdd'];
+    const starterSkills = ['find-skills', 'grill-me', 'frontend-design', 'web-design-guidelines', 'systematic-debugging', 'speckit-odd'];
     starterSkills.forEach(s => {
       const srcFile = path.join(srcSkillsDir, s, 'SKILL.md');
       if (fs.existsSync(srcFile)) {
@@ -1242,7 +1242,7 @@ ${colors.yellow}Comandos disponibles en tu editor / IA:${colors.reset}
 ${colors.yellow}Comandos CLI disponibles en la terminal:${colors.reset}
   👉 ${colors.bold}agent create <nombre>${colors.reset} - Crea una nueva spec con plantillas
   👉 ${colors.bold}agent verify${colors.reset}          - Comprueba el estado de todas las specs
-  👉 ${colors.bold}agent install-skill${colors.reset}   - Instala la skill speckit-sdd en Antigravity
+  👉 ${colors.bold}agent install-skill${colors.reset}   - Instala la skill speckit-odd en Antigravity
 `);
 }
 
@@ -1422,17 +1422,17 @@ ${colors.green}${colors.bold}===================================================
 // ==========================================
 function cmdInstallSkill() {
   printBanner();
-  log(`\n🚀 Instalando Skill Global de Antigravity (speckit-sdd)...\n`, colors.cyan);
+  log(`\n🚀 Instalando Skill Global de Antigravity (speckit-odd)...\n`, colors.cyan);
 
-  const skillSource = path.join(ROOT_DIR, 'skills', 'speckit-sdd', 'SKILL.md');
+  const skillSource = path.join(ROOT_DIR, 'skills', 'speckit-odd', 'SKILL.md');
   if (!fs.existsSync(skillSource)) {
     log(`[-] No se encontró la skill en: ${skillSource}`, colors.red);
     process.exit(1);
   }
 
   const geminiConfigDir = path.join(os.homedir(), '.gemini', 'config');
-  const targetSkillsDir = path.join(geminiConfigDir, 'skills', 'speckit-sdd');
-  const antigravitySkillsDir = path.join(os.homedir(), '.gemini', 'antigravity', 'skills', 'speckit-sdd');
+  const targetSkillsDir = path.join(geminiConfigDir, 'skills', 'speckit-odd');
+  const antigravitySkillsDir = path.join(os.homedir(), '.gemini', 'antigravity', 'skills', 'speckit-odd');
 
   log(`1. Verificando directorio global de Antigravity (~/.gemini/config)...`, colors.yellow);
   ensureDirSync(targetSkillsDir);
@@ -1448,13 +1448,13 @@ function cmdInstallSkill() {
   const globalRulesFile = path.join(geminiConfigDir, 'GEMINI.md');
   const ruleBlock = `
 ## Metodología Spec-Driven Development & Elite Agent v2 (GitHub Spec Kit)
-- **Detección y Bootstrapping:** Si el espacio de trabajo actual contiene \`.specify/\`, \`specs/\` o \`.agents/registry.json\`, el agente entrará automáticamente en modo **Elite Agent Bootstrap v2 (SDD)**. Si no los contiene y el usuario solicita inicializar gobernanza o arrancar un proyecto, ejecutar o sugerir: \`npx --yes github:BeLc3bU/elite-agent-bootstrap init\`.
+- **Detección y Bootstrapping:** Si el espacio de trabajo actual contiene \`.specify/\`, \`specs/\` o \`.agents/registry.json\`, el agente entrará automáticamente en modo **Elite Agent Bootstrap v2 (ODD)**. Si no los contiene y el usuario solicita inicializar gobernanza o arrancar un proyecto, ejecutar o sugerir: \`npx --yes github:BeLc3bU/elite-agent-bootstrap init\`.
 - **Lectura Constitucional:** Es obligatorio leer \`.specify/memory/constitution.md\` antes de proponer cambios de arquitectura o código.
 - **Separación de Autoridad (Agent ≠ Authority):** Ningún agente puede auto-aprobarse ni realizar merge directo sin aprobación humana. Consultar \`.agents/registry.json\` para roles, permisos y restricciones de rutas.
 - **Prohibición de Vibe Coding:** No escribir ni modificar código de producción sin contar con la especificación aprobada en \`specs/NNN-<feature>/\` (\`spec.md\`, \`plan.md\`, \`tasks.md\`).
 - **Protocolo de Traspasos y Evidencias:** Traspasos documentados en \`.agents/handoffs/\` y comprobantes de ejecución en \`.evidence/\`. No marcar \`[x]\` sin comprobante de verificación exitoso.
 - **Enrutamiento y Decisiones:** Usar \`agent route "<tarea>"\` o la capa de decisión (\`lib/adapters/DecisionProvider.js\` / Kev / Jev) para clasificar y asignar roles.
-- **Activación de Skill:** Usar la skill \`speckit-sdd\` para orquestar las fases: specify -> plan -> tasks -> implement -> converge.
+- **Activación de Skill:** Usar la skill \`speckit-odd\` para orquestar las fases: specify -> plan -> tasks -> implement -> converge.
 `;
 
   let currentContent = '';
@@ -1472,13 +1472,13 @@ function cmdInstallSkill() {
     : '# Reglas Globales de Antigravity\n' + ruleBlock.trim() + '\n';
 
   fs.writeFileSync(globalRulesFile, finalContent, 'utf8');
-  log(`   [OK] Directrices SDD v2 actualizadas en: ${globalRulesFile}`, colors.green);
+  log(`   [OK] Directrices ODD v2 actualizadas en: ${globalRulesFile}`, colors.green);
 
   log(`
 ${colors.green}${colors.bold}=======================================================
 ✅ Instalación completada con éxito.
 Cualquier sesión de Antigravity en este ordenador
-cuenta ahora con la skill 'speckit-sdd' activa.
+cuenta ahora con la skill 'speckit-odd' activa.
 =======================================================${colors.reset}
 `);
 }
@@ -1584,7 +1584,7 @@ Comandos:
   route <descripción>    Enruta una tarea al agente idóneo mediante la capa de decisión
   eval                   Ejecuta la suite de evaluación sintética de agentes (.evals/)
   sync [mensaje]         Audita, commitea y sube los cambios a GitHub (push)
-  install-skill          Instala la skill speckit-sdd en Antigravity (~/.gemini/config)
+  install-skill          Instala la skill speckit-odd en Antigravity (~/.gemini/config)
   install-skills-pack    Instala el Starter Pack de 5 skills (skills.sh) local y global
   install-mcp-pack       Instala y fusiona el pack de 5 MCPs esenciales en Antigravity
   version                Muestra la versión instalada
