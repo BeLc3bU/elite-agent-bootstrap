@@ -1,19 +1,14 @@
-# Reglas de Proyecto: Elite Agent Bootstrap v2 (Spec-Kit SDD)
+﻿# Reglas de Proyecto: Plantilla ODD (Gentle Shell)
 
-Este proyecto es el repositorio canónico de **Elite Agent Bootstrap v2** y estándar de ingeniería agéntica para Antigravity.
+Este proyecto es la plantilla maestra bajo el estándar **Organic-Driven Development (ODD)** del arnés **el Gentleman** (Gentle Shell).
 
 ---
 
-## 🏛️ Gobernanza y Operación de Agentes
-1. **Idioma Estricto**: Toda comunicación, comentario de código, commits (Conventional Commits) y especificaciones deben ser en **Español**.
-2. **Metodología Spec-Driven Development (SDD)**: Prohibido modificar código de producción sin contar con la especificación aprobada en `specs/NNN-<feature>/` (`spec.md`, `plan.md`, `tasks.md`).
-3. **Separación de Autoridad (Agent ≠ Authority)**: Ningún agente puede auto-aprobarse ni mergear a `main` sin revisión humana explícita. Consultar permisos en `.agents/registry.json`.
-4. **Protocolo de Traspasos y Evidencias**:
-   - Registrar delegaciones en `.agents/handoffs/`.
-   - Registrar comprobantes inmutables en `.evidence/` antes de marcar cualquier tarea con `[x]`.
-5. **Capa de Decisión y Enrutamiento**: Usar `agent route "<tarea>"` (o `speckit route`) para asignar el agente idóneo (`lib/adapters/DecisionProvider.js`).
-6. **Memoria Persistente (Progressive Disclosure)**:
-   - Consultar `MEMORY.md` y `.agents/memory/` sólo bajo demanda al iniciar una tarea.
-   - Jerarquía estricta: `Constitución > Spec > Reglas > ADR > Memoria > Chat`.
-   - Evaluar lecciones/patrones estables al concluir tareas y persistir vía `agent memory` (o `speckit memory`).
-7. **Comprobación Continua**: Ejecutar `npm run test:verify`, `npm run test:registry`, `npm run test:handoff`, `npm run test:evidence`, `npm run test:evals` y `npm run test:memory` antes de proponer cambios.
+## 🏛️ Gobernanza y Operación ODD
+1. **Idioma Estricto**: Toda comunicación, comentario de código, commits (Conventional Commits) y tareas deben ser en **Español**.
+2. **Metodología ODD**:
+   - Tareas pequeñas: Ejecución directa inline (sin archivos de tareas, test + fix inline).
+   - Tareas grandes: Registrar seguimiento en `odd/tasks/<feature>.md`.
+3. **Separación de Autoridad (Agent ≠ Authority)**: Ningún agente puede auto-aprobarse ni mergear a `main` sin revisión humana explícita.
+4. **Work-Unit Commits**: Commits por unidades de trabajo coherentes (~400 líneas uniendo código + pruebas + documentación).
+5. **Verificación Continua**: Ejecutar las pruebas aplicables antes de proponer cambios.

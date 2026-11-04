@@ -139,3 +139,9 @@ Este archivo actúa como la memoria a largo plazo del proyecto, documentando la 
 
 
 
+
+
+## [2026-10-05] - Integración de Spec-Kit (SDD)
+- **Evento**: Integración segura de Spec-Kit.
+- **Stack**: Node.js / TypeScript / Web (elite-speckit)
+- **Estado**: Guardrails y plantillas activadas sin alterar archivos existentes.

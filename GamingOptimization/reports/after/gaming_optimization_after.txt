@@ -1,0 +1,51 @@
+﻿
+================================================================================
+  1. VERIFICACION DE ESTADO TRAS OPTIMIZACION
+================================================================================
+
+Fecha de Verificacion               : 2026-10-05 01:23:13 +02:00
+Equipo                              : BELCE-PC
+
+================================================================================
+  2. ESTADO DE APLICACIONES DE INICIO (HKCU & HKLM RUN)
+================================================================================
+
+HKCU Activo                         : Steam -> "C:\Program Files (x86)\Steam\steam.exe" -silent
+HKCU Activo                         : Discord -> "C:\Users\Usuario\AppData\Local\Discord\Update.exe" --processStart Discord.exe
+HKCU Activo                         : Warp -> "C:\Users\Usuario\AppData\Local\Programs\Warp\warp.exe"
+HKLM Activo                         : SecurityHealth -> C:\Windows\system32\SecurityHealthSystray.exe
+HKLM Activo                         : RtkAudUService -> "C:\Windows\System32\DriverStore\FileRepository\realtekservice.inf_amd64_9873da36e3c839c5\RtkAudUService64.exe" -background
+HKLM Activo                         : UrbanVPN -> "C:\Program Files\UrbanVPN\Urban Vpn Updater.exe" /checknow -minuseractions -restartapp "C:\Program Files\UrbanVPN\bin\urban-vpn-app.exe" -restartappcmd "--tray-minimized"
+HKLM Activo                         : PDF24 -> "C:\Program Files\PDF24\pdf24.exe"
+
+================================================================================
+  3. ESTADO DE SERVICIOS OEM (DPC POLLING)
+================================================================================
+
+Servicio EasyTuneEngineService      : Estado: Running | Tipo Inicio: Automatic
+Servicio GigabyteUpdateService      : Estado: Running | Tipo Inicio: Automatic
+Servicio UrbanVPN-Service           : Estado: Stopped | Tipo Inicio: Automatic
+
+================================================================================
+  4. PROPIEDADES ENERGETICAS ADAPTADOR REALTEK 2.5GbE
+================================================================================
+
+Ethernet de consumo eficiente de energía (*EEE) : Desactivado
+Advanced EEE (AdvancedEEE)          : Desactivado
+Ethernet ecológico (EnableGreenEthernet) : Activado
+Gigabit Lite (GigaLite)             : Activado
+Power Saving Mode (PowerSavingMode) : Activado
+Latencia Cloudflare (1.1.1.1)       : 7.8 ms
+
+================================================================================
+  5. WINDOWS MODO JUEGO Y GAME DVR
+================================================================================
+
+Modo Juego (AllowAutoGameMode)      : 1 (Activado)
+Game DVR Background Recording       : 0 (Desactivado - Optimo)
+
+================================================================================
+  6. RECORDATORIO CRITICO DE HARDWARE (REQUIERE ACCION EN BIOS)
+================================================================================
+
+ESTADO MEMORIA RAM                  : ACTUAL: 4800 MT/s. ACCION REQUERIDA: Habilitar EXPO 1 en BIOS para alcanzar 6000 MT/s CL30.

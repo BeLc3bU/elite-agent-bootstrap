@@ -1,6 +1,6 @@
 # AGENTS.md - Plantilla Proyecto (Elite Agent Bootstrap v2)
 
-Este repositorio es el estándar de ingeniería y gobernanza para **Spec-Driven Development (SDD)** con inteligencia artificial y arquitectura de agentes tipados.
+Este repositorio es el estándar de ingeniería y gobernanza para **Organic-Driven Development (ODD) (SDD)** con inteligencia artificial y arquitectura de agentes tipados.
 
 **REGLA DE ORO**: Toda la comunicación, documentación y mensajes de sistema deben ser exclusivamente en **ESPAÑOL**.
 
@@ -45,7 +45,7 @@ Este repositorio es el estándar de ingeniería y gobernanza para **Spec-Driven 
 - **Capa de Decisión y Adaptadores**: `lib/adapters/DecisionProvider.js`
 - **Esquemas JSON de Validación**: `schemas/agent.schema.json`, `schemas/registry.schema.json`, `schemas/handoff.schema.json`, `schemas/evidence.schema.json`, `schemas/memory.schema.json`
 - **Configuración Spec-Kit**: `.specify/`
-- **Constitución Inmutable**: `.specify/memory/constitution.md`
+- **Constitución Inmutable**: `odd/tasks/<feature>.md`
 - **Plantillas SDD Canónicas**: `.specify/templates/`
 - **Especificaciones Activas**: `specs/`
 - **Prompts de Integración**: `.github/prompts/`
