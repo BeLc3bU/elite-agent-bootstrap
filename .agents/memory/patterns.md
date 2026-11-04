@@ -20,7 +20,7 @@ Este documento recopila patrones técnicos probados y reutilizables descubiertos
 
 ---
 
-### MEM-006: Estructuración Atómica de Tareas SDD con Comandos Verificables
+### MEM-006: Estructuración Atómica de Tareas ODD con Comandos Verificables
 - **ID**: `MEM-006-atomic-sdd-tasks-with-commands`
 - **Tipo**: `pattern`
 - **Estado**: `active`

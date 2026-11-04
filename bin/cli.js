@@ -2,7 +2,7 @@
 
 /**
  * Elite Agent + Spec-Kit Universal CLI
- * Herramienta de gestión e integración para Spec-Driven Development (SDD)
+ * Herramienta de gestión e integración para Organic-Driven Development (ODD)
  */
 
 const fs = require('fs');
@@ -33,7 +33,7 @@ function printBanner() {
   log(`
 ${colors.cyan}${colors.bold}=======================================================
 🤖 Elite Agent + Spec-Kit Universal CLI v1.0.0
-   Spec-Driven Development (SDD) para Agentes de IA
+   Organic-Driven Development (ODD) para Agentes de IA
 =======================================================${colors.reset}`);
 }
 
@@ -1086,7 +1086,7 @@ async function cmdInit(options) {
       let readmeTpl = fs.readFileSync(path.join(TEMPLATES_SCAFFOLD_DIR, 'README.project.template.md'), 'utf8');
       readmeTpl = readmeTpl
         .replace(/\{\{PROJECT_NAME\}\}/g, context.stack.projectName)
-        .replace(/\{\{PROJECT_DESCRIPTION\}\}/g, `Proyecto desarrollado con arquitectura modular y metodología Spec-Driven Development (SDD).`)
+        .replace(/\{\{PROJECT_DESCRIPTION\}\}/g, `Proyecto desarrollado con arquitectura modular y metodología Organic-Driven Development (ODD).`)
         .replace(/\{\{PREREQUISITES\}\}/g, `Entorno configurado para ${context.stack.name}`)
         .replace(/\{\{INSTALL_COMMAND\}\}/g, `npm install`)
         .replace(/\{\{DEV_COMMAND\}\}/g, context.stack.devCmd)
@@ -1120,7 +1120,7 @@ async function cmdInit(options) {
     .replace(/\{\{TEST_COMMAND\}\}/g, context.stack.testCmd)
     .replace(/\{\{SRC_PATH\}\}/g, context.stack.srcPath)
     .replace(/\{\{COMPONENTS_PATH\}\}/g, context.stack.componentsPath)
-    .replace(/\{\{SPECIALIZED_AGENTS_LIST\}\}/g, `| **SpecAgent** | Guardián de especificaciones y ciclo SDD | spec-kit |`)
+    .replace(/\{\{SPECIALIZED_AGENTS_LIST\}\}/g, `| **SpecAgent** | Guardián de especificaciones y ciclo ODD | spec-kit |`)
     .replace(/\{\{PHASE_PLAN_CHECKLIST\}\}/g, `- [ ] Fase 1: Integración y validación de especificaciones base.\n- [ ] Fase 2: Desarrollo continuo guiado por specs.`);
 
   if (!fs.existsSync(targetAgents)) {
@@ -1160,7 +1160,7 @@ async function cmdInit(options) {
 
   // 7. Manejo de .cursorrules
   const targetCursorRules = path.join(targetDir, '.cursorrules');
-  const cursorRulesSnippet = `\n# Reglas de Proyecto - Spec-Kit & Elite Agent\n1. Idioma: Toda respuesta, commit y documentación DEBE ser en Español.\n2. Metodología: Spec-Driven Development (SDD). No escribir código sin spec/plan/tasks en specs/.\n3. Guardrails: No comitear ni abrir PRs con errores de lint, typecheck o tests.\n4. Consulta .specify/memory/constitution.md para principios inmutables.\n`;
+  const cursorRulesSnippet = `\n# Reglas de Proyecto - ODD & Elite Agent\n1. Idioma: Toda respuesta, commit y documentación DEBE ser en Español.\n2. Metodología: Organic-Driven Development (ODD) — Gentle Shell.\n3. Guardrails: No comitear ni abrir PRs con errores de lint, typecheck o tests.\n4. Consulta odd/tasks/<feature>.md para principios y tareas.\n`;
   if (!fs.existsSync(targetCursorRules)) {
     fs.writeFileSync(targetCursorRules, cursorRulesSnippet.trim() + '\n', 'utf8');
     log(`  [+] Generado: .cursorrules`, colors.green);

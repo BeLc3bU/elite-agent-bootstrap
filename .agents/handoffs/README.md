@@ -1,6 +1,6 @@
 # 🤝 Protocolo de Traspasos entre Agentes (Handoffs)
 
-Este directorio almacena los traspasos estructurados e inmutables generados durante el ciclo de vida **Spec-Driven Development (SDD)**.
+Este directorio almacena los traspasos estructurados e inmutables generados durante el ciclo de vida **Organic-Driven Development (ODD)**.
 
 ## 📋 Estructura y Reglas
 1. Cada traspaso debe cumplir estrictamente con el esquema formal [`schemas/handoff.schema.json`](../../schemas/handoff.schema.json).

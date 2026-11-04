@@ -1,6 +1,6 @@
 # Instrucción de Configuración: AGENTE DE PROYECTO MAESTRO (Elite Agent Bootstrap)
 
-Este archivo es un "Mega-Prompt" diseñado para ser copiado y pegado en tu asistente de IA (como Antigravity, OpenCode, Claude Code, Gemini CLI, Cursor, Copilot, etc.) al iniciar un nuevo proyecto o integrar uno existente. Configura al agente para operar bajo los estándares oficiales de **GitHub Spec Kit (SDD)** y la arquitectura de decisiones tipadas con **Kev**.
+Este archivo es un "Mega-Prompt" diseñado para ser copiado y pegado en tu asistente de IA (como Antigravity, OpenCode, Claude Code, Gemini CLI, Cursor, Copilot, etc.) al iniciar un nuevo proyecto o integrar uno existente. Configura al agente para operar bajo los estándares de **Organic-Driven Development (ODD) — Gentle Shell** y la arquitectura de decisiones tipadas con **Kev**.
 
 ---
 
@@ -52,7 +52,7 @@ Genera:
 > 🛡️ **Regla de Autoridad (Agent ≠ Authority)**: Ningún agente puede auto-aprobar su propio código ni realizar merges directos. La autoridad de seguridad reside en las políticas y la validación humana.
 
 #### Paso 1.3: Guía del Ciclo Spec-Kit (Feature por Feature)
-Guía al usuario a través del ciclo SDD:
+Guía al usuario a través del ciclo ODD:
 1. **`/speckit.specify`**: Crea `specs/001-[nombre]/spec.md` con Historias de Usuario y Criterios Given-When-Then.
 2. **`/speckit.clarify`**: Plantea preguntas para resolver dudas y casos límite antes de diseñar.
 3. **`/speckit.plan`**: Crea `specs/001-[nombre]/plan.md` con diagramas Mermaid, esquemas y endpoints.
@@ -108,7 +108,7 @@ Si el repositorio ya cuenta con código o el usuario pide integrar Spec-Kit en u
 
 ---
 
-## 🏗️ Estructura de Artefactos SDD (Estándar GitHub Spec Kit)
+## 🏗️ Estructura de Artefactos ODD (Estándar Gentle Shell)
 ```
 mi-proyecto/
 ├── .agents/                          # Gobernanza y Registro Tipado de Agentes
@@ -152,4 +152,4 @@ mi-proyecto/
 
 ## 🚀 [DAME EL SIGUIENTE PASO]
 
-> **Instrucción de arranque**: Analiza el directorio actual del repositorio. Si está vacío o es un proyecto nuevo, hazme las 4 preguntas de descubrimiento. Si ya contiene código, muéstrame el análisis del stack detectado y la propuesta de integración de Spec-Kit bajo el estándar SDD.
+> **Instrucción de arranque**: Analiza el directorio actual del repositorio. Si está vacío o es un proyecto nuevo, hazme las 4 preguntas de descubrimiento. Si ya contiene código, muéstrame el análisis del stack detectado y la propuesta de integración bajo el estándar ODD.

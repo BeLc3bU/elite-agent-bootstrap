@@ -1,6 +1,6 @@
 # 📖 Guía Definitiva de Uso: Elite Agent + Spec-Kit
 
-Bienvenido a la guía práctica para desarrollar software con inteligencia artificial usando **Spec-Driven Development (SDD)**. Esta guía está diseñada para que cualquier desarrollador, líder técnico o entusiasta pueda usar el sistema de inmediato, tanto en proyectos desde cero como en proyectos existentes.
+Bienvenido a la guía práctica para desarrollar software con inteligencia artificial usando **Organic-Driven Development (ODD)**. Esta guía está diseñada para que cualquier desarrollador, líder técnico o entusiasta pueda usar el sistema de inmediato, tanto en proyectos desde cero como en proyectos existentes.
 
 ---
 
@@ -11,7 +11,7 @@ Tradicionalmente, programar con IA (*vibe coding*) consiste en pedir código dir
 - Pérdida de contexto en proyectos medianos o grandes.
 - Funcionalidades incompletas o sin pruebas.
 
-**Spec-Driven Development (SDD)** resuelve esto convirtiendo el proceso en un flujo de **contratos estructurados en Markdown**:
+**Organic-Driven Development (ODD)** resuelve esto convirtiendo el proceso en un flujo de trabajo disciplinado y estructurado:
 
 ```mermaid
 flowchart LR

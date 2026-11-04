@@ -2,7 +2,7 @@
 
 ## 🌟 Reglas de Oro
 1. **Idioma Oficial**: Toda la interacción, comentarios de código, mensajes de commit (Conventional Commits) y Pull Requests DEBEN ser en **Español**.
-2. **Spec-Driven Development (SDD)**:
+2. **Organic-Driven Development (ODD) — Gentle Shell**:
    - Antes de implementar código en `src/`, verifica que exista una especificación aprobada en `specs/[ID]-[FEATURE]/`.
    - Flujo obligatorio: `spec.md` -> `clarify.md` -> `plan.md` -> `tasks.md` -> `implement` -> `converge`.
 3. **Guardrails de Calidad**:

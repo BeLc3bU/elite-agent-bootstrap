@@ -94,7 +94,7 @@ elite-agent-bootstrap-main/
 │       └── verify-spec.ps1 / .sh
 ├── skills/                         # Habilidades exportables de Antigravity
 │   └── speckit-sdd/
-│       └── SKILL.md                # Definición oficial de la skill SDD
+│       └── SKILL.md                # Definición oficial de la skill ODD
 ├── scripts/                        # Wrappers de conveniencia para bin/cli.js
 │   ├── install-sdd.bat / .ps1      # Instalador de la skill Antigravity en ~/.gemini/config/
 │   ├── init-project-sdd.bat / .ps1 # Inicializador local de proyecto
@@ -177,7 +177,7 @@ Puedes invocar los comandos mediante `agent <comando>`, `speckit <comando>` o di
 
 | Comando | Alias Directo | Descripción |
 |---|---|---|
-| `agent init [dir]` | `init [dir]` | Inicializa o integra la infraestructura SDD y agentes (asistente guiado) |
+| `agent init [dir]` | `init [dir]` | Inicializa o integra la infraestructura ODD y agentes (asistente guiado) |
 | `agent verify` | `verify` | Audita y comprueba el avance de todas las especificaciones y tareas (`specs/`) |
 | `agent create <nombre>` | `create <nombre>` | Crea una nueva especificación numerada con plantillas canónicas (`specs/NNN-<nombre>/`) |
 | `agent memory list` | `memory list` | Lista el catálogo de memorias activas categorizadas |

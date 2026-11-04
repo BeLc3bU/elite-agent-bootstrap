@@ -8,7 +8,7 @@
     {
       "id": "orchestrator",
       "name": "Orquestador Principal",
-      "description": "Coordina el flujo de trabajo SDD, asigna tareas entre agentes y gestiona el estado global y memoria del proyecto.",
+      "description": "Coordina el flujo de trabajo ODD, asigna tareas entre agentes y gestiona el estado global y memoria del proyecto.",
       "role": "orchestrator",
       "capabilities": [
         "routing",

@@ -4,8 +4,8 @@
 - **Español 100%**: Todas las respuestas, explicaciones, commits y PRs deben ser en Español.
 - Commits en formato Conventional Commits en español (`feat:`, `fix:`, `refactor:`, `perf:`, `docs:`).
 
-## 🚀 Metodología: Spec-Driven Development (Spec-Kit)
-- Este proyecto sigue estrictamente el ciclo SDD:
+## 🚀 Metodología: Organic-Driven Development (ODD) — Gentle Shell
+- Este proyecto sigue estrictamente el ciclo ODD:
   1. Revisar `.specify/memory/constitution.md` para las reglas de gobierno.
   2. Cada nueva funcionalidad reside en `specs/[ID]-[NOMBRE]/`.
   3. No escribir código de producción sin `spec.md`, `plan.md` y `tasks.md`.

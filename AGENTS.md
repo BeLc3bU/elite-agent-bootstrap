@@ -1,6 +1,6 @@
 # AGENTS.md - Plantilla Proyecto (Elite Agent Bootstrap v2)
 
-Este repositorio es el estándar de ingeniería y gobernanza para **Organic-Driven Development (ODD) (SDD)** con inteligencia artificial y arquitectura de agentes tipados.
+Este repositorio es el estándar de ingeniería y gobernanza para **Organic-Driven Development (ODD)** con inteligencia artificial y arquitectura de agentes tipados.
 
 **REGLA DE ORO**: Toda la comunicación, documentación y mensajes de sistema deben ser exclusivamente en **ESPAÑOL**.
 
@@ -9,7 +9,7 @@ Este repositorio es el estándar de ingeniería y gobernanza para **Organic-Driv
 ## 🛠️ Comandos de Mantenimiento y Gobernanza
 | Comando | Descripción |
 |---|---|
-| `agent init [dir]` (o `init`) | Inicializar o integrar la infraestructura de agentes y SDD |
+| `agent init [dir]` (o `init`) | Inicializar o integrar la infraestructura de agentes y ODD |
 | `agent verify` (o `verify`) | Verificar estado y tareas de todas las especificaciones |
 | `agent create <nombre>` (o `create`) | Crear una nueva especificación numerada en `specs/` |
 | `agent memory list` (o `memory list`) | Listar el catálogo de memorias activas categorizadas |
@@ -46,7 +46,7 @@ Este repositorio es el estándar de ingeniería y gobernanza para **Organic-Driv
 - **Esquemas JSON de Validación**: `schemas/agent.schema.json`, `schemas/registry.schema.json`, `schemas/handoff.schema.json`, `schemas/evidence.schema.json`, `schemas/memory.schema.json`
 - **Configuración Spec-Kit**: `.specify/`
 - **Constitución Inmutable**: `odd/tasks/<feature>.md`
-- **Plantillas SDD Canónicas**: `.specify/templates/`
+- **Plantillas ODD Canónicas**: `.specify/templates/`
 - **Especificaciones Activas**: `specs/`
 - **Prompts de Integración**: `.github/prompts/`
 - **CLI Universal**: `bin/cli.js`
@@ -65,7 +65,7 @@ El catálogo formal con permisos de lectura/escritura de archivos, memoria persi
 | Agente ID | Rol | Nivel de Riesgo | Mod. Código | Mod. Specs | Memoria (Read/Write) | Aprobación Humana |
 |---|---|---|---|---|---|---|
 | `orchestrator` | Orquestador | `medium` | ❌ No | ✅ Sí | 📖 Lectura / ✍️ Escritura | ⚡ No requerida |
-| `spec-agent` | Especificación SDD | `low` | ❌ No | ✅ Sí | 📖 Lectura / ✍️ Escritura | ⚡ No requerida |
+| `spec-agent` | Especificación ODD | `low` | ❌ No | ✅ Sí | 📖 Lectura / ✍️ Escritura | ⚡ No requerida |
 | `implementer` | Implementación TDD | `medium` | ✅ Sí | ❌ No | 📖 Lectura / ✍️ Escritura | ⚡ No requerida |
 | `tester` | Pruebas y Cobertura | `low` | ✅ Sí (tests) | ❌ No | 📖 Lectura / ✍️ Escritura | ⚡ No requerida |
 | `security-agent` | Auditoría OWASP | `low` | ❌ No | ❌ No | 📖 Lectura / ✍️ Escritura | ⚡ No requerida |
