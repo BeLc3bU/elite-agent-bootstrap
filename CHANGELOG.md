@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/BeLc3bU/elite-agent-bootstrap/compare/v1.3.0...v1.3.1) (2026-11-04)
+
+
+### Bug Fixes
+
+* **docs:** corregir codificacion UTF-8 de raya em en README.md ([ba05850](https://github.com/BeLc3bU/elite-agent-bootstrap/commit/ba0585010852e586cf764fc8f1ff4fb4e70aaace))
+
 ## [1.3.0](https://github.com/BeLc3bU/elite-agent-bootstrap/compare/v1.2.0...v1.3.0) (2026-10-01)
 
 
