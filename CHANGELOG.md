@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/BeLc3bU/elite-agent-bootstrap/compare/v1.3.1...v1.4.0) (2026-11-26)
+
+
+### Features
+
+* sincronizar estandar ODD Gentle Shell v5, guardrails y skills LLM-first ([c0802a4](https://github.com/BeLc3bU/elite-agent-bootstrap/commit/c0802a487c250a86aa4ed6743fbb6c4142174326))
+
 ## [1.3.1](https://github.com/BeLc3bU/elite-agent-bootstrap/compare/v1.3.0...v1.3.1) (2026-11-04)
 
 
