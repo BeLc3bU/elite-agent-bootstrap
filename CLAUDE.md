@@ -2,21 +2,20 @@
 
 ## 🌍 Idioma y Convenciones
 - **Español 100%**: Todas las respuestas, explicaciones, commits y PRs deben ser en Español.
-- Commits en formato Conventional Commits en español (`feat:`, `fix:`, `refactor:`, `perf:`, `docs:`).
+- Commits en formato Conventional Commits en español (`feat:`, `fix:`, `refactor:`, `perf:`, `docs:`) aplicando *work-unit commits* (~400 líneas código + tests + docs).
 
-## 🚀 Metodología: Organic-Driven Development (ODD) — Gentle Shell
-- Este proyecto sigue estrictamente el ciclo ODD:
-  1. Revisar `.specify/memory/constitution.md` para las reglas de gobierno.
-  2. Cada nueva funcionalidad reside en `specs/[ID]-[NOMBRE]/`.
-  3. No escribir código de producción sin `spec.md`, `plan.md` y `tasks.md`.
-  4. Marcar tareas completadas en `tasks.md` tras pasar las pruebas.
-  5. Validar con `/speckit.converge` antes de cerrar la feature.
+## 🚀 Metodología: Organic-Driven Development (ODD) — Gentle Shell v5
+- Este proyecto sigue estrictamente el protocolo ODD de 7 pasos (`Authorize -> Explore -> Resolve -> Classify -> Track -> Implement -> Close`):
+  1. Consultar `AGENTS.md` y `.agents/registry.json` para las reglas de gobierno y separación de autoridad (`Agent ≠ Authority`).
+  2. Tareas pequeñas (entendidas, riesgo contenido, reanudables desde el diff): ejecución inline con TDD aplicable.
+  3. Tareas grandes (fallan el *resume test*): crear `odd/tasks/NNN-<feature>.md` (`node bin/cli.js create <nombre>`) antes de editar código.
+  4. Todo writer delegado requiere `## Allowed edit surfaces` explícito (nunca `.` ni rutas absolutas).
+  5. Cerrar cada cambio de código con `Risk: item N (razón)` o `Risk: none` (ítem 1–6).
 
 ## 🛡️ Comandos del Proyecto & Guardrails
-- **Desarrollo**: Comprobar scripts en `package.json` o gestor del proyecto.
-- **Lint**: `npm run lint` / `ruff check .` / `cargo clippy`
-- **Tipos**: `npm run typecheck`
-- **Tests**: `npm test` / `pytest` / `cargo test`
-- **Memoria Persistente**: Consultar `MEMORY.md` y `.agents/memory/` para contexto operativo y patrones. Validar con `node bin/cli.js memory validate`.
-- **Crear Spec**: `powershell .\.specify\scripts\create-feature.ps1 -FeatureId "XXX" -FeatureName "nombre"` o `./.specify/scripts/create-feature.sh XXX nombre`
-- **Verificar Specs**: `powershell .\.specify\scripts\verify-spec.ps1` o `node bin/cli.js verify`
+- **Pruebas**: `npm test`
+- **Guardrails Gentle Shell**: `npm run test:guards` / `node bin/cli.js guard`
+- **Verificar ODD**: `node bin/cli.js verify`
+- **Enrutamiento y Riesgo**: `node bin/cli.js route "<tarea>"`
+- **Validación Integral**: `npm run test:registry`, `npm run test:handoff`, `npm run test:evidence`, `npm run test:evals`, `npm run test:memory`
+- **Memoria Persistente**: Consultar `MEMORY.md` y `.agents/memory/` bajo demanda.

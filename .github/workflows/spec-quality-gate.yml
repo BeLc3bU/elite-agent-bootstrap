@@ -1,4 +1,4 @@
-name: 🛡️ Quality Gate & Spec Verification
+name: 🛡️ Quality Gate & ODD Verification
 
 on:
   pull_request:
@@ -34,16 +34,15 @@ jobs:
         if: hashFiles('package.json') != ''
         run: npm run typecheck --if-present
 
-      - name: Ejecutar Pruebas
+      - name: Ejecutar Pruebas Unitarias e Integración
         if: hashFiles('package.json') != ''
         run: npm test --if-present
 
-      - name: Validar Estado de Especificaciones (Spec-Kit)
-        run: |
-          if [ -f "./.specify/scripts/verify-spec.sh" ]; then
-            chmod +x ./.specify/scripts/verify-spec.sh
-            ./.specify/scripts/verify-spec.sh
-          fi
+      - name: Validar Guardrails Gentle Shell (Conflictos y Políticas)
+        run: node bin/cli.js guard --conflicts
+
+      - name: Validar Estado de Documentos ODD y Specs
+        run: node bin/cli.js verify
 
       - name: Validar Registro de Agentes y Gobernanza
         run: node bin/cli.js registry validate

@@ -128,27 +128,18 @@ Puedes escribir estos comandos directamente en el chat de tu IA (Cursor, Copilot
 
 Puedes ejecutar estos scripts desde la raíz de cualquier proyecto integrado:
 
-### 1. Crear una nueva funcionalidad rápidamente:
-- **Windows**:
-  ```powershell
-  .\.specify\scripts\create-feature.ps1 -FeatureId "002" -FeatureName "carrito-compras"
-  ```
-- **Linux/Mac**:
-  ```bash
-  ./.specify/scripts/create-feature.sh 002 carrito-compras
-  ```
-*Esto crea la carpeta `specs/002-carrito-compras/` con todas sus plantillas listas para rellenar.*
+### 1. Crear una nueva feature ODD rápidamente:
+```bash
+node bin/cli.js create carrito-compras
+```
+*Esto crea `odd/tasks/001-carrito-compras.md` con las secciones canónicas (`## Specs`, `## Tasks`, `## Log`).*
 
-### 2. Comprobar el estado y avance de todas las features:
-- **Windows**:
-  ```powershell
-  .\.specify\scripts\verify-spec.ps1
-  ```
-- **Linux/Mac**:
-  ```bash
-  ./.specify/scripts/verify-spec.sh
-  ```
-*Te mostrará una tabla visual con el porcentaje de tareas completadas por cada funcionalidad.*
+### 2. Comprobar el estado de features ODD y guardrails:
+```bash
+node bin/cli.js verify
+node bin/cli.js guard --conflicts
+```
+*Muestra el porcentaje de tareas completadas en `odd/tasks/` (y `specs/` heredadas) y audita que no existan marcadores de conflicto sin resolver.*
 
 ---
 

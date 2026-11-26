@@ -41,24 +41,23 @@ Analiza el entorno y hazle al usuario las siguientes 4 preguntas clave:
 3. **¿Qué nivel de rigor y arquitectura necesitas?** (MVP Rápido, Clean Architecture, Enterprise TDD, Microservicios).
 4. **¿Requieres agentes o integraciones especializadas?** (Context7 MCP para documentación en tiempo real, Kev/Jev para decisiones tipadas, SEO, etc.).
 
-#### Paso 1.2: Inicialización de la Constitución y Gobernanza
+#### Paso 1.2: Inicialización de la Gobernanza ODD (Gentle Shell v5)
 Genera:
-- `.specify/memory/constitution.md`: Principios inmutables del proyecto basados en la plantilla.
+- `odd/tasks/`: Carpeta canónica para documentos de características grandes (`NNN-<feature>.md`).
 - `.agents/registry.json`: Registro formal y tipado de agentes, permisos y roles según `schemas/registry.schema.json`.
-- `MEMORY.md` y `.agents/memory/`: Memoria persistente del repositorio estructurada por capas (decisions, patterns, lessons, context) con divulgación progresiva.
+- `MEMORY.md` y `.agents/memory/`: Memoria persistente del repositorio estructurada por capas (`decisions`, `patterns`, `lessons`, `context`) con divulgación progresiva.
 - `AGENTS.md`: Mapa de comandos, subagentes y guardrails (máximo 500 líneas).
 - `.cursorrules` / `GEMINI.md` / `CLAUDE.md`: Reglas específicas para el editor.
 
 > 🛡️ **Regla de Autoridad (Agent ≠ Authority)**: Ningún agente puede auto-aprobar su propio código ni realizar merges directos. La autoridad de seguridad reside en las políticas y la validación humana.
 
-#### Paso 1.3: Guía del Ciclo Spec-Kit (Feature por Feature)
-Guía al usuario a través del ciclo ODD:
-1. **`/speckit.specify`**: Crea `specs/001-[nombre]/spec.md` con Historias de Usuario y Criterios Given-When-Then.
-2. **`/speckit.clarify`**: Plantea preguntas para resolver dudas y casos límite antes de diseñar.
-3. **`/speckit.plan`**: Crea `specs/001-[nombre]/plan.md` con diagramas Mermaid, esquemas y endpoints.
-4. **`/speckit.tasks`**: Crea `specs/001-[nombre]/tasks.md` con tareas atómicas con IDs `[TASK-001]`.
-5. **`/speckit.implement`**: Ejecuta las tareas en orden con TDD y marca los checks `[x]`.
-6. **`/speckit.converge`**: Ejecuta tests, lint, actualiza `PROJECT_LOG.md` y prepara el PR.
+#### Paso 1.3: Guía del Ciclo ODD en 7 Pasos
+Guía al usuario a través del protocolo ODD (`Gentle Shell v5`):
+1. **Authorize & Explore**: Mantener read-only si no hay cambio autorizado; leer en 1 batch acotado (≤3 llamadas / ~10k tokens).
+2. **Resolve & Classify**: Resolver dudas reales y clasificar como `small` (inline) o `large` (*resume test*).
+3. **Track (`odd/tasks/NNN-<feature>.md`)**: Para tareas grandes, registrar cabecera, `## Specs` verbatim, `## Tasks` y `## Log`.
+4. **Implement & Verify**: TDD aplicable (`RED -> GREEN -> TRIANGULATE -> REFACTOR`), `## Allowed edit surfaces` en delegaciones, *work-unit commits* (~400 líneas) y línea `Risk: item N` o `Risk: none`.
+5. **Close**: Ejecutar `npm test`, `agent verify`, `agent guard --conflicts`, `agent registry validate`, `agent eval` y `agent memory validate`.
 
 ---
 
@@ -108,43 +107,26 @@ Si el repositorio ya cuenta con código o el usuario pide integrar Spec-Kit en u
 
 ---
 
-## 🏗️ Estructura de Artefactos ODD (Estándar Gentle Shell)
+## 🏗️ Estructura de Artefactos ODD (Estándar Gentle Shell v5)
 ```
 mi-proyecto/
 ├── .agents/                          # Gobernanza y Registro Tipado de Agentes
 │   ├── registry.json                 # Catálogo formal de agentes, roles y permisos
-│   └── handoffs/                     # Protocolo formal de traspaso de tareas
+│   ├── handoffs/                     # Protocolo formal de traspaso de tareas
+│   └── memory/                       # Memoria persistente modular
 ├── .evidence/                        # Registro inmutable de comprobantes de ejecución
 ├── .evals/                           # Arnés de evaluación sintética de agentes
-│   └── scenarios/                    # Casos de prueba de enrutamiento y guardrails
-├── lib/adapters/                     # Capa de decisión desacoplada (Core + Extended)
-│   └── DecisionProvider.js           # Motor determinista y adaptador Kev/Jev
+│   └── scenarios/                    # Casos de prueba de enrutamiento y alto riesgo
+├── lib/
+│   ├── adapters/DecisionProvider.js  # Motor determinista + rúbrica ODD + Kev/Jev
+│   └── guards/GentleGuards.js        # Rutas sensibles, comandos destructivos y conflictos
+├── odd/tasks/                        # Documentos canónicos ODD por feature grande
 ├── schemas/                          # Esquemas JSON de validación
-│   ├── agent.schema.json
-│   ├── registry.schema.json
-│   ├── handoff.schema.json
-│   └── evidence.schema.json
-├── .specify/                         # Infraestructura y runtime de Spec Kit
-│   ├── memory/
-│   │   └── constitution.md           # Leyes innegociables y principios de arquitectura
-│   └── templates/                    # Plantillas oficiales canónicas
-│       ├── spec.md
-│       ├── plan.md
-│       ├── tasks.md
-│       ├── clarify.md
-│       └── checklist.md
-├── specs/                            # Historial y registro de características
-│   ├── README.md
-│   └── 001-nombre-feature/
-│       ├── spec.md
-│       ├── plan.md
-│       └── tasks.md
-├── skills/                           # Habilidades de agente
-│   └── speckit-odd/                  # Skill nativa de Antigravity
-├── docs/                             # Guías técnicas y documentación de arquitectura
+├── skills/                           # Habilidades de agente (speckit-odd, work-unit-commits...)
+├── docs/                             # Guías técnicas (gentle-shell-odd-v5.md, skill-style-guide.md)
 ├── PROJECT_LOG.md                    # Registro de Decisiones de Arquitectura (ADRs)
-├── AGENTS.md                         # Arnés de control de agentes (máx. 300 líneas)
-├── bin/                              # CLI Universal sin dependencias
+├── AGENTS.md                         # Arnés de control de agentes (máx. 500 líneas)
+├── bin/cli.js                        # CLI Universal sin dependencias
 └── src/                              # Código fuente del proyecto
 ```
 

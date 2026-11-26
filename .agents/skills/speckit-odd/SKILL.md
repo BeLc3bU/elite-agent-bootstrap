@@ -1,127 +1,70 @@
 ---
 name: speckit-odd
-description: "Estándar oficial de Organic-Driven Development y Agent Engineering (elite-agent-bootstrap v2). Orquesta las 5 fases de especificación (specify, plan, tasks, implement, converge), catálogo de gobernanza (.agents/registry.json), protocolo de traspasos (.agents/handoffs/), evidencias reproducibles (.evidence/), enrutamiento con capa de decisión y evaluación sintética."
+description: "Trigger: /odd, /specify, /plan, /tasks, /implement, /converge, odd/tasks, desarrollo ODD. Orquesta el protocolo Organic-Driven Development (ODD) de Gentle Shell v5, gobernanza (.agents/registry.json), traspasos, evidencias y guardrails."
+license: MIT
+metadata:
+  author: BeLc3bU
+  version: "2.0"
 ---
 
-# 📐 Skill: Organic-Driven Development & Elite Agent v2 (GitHub Spec Kit Standard)
+## Activation Contract
 
-Esta habilidad dota al agente del estándar oficial **Organic-Driven Development (ODD)** de [github/spec-kit](https://github.com/github/spec-kit) y de la arquitectura de agentes gobernados de **elite-agent-bootstrap v2**. 
+Activa esta skill en tareas de desarrollo, arquitectura o gobernanza dentro de repositorios con `odd/tasks/`, `.agents/registry.json` o `specs/`. No la actives para consultas triviales de una sola lectura que no requieran flujo ODD.
 
-Su propósito es erradicar el "vibe coding" y estructurar el ciclo completo de diseño, implementación, verificación, traspasos de contexto y auditoría de agentes de IA con cero sobreingeniería.
+## Hard Rules
 
----
+- **Idioma estricto:** Comunicación, comentarios, docs, commits y documentos ODD en **Español** (respetando identificadores técnicos).
+- **Separación de autoridad (`Agent ≠ Authority`):** Ningún agente puede auto-aprobarse ni fusionar a ramas protegidas sin aprobación humana explícita. Consultar `.agents/registry.json`.
+- **Evidencia antes de afirmaciones:** Prohibido marcar una tarea completada (`[x]`) sin ejecutar su verificación observando `exit_code: 0`. Registrar evidencias formales en `.evidence/`.
+- **Línea de riesgo obligatoria:** Cerrar cada cambio de código con `Risk: item N (razón)` o `Risk: none` según los 6 ítems de alto riesgo; antes de escribir `Risk: none`, verificar si el diff toca código compartido usado por otros flujos (ítem 3).
+- **Guardrails previos al commit:** Ejecutar `agent guard --conflicts` y respetar la política de rutas sensibles (`.env*`, `.envrc`, `.netrc`, `.ssh/`, `secrets/`, `auth.json`, `*.pem|key|p12|pfx`).
+- **Continuidad acotada:** Ante un fallo en scope, diagnosticar la causa desde la salida y cambiar la solución sin parar por conteos arbitrarios; no preguntar al usuario salvo decisión real de producto/negocio o permiso bloqueante.
 
-## 🏛️ Puertas Constitucionales de Calidad (Hard Gates Innegociables)
+## Decision Gates
 
-1. **Lectura Constitucional Previa:** Antes de proponer o ejecutar cambios de arquitectura o código, el agente DEBE leer la constitución del proyecto en `.specify/memory/constitution.md`. Cualquier propuesta que viole un principio constitucional queda automáticamente invalidada.
-2. **Separación Estricta de Autoridad (Agent ≠ Authority):** Ningún agente puede auto-aprobar su trabajo ni realizar merge directo a ramas de producción (`main`/`master`) sin revisión humana explícita. Los permisos y restricciones de rutas se consultan en `.agents/registry.json`.
-3. **Cero Código sin Especificación Aprobada:** Prohibido crear, modificar o refactorizar archivos en el código fuente de producción sin contar con:
-   - `specs/NNN-<nombre-feature>/spec.md` (Aprobado).
-   - `specs/NNN-<nombre-feature>/plan.md` (Aprobado).
-   - `specs/NNN-<nombre-feature>/tasks.md` (Con tareas atómicas y comandos de test).
-4. **Evidencia antes de Afirmaciones:** No se marca ninguna tarea como completada (`[x]`) sin haber ejecutado el comando de verificación y comprobado que su resultado sea exitoso (`exit_code: 0`). Los comprobantes inmutables se registran en `.evidence/`.
-5. **Protocolo de Traspasos Tipados:** Toda delegación de tareas entre agentes especializados debe formalizarse mediante un registro estructurado en `.agents/handoffs/` que preserve el contexto, las decisiones tomadas y los riesgos.
-
----
-
-## 🔄 El Ciclo de Desarrollo ODD en 5 Fases
-
-```mermaid
-flowchart LR
-    A["1. /specify (o /speckit.specify)\n(Rol: spec-agent)"] --> B["2. /plan (o /speckit.plan)\n(Rol: spec-agent)"]
-    B --> C["3. /tasks (o /speckit.tasks)\n(Rol: orchestrator)"]
-    C --> D["4. /implement (o /speckit.implement)\n(Roles: implementer + tester)"]
-    D --> E["5. /converge (o /speckit.converge)\n(Roles: reviewer + security-agent)"]
-```
-
----
-
-### Fase 1: `/specify (o /speckit.specify) <nombre-feature>` (spec-agent)
-* **Objetivo:** Definir qué se va a construir y cuáles son sus criterios de aceptación (Given-When-Then), sin detalles de implementación.
-* **Acciones:**
-  1. Localizar el siguiente número correlativo en `specs/` (ej. `006-nuevo-modulo`).
-  2. Crear el directorio `specs/NNN-<nombre-feature>/` usando la plantilla canónica `.specify/templates/spec.md`.
-  3. Formular preguntas breves de aclaración (`/clarify (o /speckit.clarify)`) si existen ambigüedades.
-  4. Presentar el `spec.md` y **DETENERSE**. Esperar la aprobación explícita del usuario.
-
----
-
-### Fase 2: `/plan (o /speckit.plan)` (spec-agent / architect)
-* **Objetivo:** Trazar el plano arquitectónico y técnico basándose en el `spec.md` aprobado.
-* **Acciones:**
-  1. Cargar el `spec.md` y `.specify/memory/constitution.md`.
-  2. Determinar archivos exactos a crear, modificar o eliminar.
-  3. Si la característica requiere decisiones rápidas, clasificación o scoring, definir el contrato con la capa de decisión (`lib/adapters/DecisionProvider.js` o Kev / `/v1/systemone`).
-  4. Generar `specs/NNN-<nombre-feature>/plan.md`.
-  5. Presentar el plan al usuario y solicitar su validación técnica.
-
----
-
-### Fase 3: `/tasks (o /speckit.tasks)` (orchestrator / spec-agent)
-* **Objetivo:** Descomponer el plan técnico en tareas de trabajo atómicas e independientes.
-* **Acciones:**
-  1. Generar `specs/NNN-<nombre-feature>/tasks.md` a partir de `.specify/templates/tasks.md`.
-  2. Cada tarea debe tener:
-     - Identificador unívoco: `[TASK-XXX]`.
-     - Archivos afectados.
-     - **Comando de verificación exacto** (ej. `npm test`, `pytest tests/`).
-  3. Emitir el protocolo de traspaso inicial en `.agents/handoffs/` hacia `implementer`.
-  4. El usuario aprueba la lista de tareas antes de iniciar la implementación.
-
----
-
-### Fase 4: `/implement (o /speckit.implement)` (implementer + tester)
-* **Objetivo:** Escribir el código siguiendo Test-Driven Development (TDD).
-* **Acciones:**
-  1. Tomar la siguiente tarea pendiente en `tasks.md`.
-  2. Escribir la prueba unitaria o de integración (Fase RED).
-  3. Ejecutar el test y comprobar que falla por la razón esperada.
-  4. Implementar el código mínimo necesario para que el test pase (Fase GREEN).
-  5. Refactorizar si es necesario (Fase REFACTOR).
-  6. Registrar comprobante de ejecución en `.evidence/` con `exit_code: 0`.
-  7. Marcar la tarea con `[x]` en `tasks.md` y realizar un commit atómico en Git (Conventional Commits en español).
-  8. Repetir hasta completar todas las tareas.
-
----
-
-### Fase 5: `/converge (o /speckit.converge)` (reviewer + security-agent)
-* **Objetivo:** Validar la integridad final del sistema, auditar seguridad y cerrar la especificación.
-* **Acciones:**
-  1. Ejecutar la suite completa de pruebas y validaciones:
-     - `gent verify` (100% de tareas).
-     - `gent registry validate` (Gobernanza íntegra).
-     - `gent handoff validate` (Traspasos válidos).
-     - `gent evidence verify` (Comprobantes auditados).
-     - `gent eval` (Evaluación sintética superada).
-  2. Completar `specs/NNN-<nombre-feature>/checklist.md`.
-  3. Registrar Architectural Decision Record (ADR) en `PROJECT_LOG.md`.
-  4. Notificar al usuario para la revisión y aprobación humana final previa al merge.
-
----
-
-## 🚀 Integración en Proyectos Nuevos y Existentes
-
-Si te encuentras en un proyecto que aún no cuenta con la infraestructura de Spec-Kit:
-- **Proyecto Existente (Brownfield)**: Ejecuta o recomienda ejecutar:
-  ```bash
-  npx --yes github:BeLc3bU/elite-agent-bootstrap init
-  ```
-  Aplica la política **Zero-Overwrite**: preserva `README.md` creando `SPECKIT_GUIDE.md` y actualiza reglas sin destruir archivos previos.
-- **Proyecto Nuevo (Greenfield)**: Aplica las 4 preguntas de descubrimiento descritas en `AGENT_BOOTSTRAP.md` e inicializa la constitución y el registro de agentes `.agents/registry.json`.
-
----
-
-## 🛠️ Comandos CLI Disponibles
-| Comando | Descripción |
+| Criterio / Situación | Acción |
 |---|---|
-| `gent verify` | Valida el progreso de todas las specs activas |
-| `gent registry validate` | Valida el catálogo formal de agentes contra JSON Schema |
-| `gent registry list` | Lista los roles, permisos y niveles de riesgo de los agentes |
-| `gent handoff validate` | Valida el protocolo formal de traspaso entre agentes |
-| `gent handoff list` | Lista los traspasos históricos registrados |
-| `gent evidence verify` | Audita que ninguna tarea completada carezca de comprobante exitoso |
-| `gent evidence list` | Lista los comprobantes de ejecución inmutables |
-| `gent route "<tarea>"` | Enruta la tarea al agente idóneo mediante la capa de decisión |
-| `gent eval` | Ejecuta la batería de evaluación sintética de agentes (.evals/) |
-| `gent create <nombre>` | Crea una nueva especificación numerada en `specs/` |
-| `gent install-skill` | Instala o actualiza esta skill globalmente en Antigravity |
+| Petición de solo lectura (explicar, comparar, auditar) | Permanecer read-only; no crear documentos ODD ni editar código |
+| Intención de cambio ambigua o decisión de producto abierta | Hacer 1 pregunta enfocada y esperar |
+| Tarea **pequeña** (entendida en ≤3 lecturas/~10k tokens, riesgo contenido, reanudable desde el diff) | Ruta inline: leer batch acotado, observar RED, implementar GREEN, verificar suite inline |
+| Tarea **grande** (falla el *resume test*: multi-sesión, esperas externas, requisitos largos) | Crear `odd/tasks/NNN-<feature>.md` (vía `agent create`) antes de editar código |
+| Entendimiento supera presupuesto (>3 lecturas o >10k tokens) | Delegar exploración read-only (handoff ≤2k tokens con `path:line`) |
+| Unidad delegada a writer (`parallel` ≥2 unidades disjuntas o *context backstop*) | Declarar `## Allowed edit surfaces` no vacío (nunca `.` ni rutas absolutas) |
+| Cambio toca alguno de los 6 ítems de alto riesgo | Escalar verificación independiente (`agent route` / `reviewer`) y separar su commit |
+
+### Rúbrica de Alto Riesgo (Ítems 1–6)
+1. **Datos irreversibles:** Migraciones, borrado o cambio de formato persistido no reconstruible.
+2. **Seguridad:** Auth, permisos, credenciales, secretos, guardias o sandbox.
+3. **Contratos compartidos:** API pública, flags CLI, esquemas, prompts o código compartido tocado sin solicitud explícita.
+4. **Concurrencia:** Locks, condiciones de carrera u orden asíncrono.
+5. **Entrega / entorno:** Instaladores, release, CI/CD, deploy o dependencias.
+6. **Sin cobertura:** Ningún test detectaría regresiones en lo modificado.
+
+## Execution Steps
+
+1. **Authorize:** Confirmar si hay autorización de cambio; si es solo análisis, mantener read-only.
+2. **Explore:** Inspeccionar código y requisitos en 1 batch acotado (≤3 llamadas).
+3. **Resolve uncertainty:** Resolver ambigüedades reales o validar premisas de alto riesgo; continuar si no queda decisión humana.
+4. **Classify:** Determinar `small` vs `large` mediante el *resume test* (la cantidad de archivos o tests por sí sola no hace grande una tarea).
+5. **Track (solo tareas grandes):** Crear `odd/tasks/NNN-<feature>.md` con orden fijo: cabecera (objetivo, rama, estrategia de entrega, runner), `## Specs` (`S1`..`Sn` verbatim), `## Tasks` (`T1`..`Tn` con `S#`, ruta `inline|delegated`, riesgo) y `## Log` (`L1` petición original verbatim). Si aplica memoria local, consultar `MEMORY.md` y `.agents/memory/`.
+6. **Implement task by task:**
+   - Aplicar TDD aplicable (`RED` observado -> `GREEN` mínimo -> `TRIANGULATE` -> `REFACTOR`); si no aplica (docs pasivas, sin runner), documentar la excepción y ejecutar verificación estructural.
+   - Ejecutar verificación diferencial (`PRESERVE`) cuando se toque código compartido y mantener scratch temporal fuera del worktree (`mktemp`).
+   - Realizar *work-unit commits* coherentes (~400 líneas código + tests + docs juntos; ver skill `work-unit-commits`).
+   - Actualizar estado de tareas y registrar traspasos en `.agents/handoffs/` cuando se delegue entre roles.
+7. **Close:** Ejecutar `agent verify`, `agent registry validate`, `agent handoff validate`, `agent evidence verify`, `agent memory validate`, `agent eval` y `agent guard`; registrar evidencia en `.evidence/` y ADR en `PROJECT_LOG.md` si hubo cambios de arquitectura.
+
+## Output Contract
+
+Al concluir una tarea ODD reportar de forma concisa:
+- Archivos creados o modificados y estado de `odd/tasks/NNN-<feature>.md`.
+- Comandos de verificación ejecutados con sus resultados reales observados.
+- Línea de cierre de riesgo (`Risk: item N (razón)` o `Risk: none`).
+- Bloqueos pendientes o decisiones humanas requeridas (si existen).
+
+## References
+
+- `../../docs/gentle-shell-odd-v5.md` — resumen técnico de ODD v5, continuidad y guardrails.
+- `../../docs/skill-style-guide.md` — guía normativa de diseño de skills LLM-first.
+- `../work-unit-commits/SKILL.md` — reglas de slicing por unidades de trabajo (~400 líneas).
+- `../../.agents/registry.json` — catálogo de roles, permisos y rutas permitidas/prohibidas.

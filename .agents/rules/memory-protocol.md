@@ -58,7 +58,7 @@ Al concluir o avanzar en una tarea, el agente debe evaluar si ha obtenido un con
 ### ❌ PROHIBIDO Persistir si:
 - Es información transitoria o estado de ejecución momentáneo (utilizar `.agents/handoffs/`).
 - Es un resumen conversacional del chat o volcado de prompts crudos.
-- Es información que ya reside canónicamente en `PROJECT_LOG.md` (ADR), `constitution.md` o `specs/`.
+- Es información que ya reside canónicamente en `PROJECT_LOG.md` (ADR), `AGENTS.md`, `odd/tasks/` o `specs/`.
 - Es código o texto fácilmente derivable de inspeccionar los archivos existentes.
 
 ---

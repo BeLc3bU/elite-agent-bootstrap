@@ -1,20 +1,13 @@
-# Reglas de Proyecto - Spec-Kit & Elite Agent System
+# Reglas de Proyecto - ODD (Gentle Shell v5) & Elite Agent System
 
 ## 🌟 Reglas de Oro
 1. **Idioma Oficial**: Toda la interacción, comentarios de código, mensajes de commit (Conventional Commits) y Pull Requests DEBEN ser en **Español**.
-2. **Organic-Driven Development (ODD) — Gentle Shell**:
-   - Antes de implementar código en `src/`, verifica que exista una especificación aprobada en `specs/[ID]-[FEATURE]/`.
-   - Flujo obligatorio: `spec.md` -> `clarify.md` -> `plan.md` -> `tasks.md` -> `implement` -> `converge`.
+2. **Organic-Driven Development (ODD) — Gentle Shell v5**:
+   - Flujo en 7 pasos: `Authorize -> Explore -> Resolve -> Classify -> Track -> Implement -> Close`.
+   - Tareas pequeñas: ejecución inline con TDD aplicable y línea `Risk:`.
+   - Tareas grandes (falla *resume test*): registrar `odd/tasks/NNN-<feature>.md` (`node bin/cli.js create <nombre>`).
 3. **Guardrails de Calidad**:
-   - Zero Errors Policy: Prohibido abrir PRs si fallan tests, lint o typecheck.
-   - Si se modifica UI, incluir verificación visual.
-   - Sincronizar `PROJECT_LOG.md` y `README.md` al completar cada fase.
-
-## 🛠️ Comandos Spec-Kit Reconocidos
-- `/speckit.constitution`: Principios inmutables del proyecto.
-- `/speckit.specify`: Crear o refinar especificación funcional.
-- `/speckit.clarify`: Auditoría y resolución de ambigüedades.
-- `/speckit.plan`: Plan de arquitectura técnica y diagramas.
-- `/speckit.tasks`: Desglose de tareas ejecutables con IDs `[TASK-XXX]`.
-- `/speckit.implement`: Implementación guiada por pruebas (TDD).
-- `/speckit.converge`: Auditoría final de calidad y preparación de PR.
+   - Zero Errors Policy: Prohibido abrir PRs si fallan `npm test`, `npm run test:guards`, lint o typecheck.
+   - Work-Unit Commits (~400 líneas código + tests + docs).
+   - Separación de autoridad (`Agent ≠ Authority`): ningún agente aprueba ni mergea sin revisión humana.
+   - Sincronizar `PROJECT_LOG.md` y `README.md` ante cambios arquitectónicos.

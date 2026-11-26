@@ -120,6 +120,17 @@ Este archivo actúa como la memoria a largo plazo del proyecto, documentando la 
   6. Emitir comprobante inmutable de evidencia en `.evidence/EV-005-mcp-starter-pack.json`.
 - **Consecuencias**: Acceso unificado y seguro a herramientas MCP líderes en Antigravity, erradicación de alucinaciones en librerías y diseño, y preservación íntegra de credenciales preexistentes.
 
+### ADR-011: Sincronización con Gentle Shell v4.6–v5.0+ (ODD 7 Pasos, Guardrails y Skills LLM-First)
+- **Fecha**: 2026-11-26
+- **Contexto**: Tras revisar las novedades de `Gentleman-Programming/gentle-shell` entre `v4.6.0` y `v5.0.0+` (`main`) y auditar la deuda técnica heredada de la migración inicial a ODD (`d203f15`, que dejó roto `npm run test:evals` y referencias huérfanas a `.specify/` en `bin/cli.js` y skills), se requería alinear el repositorio con la arquitectura actual de ODD y sus guardrails deterministas.
+- **Decisión**:
+  1. Implementar `lib/guards/GentleGuards.js` (cero dependencias) con la política compartida de rutas sensibles (incluyendo `.envrc` y `.netrc`), clasificación de comandos destructivos (`git`, `filesystem`, `database`), detector de marcadores de conflicto (`<<<<<<<` / `=======` / `>>>>>>>`) y validación de `## Allowed edit surfaces`.
+  2. Ampliar `lib/adapters/DecisionProvider.js` con la rúbrica de los 6 ítems de Alto Riesgo ODD, clasificación `small`/`large` (*resume test*) y modos `organic` vs `full-delegation`, restaurando `.evals/scenarios/routing-scenarios.json`.
+  3. Actualizar `bin/cli.js` para operar nativamente sobre `odd/tasks/` (`create`, `verify`, `init`) manteniendo retrocompatibilidad con `specs/` existentes y añadiendo el subcomando `guard` (`agent guard`).
+  4. Estandarizar `skills/speckit-odd/SKILL.md` y añadir `skills/work-unit-commits/SKILL.md` bajo `docs/skill-style-guide.md`, junto con `docs/gentle-shell-odd-v5.md`.
+  5. Actualizar `.agents/registry.json` (`v2.4.0`), `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`, `.cursorrules`, `README.md`, `AGENT_BOOTSTRAP.md`, `GUIA_DE_USO.md` y `.github/workflows/spec-quality-gate.yml`.
+- **Consecuencias**: Repositorio 100% coherente con Gentle Shell v5, CLI funcional sin `.specify/`, guardrails ejecutables offline y cobertura automatizada mediante `node --test`.
+
 ---
 
 ## 🗺️ Historial de Fases e Hitos
@@ -136,6 +147,7 @@ Este archivo actúa como la memoria a largo plazo del proyecto, documentando la 
 | **v2 - Fase 5** | Sistema Nativo de Memoria Persistente de Agentes (MEMORY.md + .agents/memory/) | ✅ Completado | 2026-10-01 |
 | **v2 - Fase 6** | Integración del Starter Pack de Skills (skills.sh) y comando install-skills-pack | ✅ Completado | 2026-10-01 |
 | **v2 - Fase 7** | Integración del Pack de Servidores MCP Esenciales y comando install-mcp-pack | ✅ Completado | 2026-10-01 |
+| **v2 - Fase 8** | Sincronización ODD Gentle Shell v5, Guardrails Deterministas y Work-Unit Commits | ✅ Completado | 2026-11-26 |
 
 
 

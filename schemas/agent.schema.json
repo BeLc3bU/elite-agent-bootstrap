@@ -112,7 +112,7 @@
     },
     "can_modify_specs": {
       "type": "boolean",
-      "description": "Permiso para crear o editar especificaciones en specs/ o .specify/templates/"
+      "description": "Permiso para crear o editar documentos ODD en odd/tasks/ o specs/"
     },
     "can_modify_governance": {
       "type": "boolean",

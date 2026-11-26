@@ -32,8 +32,8 @@ function log(msg, color = colors.reset) {
 function printBanner() {
   log(`
 ${colors.cyan}${colors.bold}=======================================================
-🤖 Elite Agent + Spec-Kit Universal CLI v1.0.0
-   Organic-Driven Development (ODD) para Agentes de IA
+🤖 Elite Agent + ODD Universal CLI v2.0.0
+   Organic-Driven Development (ODD) — Gentle Shell v5
 =======================================================${colors.reset}`);
 }
 
@@ -45,6 +45,9 @@ const TEMPLATES_SCAFFOLD_DIR = path.join(ROOT_DIR, '.specify', 'templates', 'sca
 const SPECIFY_SRC_DIR = path.join(ROOT_DIR, '.specify');
 const PROMPTS_SRC_DIR = path.join(ROOT_DIR, '.github', 'prompts');
 const WORKFLOWS_SRC_DIR = path.join(ROOT_DIR, '.github', 'workflows');
+const EVALS_SRC_DIR = path.join(ROOT_DIR, '.evals');
+const LIB_SRC_DIR = path.join(ROOT_DIR, 'lib');
+const SCHEMAS_SRC_DIR = path.join(ROOT_DIR, 'schemas');
 
 // ==========================================
 // Funciones Utilitarias
@@ -163,53 +166,101 @@ function detectProjectContext(targetDir) {
 }
 
 // ==========================================
-// Comando: Verificar Specs (verify)
+// Comando: Verificar Documentos ODD y Specs (verify)
 // ==========================================
 function cmdVerify(targetDir) {
   printBanner();
+  const oddTasksDir = path.join(targetDir, 'odd', 'tasks');
   const specsDir = path.join(targetDir, 'specs');
-  if (!fs.existsSync(specsDir)) {
-    log(`[-] No se encontró la carpeta 'specs/' en: ${targetDir}`, colors.red);
+
+  const hasOdd = fs.existsSync(oddTasksDir);
+  const hasSpecs = fs.existsSync(specsDir);
+
+  if (!hasOdd && !hasSpecs) {
+    log(`[-] No se encontró 'odd/tasks/' ni 'specs/' en: ${targetDir}`, colors.red);
     return;
   }
 
-  log(`\n🔍 Verificando especificaciones en: ${colors.bold}${specsDir}${colors.reset}\n`);
-  const entries = fs.readdirSync(specsDir, { withFileTypes: true })
-    .filter(e => e.isDirectory());
+  let anyFound = false;
 
-  if (entries.length === 0) {
-    log(`[INFO] No hay especificaciones creadas aún en 'specs/'. Usa 'agent create <nombre>'`, colors.gray);
-    return;
-  }
+  if (hasOdd) {
+    const oddFiles = fs.readdirSync(oddTasksDir, { withFileTypes: true })
+      .filter(e => !e.isDirectory() && e.name.endsWith('.md'))
+      .map(e => e.name)
+      .sort();
 
-  log(`=== Estado de Especificaciones y Tareas ===\n`, colors.cyan);
+    if (oddFiles.length > 0) {
+      anyFound = true;
+      log(`\n🔍 Verificando documentos ODD en: ${colors.bold}${oddTasksDir}${colors.reset}\n`);
+      log(`=== Estado de Features ODD (Gentle Shell) ===\n`, colors.cyan);
 
-  for (const entry of entries) {
-    const featureDir = path.join(specsDir, entry.name);
-    const hasSpec = fs.existsSync(path.join(featureDir, 'spec.md'));
-    const hasPlan = fs.existsSync(path.join(featureDir, 'plan.md'));
-    const hasTasks = fs.existsSync(path.join(featureDir, 'tasks.md'));
+      for (const fileName of oddFiles) {
+        const content = fs.readFileSync(path.join(oddTasksDir, fileName), 'utf8');
+        const hasSpecsSec = /^##\s+Specs\b/m.test(content);
+        const hasTasksSec = /^##\s+Tasks\b/m.test(content);
+        const hasLogSec = /^##\s+Log\b/m.test(content);
 
-    log(`[*] Feature: ${colors.bold}${entry.name}${colors.reset}`, colors.yellow);
-    log(`   - spec.md:  ${hasSpec ? colors.green + '[OK] Presente' : colors.red + '[X] Faltante'}${colors.reset}`);
-    log(`   - plan.md:  ${hasPlan ? colors.green + '[OK] Presente' : colors.red + '[X] Faltante'}${colors.reset}`);
-    log(`   - tasks.md: ${hasTasks ? colors.green + '[OK] Presente' : colors.red + '[X] Faltante'}${colors.reset}`);
+        const tasksSectionMatch = content.match(/^##\s+Tasks\b([\s\S]*?)(?=^##\s+Log\b|(?![\s\S]))/m);
+        const taskLines = (tasksSectionMatch ? tasksSectionMatch[1] : content).split(/\r?\n/);
+        const totalTasks = taskLines.filter(l => /^- \[( |x)\] /.test(l.trim())).length;
+        const doneTasks = taskLines.filter(l => /^- \[x\] /.test(l.trim())).length;
 
-    if (hasTasks) {
-      const tasksContent = fs.readFileSync(path.join(featureDir, 'tasks.md'), 'utf8');
-      const lines = tasksContent.split('\n');
-      const totalTasks = lines.filter(l => /^- \[( |x)\] \*\*`\[TASK-/.test(l)).length;
-      const doneTasks = lines.filter(l => /^- \[x\] \*\*`\[TASK-/.test(l)).length;
+        log(`[*] Feature ODD: ${colors.bold}${fileName.replace(/\.md$/, '')}${colors.reset}`, colors.yellow);
+        log(`   - ## Specs: ${hasSpecsSec ? colors.green + '[OK]' : colors.red + '[X]'} | ## Tasks: ${hasTasksSec ? colors.green + '[OK]' : colors.red + '[X]'} | ## Log: ${hasLogSec ? colors.green + '[OK]' : colors.red + '[X]'}${colors.reset}`);
 
-      if (totalTasks > 0) {
-        const pct = ((doneTasks / totalTasks) * 100).toFixed(1);
-        const color = doneTasks === totalTasks ? colors.green : colors.cyan;
-        log(`   - Tareas:   ${doneTasks} / ${totalTasks} completadas (${pct}%)`, color);
-      } else {
-        log(`   - Tareas:   Sin tareas estructuradas [TASK-XXX]`, colors.gray);
+        if (totalTasks > 0) {
+          const pct = ((doneTasks / totalTasks) * 100).toFixed(1);
+          const color = doneTasks === totalTasks ? colors.green : colors.cyan;
+          log(`   - Tareas:   ${doneTasks} / ${totalTasks} completadas (${pct}%)`, color);
+        } else {
+          log(`   - Tareas:   Sin checkboxes de tarea registrados`, colors.gray);
+        }
+        console.log('');
       }
     }
-    console.log('');
+  }
+
+  if (hasSpecs) {
+    const entries = fs.readdirSync(specsDir, { withFileTypes: true })
+      .filter(e => e.isDirectory());
+
+    if (entries.length > 0) {
+      anyFound = true;
+      log(`\n🔍 Verificando especificaciones heredadas en: ${colors.bold}${specsDir}${colors.reset}\n`);
+      log(`=== Estado de Especificaciones y Tareas (Legacy) ===\n`, colors.cyan);
+
+      for (const entry of entries) {
+        const featureDir = path.join(specsDir, entry.name);
+        const hasSpec = fs.existsSync(path.join(featureDir, 'spec.md'));
+        const hasPlan = fs.existsSync(path.join(featureDir, 'plan.md'));
+        const hasTasks = fs.existsSync(path.join(featureDir, 'tasks.md'));
+
+        log(`[*] Feature: ${colors.bold}${entry.name}${colors.reset}`, colors.yellow);
+        log(`   - spec.md:  ${hasSpec ? colors.green + '[OK] Presente' : colors.red + '[X] Faltante'}${colors.reset}`);
+        log(`   - plan.md:  ${hasPlan ? colors.green + '[OK] Presente' : colors.red + '[X] Faltante'}${colors.reset}`);
+        log(`   - tasks.md: ${hasTasks ? colors.green + '[OK] Presente' : colors.red + '[X] Faltante'}${colors.reset}`);
+
+        if (hasTasks) {
+          const tasksContent = fs.readFileSync(path.join(featureDir, 'tasks.md'), 'utf8');
+          const lines = tasksContent.split('\n');
+          const totalTasks = lines.filter(l => /^- \[( |x)\] \*\*`\[TASK-/.test(l)).length;
+          const doneTasks = lines.filter(l => /^- \[x\] \*\*`\[TASK-/.test(l)).length;
+
+          if (totalTasks > 0) {
+            const pct = ((doneTasks / totalTasks) * 100).toFixed(1);
+            const color = doneTasks === totalTasks ? colors.green : colors.cyan;
+            log(`   - Tareas:   ${doneTasks} / ${totalTasks} completadas (${pct}%)`, color);
+          } else {
+            log(`   - Tareas:   Sin tareas estructuradas [TASK-XXX]`, colors.gray);
+          }
+        }
+        console.log('');
+      }
+    }
+  }
+
+  if (!anyFound) {
+    log(`[INFO] No hay features creadas aún en 'odd/tasks/'. Usa 'agent create <nombre>'`, colors.gray);
   }
 
   log(`===========================================`, colors.cyan);
@@ -836,7 +887,7 @@ function cmdMemory(targetDir, subAction = 'list', rawArgs = []) {
 // ==========================================
 // Comandos de Enrutamiento y Decisión (route)
 // ==========================================
-async function cmdRoute(targetDir, query) {
+async function cmdRoute(targetDir, query, options = {}) {
   printBanner();
   if (!query) {
     log(`[-] Error: Debes especificar una descripción de la tarea a enrutar.`, colors.red);
@@ -848,16 +899,18 @@ async function cmdRoute(targetDir, query) {
   const registryPath = path.join(targetDir, '.agents', 'registry.json');
   const provider = createDecisionProvider({ registryPath });
 
-  log(`\n🎯 Enrutando Tarea a través de la Capa de Decisión:\n`, colors.cyan);
+  log(`\n🎯 Enrutando Tarea a través de la Capa de Decisión (ODD v5):\n`, colors.cyan);
   log(`   Tarea: "${query}"`, colors.bold);
 
-  const decision = await provider.decide(query);
+  const decision = await provider.decide(query, { workflowMode: options.workflowMode });
   const approvalBadge = decision.requires_human_approval ? `${colors.red}🔒 Requerida (Agent ≠ Authority)${colors.reset}` : `${colors.green}⚡ No requerida${colors.reset}`;
   const confPct = Math.round((decision.confidence || 0) * 100);
 
   log(`\n📋 Resultado del Enrutamiento:`, colors.yellow);
   log(`   • Agente ID:         ${colors.bold}${decision.agent_id}${colors.reset}`);
   log(`   • Rol / Nombre:      ${decision.agent_name || decision.agent_id}`);
+  log(`   • Tamaño ODD:        ${decision.task_size || 'small'} | Ruta: ${decision.route || 'inline'} (${decision.workflow_mode || 'organic'})`);
+  log(`   • Línea de Riesgo:   ${decision.risk_line || 'Risk: none'}`);
   log(`   • Nivel de Riesgo:   ${decision.risk_level}`);
   log(`   • Aprobación Humana: ${approvalBadge}`);
   log(`   • Nivel Confianza:   ${confPct}% (${decision.engine})`);
@@ -866,6 +919,92 @@ async function cmdRoute(targetDir, query) {
     log(`   • Rutas Permitidas:  ${decision.allowed_files.join(', ')}`);
   }
   console.log('');
+}
+
+// ==========================================
+// Comando de Guardrails Gentle Shell (guard)
+// ==========================================
+function cmdGuard(targetDir, rawArgs = []) {
+  printBanner();
+  const {
+    isSensitivePath,
+    classifyDestructiveCommand,
+    findConflictMarkersInFiles,
+    validateEditSurfaces,
+    isPathInSurfaces
+  } = require('../lib/guards/GentleGuards');
+
+  const getFlag = (name) => {
+    const idx = rawArgs.indexOf(name);
+    return idx !== -1 && rawArgs[idx + 1] ? rawArgs[idx + 1] : null;
+  };
+
+  const targetPath = getFlag('--path');
+  const targetCmd = getFlag('--cmd');
+  const surfacesArg = getFlag('--surfaces');
+  const checkPath = getFlag('--check');
+
+  if (targetPath) {
+    if (isSensitivePath(targetPath)) {
+      log(`\n🛡️ [BLOQUEADO] Ruta sensible protegida por política Gentle Shell: ${targetPath}\n`, colors.red);
+      process.exit(1);
+    }
+    log(`\n✅ [OK] Ruta segura permitida: ${targetPath}\n`, colors.green);
+    return;
+  }
+
+  if (targetCmd) {
+    const match = classifyDestructiveCommand(targetCmd);
+    if (match) {
+      const badge = match.hardDeny ? colors.red + '[BLOQUEADO]' : colors.yellow + '[CONFIRMACIÓN REQUERIDA]';
+      log(`\n🛡️ ${badge}${colors.reset} (${match.kind} / política: ${match.confirmationPolicy}): ${match.reason}\n`);
+      process.exit(match.hardDeny ? 1 : 2);
+    }
+    log(`\n✅ [OK] Comando seguro: ${targetCmd}\n`, colors.green);
+    return;
+  }
+
+  if (surfacesArg) {
+    const parsedSurfaces = surfacesArg.split(',').map(s => s.trim()).filter(Boolean);
+    const validation = validateEditSurfaces(parsedSurfaces);
+    if (!validation.valid) {
+      log(`\n❌ Superficies de edición inválidas:\n   - ${validation.errors.join('\n   - ')}\n`, colors.red);
+      process.exit(1);
+    }
+    if (checkPath && !isPathInSurfaces(checkPath, validation.surfaces)) {
+      log(`\n❌ Ruta '${checkPath}' fuera de Allowed edit surfaces: ${validation.surfaces.join(', ')}\n`, colors.red);
+      process.exit(1);
+    }
+    log(`\n✅ [OK] Allowed edit surfaces válidas (${validation.surfaces.join(', ')})\n`, colors.green);
+    return;
+  }
+
+  // Modo por defecto / --conflicts: escanear marcadores de conflicto en archivos del proyecto
+  log(`\n🔍 Auditando marcadores de conflicto Git en: ${colors.bold}${targetDir}${colors.reset}\n`, colors.cyan);
+  const filesToScan = [];
+  const collectFiles = (dir) => {
+    if (!fs.existsSync(dir)) return;
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (['node_modules', '.git', '.evidence', 'GamingOptimization'].includes(entry.name)) continue;
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) collectFiles(full);
+      else if (/\.(js|mjs|ts|json|md|yml|yaml|ps1|sh|bat)$/i.test(entry.name)) {
+        filesToScan.push(path.relative(targetDir, full));
+      }
+    }
+  };
+  collectFiles(targetDir);
+
+  const findings = findConflictMarkersInFiles(targetDir, filesToScan);
+  if (findings.length > 0) {
+    log(`❌ Se detectaron marcadores de conflicto Git sin resolver:`, colors.red);
+    for (const f of findings) {
+      log(`   - ${f.file}:${f.lines.join(',')}`, colors.red);
+    }
+    console.log('');
+    process.exit(1);
+  }
+  log(`✅ [OK] Sin marcadores de conflicto en ${filesToScan.length} archivos auditados.\n`, colors.green);
 }
 
 // ==========================================
@@ -901,15 +1040,16 @@ async function cmdEval(targetDir) {
     const res = await provider.decide(sc.input);
     const agentMatch = res.agent_id === sc.expected_agent;
     const approvalMatch = Boolean(res.requires_human_approval) === Boolean(sc.expected_approval);
+    const escalateMatch = sc.expected_escalate === undefined || Boolean(res.escalate) === Boolean(sc.expected_escalate);
 
-    if (agentMatch && approvalMatch) {
+    if (agentMatch && approvalMatch && escalateMatch) {
       passed++;
-      log(`  [PASS] ${colors.green}✓${colors.reset} [${sc.id}] ${sc.description} ➔ ${colors.bold}${res.agent_id}${colors.reset} (conf: ${Math.round(res.confidence * 100)}%)`);
+      log(`  [PASS] ${colors.green}✓${colors.reset} [${sc.id}] ${sc.description} ➔ ${colors.bold}${res.agent_id}${colors.reset} (${res.risk_line || 'Risk: none'})`);
     } else {
       failed++;
       log(`  [FAIL] ${colors.red}✗${colors.reset} [${sc.id}] ${sc.description}`);
-      log(`         Esperado: agent=${sc.expected_agent}, approval=${sc.expected_approval}`);
-      log(`         Obtenido: agent=${res.agent_id}, approval=${res.requires_human_approval}`);
+      log(`         Esperado: agent=${sc.expected_agent}, approval=${sc.expected_approval}, escalate=${sc.expected_escalate}`);
+      log(`         Obtenido: agent=${res.agent_id}, approval=${res.requires_human_approval}, escalate=${res.escalate}`);
     }
   }
 
@@ -917,8 +1057,7 @@ async function cmdEval(targetDir) {
   console.log('');
   if (failed === 0) {
     log(`✅ Suite de evaluación sintética completada con éxito: ${passed}/${scenarios.length} escenarios superados (${pct}%).`, colors.green);
-    
-    // Registrar comprobante de evidencia si existe .evidence/
+
     const evidenceDir = path.join(targetDir, '.evidence');
     if (fs.existsSync(evidenceDir)) {
       const evRecord = {
@@ -929,7 +1068,7 @@ async function cmdEval(targetDir) {
         command: "npm run test:evals",
         exit_code: 0,
         status: "passed",
-        summary: `Evaluación sintética de enrutamiento: ${passed}/${scenarios.length} escenarios superados (100%)`,
+        summary: `Evaluación sintética de enrutamiento y riesgo ODD v5: ${passed}/${scenarios.length} escenarios superados (100%)`,
         log_artifact: ".evals/scenarios/routing-scenarios.json",
         timestamp: new Date().toISOString()
       };
@@ -946,7 +1085,7 @@ async function cmdEval(targetDir) {
 }
 
 // ==========================================
-// Comando: Crear Feature (create)
+// Comando: Crear Feature ODD (create)
 // ==========================================
 function cmdCreate(targetDir, featureName) {
   printBanner();
@@ -956,12 +1095,11 @@ function cmdCreate(targetDir, featureName) {
     return;
   }
 
-  const specsDir = path.join(targetDir, 'specs');
-  ensureDirSync(specsDir);
+  const oddTasksDir = path.join(targetDir, 'odd', 'tasks');
+  ensureDirSync(oddTasksDir);
 
-  // Calcular siguiente ID
-  const existing = fs.readdirSync(specsDir, { withFileTypes: true })
-    .filter(e => e.isDirectory())
+  const existing = fs.readdirSync(oddTasksDir, { withFileTypes: true })
+    .filter(e => !e.isDirectory() && e.name.endsWith('.md'))
     .map(e => e.name);
 
   let nextNum = 1;
@@ -976,52 +1114,37 @@ function cmdCreate(targetDir, featureName) {
   const paddedId = String(nextNum).padStart(3, '0');
   const cleanName = featureName.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
   const slug = `${paddedId}-${cleanName}`;
-  const featureDir = path.join(specsDir, slug);
+  const featureFile = path.join(oddTasksDir, `${slug}.md`);
 
-  if (fs.existsSync(featureDir)) {
-    log(`[-] La feature ya existe en: ${featureDir}`, colors.red);
+  if (fs.existsSync(featureFile)) {
+    log(`[-] La feature ODD ya existe en: ${featureFile}`, colors.red);
     return;
   }
 
-  ensureDirSync(featureDir);
-  const templatesDir = path.join(targetDir, '.specify', 'templates');
-  const fallbackTemplatesDir = path.join(ROOT_DIR, '.specify', 'templates');
-  const actualTemplatesDir = fs.existsSync(templatesDir) ? templatesDir : fallbackTemplatesDir;
-
   const dateStr = new Date().toISOString().split('T')[0];
+  const ctx = detectProjectContext(targetDir);
+  const templateContent = `# Feature: ${slug}
 
-  const files = [
-    { src: 'spec.md', fallback: 'spec-template.md', dest: 'spec.md' },
-    { src: 'plan.md', fallback: 'plan-template.md', dest: 'plan.md' },
-    { src: 'tasks.md', fallback: 'tasks-template.md', dest: 'tasks.md' },
-    { src: 'clarify.md', fallback: 'clarify-template.md', dest: 'clarify.md' },
-    { src: 'checklist.md', fallback: 'checklist-template.md', dest: 'checklist.md' }
-  ];
+## Objective and problem
+Descripción breve del objetivo de \`${cleanName}\` y el problema que resuelve.
+- Rama: \`feat/${slug}\`
+- Estrategia de entrega: \`ask-on-risk\` (slices ~400 líneas)
+- Test runner: \`${ctx.stack.testCmd}\`
 
-  for (const f of files) {
-    let srcPath = path.join(actualTemplatesDir, f.src);
-    if (!fs.existsSync(srcPath) && f.fallback) {
-      srcPath = path.join(actualTemplatesDir, f.fallback);
-    }
-    if (fs.existsSync(srcPath)) {
-      let content = fs.readFileSync(srcPath, 'utf8');
-      content = content
-        .replace(/\[NOMBRE_FEATURE\]/g, cleanName)
-        .replace(/\[ID_FEATURE\]/g, paddedId)
-        .replace(/\[YYYY-MM-DD\]/g, dateStr)
-        .replace(/\{\{NOMBRE_FEATURE\}\}/g, cleanName)
-        .replace(/\{\{NNN\}\}/g, paddedId)
-        .replace(/\{\{FECHA\}\}/g, dateStr);
-      fs.writeFileSync(path.join(featureDir, f.dest), content, 'utf8');
-    }
-  }
+## Specs
+- \`S1\`: Requisito principal con criterios de aceptación verificables (citar ejemplos, comandos o mensajes exactos verbatim).
 
-  log(`\n✨ Feature creada con éxito en: ${colors.bold}specs/${slug}${colors.reset}`, colors.green);
-  log(`Archivos listos para trabajar:`);
-  log(`  📄 specs/${slug}/spec.md       - Especificación funcional`);
-  log(`  📐 specs/${slug}/plan.md       - Arquitectura técnica`);
-  log(`  📝 specs/${slug}/tasks.md      - Desglose de tareas`);
-  log(`  ❓ specs/${slug}/clarify.md    - Dudas y casos límite\n`);
+## Tasks
+- [ ] \`T1\` (\`S1\`, route: inline, risk: none): Implementar comportamiento mínimo y pruebas RED -> GREEN.
+
+## Log
+- L1 (${dateStr}): Documento ODD creado mediante \`agent create ${cleanName}\`.
+`;
+
+  fs.writeFileSync(featureFile, templateContent, 'utf8');
+
+  log(`\n✨ Feature ODD creada con éxito en: ${colors.bold}odd/tasks/${slug}.md${colors.reset}`, colors.green);
+  log(`Estructura canónica Gentle Shell v5 lista (Header + ## Specs + ## Tasks + ## Log).\n`);
 }
 
 // ==========================================
@@ -1041,9 +1164,9 @@ async function cmdInit(options) {
 
   if (!options.nonInteractive) {
     log(`\nSelecciona el modo de instalación:`);
-    log(`  [1] Integración Segura (Para proyectos existentes: CERO sobreescritura, añade Spec-Kit)`);
-    log(`  [2] Proyecto Nuevo (Scaffold desde cero con estructura limpia)`);
-    
+    log(`  [1] Integración Segura (Para proyectos existentes: CERO sobreescritura, añade ODD + Gobernanza)`);
+    log(`  [2] Proyecto Nuevo (Scaffold desde cero con estructura limpia ODD)`);
+
     const defaultOption = chosenMode === 'existing' ? '1' : '2';
     const answer = await ask(`¿Opción deseada? [1/2] (por defecto: ${defaultOption}):`);
     if (answer === '1') chosenMode = 'existing';
@@ -1053,47 +1176,41 @@ async function cmdInit(options) {
 
   log(`\n🚀 Ejecutando en modo: ${colors.bold}${chosenMode.toUpperCase()}${colors.reset}\n`);
 
-  // 1. Instalar motor .specify
-  const targetSpecify = path.join(targetDir, '.specify');
-  ensureDirSync(path.join(targetSpecify, 'memory'));
-  ensureDirSync(path.join(targetSpecify, 'templates'));
-  ensureDirSync(path.join(targetSpecify, 'scripts'));
-  copyDirRecursiveSync(SPECIFY_SRC_DIR, targetSpecify, options.force);
-  log(`  [+] Instalado motor: .specify/`, colors.green);
+  // 1. Directorio ODD canónico (odd/tasks/) y .specify opcional si existe
+  const targetOddTasks = path.join(targetDir, 'odd', 'tasks');
+  ensureDirSync(targetOddTasks);
+  log(`  [+] Inicializado directorio ODD: odd/tasks/`, colors.green);
 
-  // 2. Instalar .github/prompts
-  const targetPrompts = path.join(targetDir, '.github', 'prompts');
-  ensureDirSync(targetPrompts);
-  copyDirRecursiveSync(PROMPTS_SRC_DIR, targetPrompts, options.force);
-  log(`  [+] Instalados prompts: .github/prompts/`, colors.green);
-
-  // 3. Instalar specs/
-  const targetSpecs = path.join(targetDir, 'specs');
-  ensureDirSync(targetSpecs);
-  const specsReadme = path.join(targetSpecs, 'README.md');
-  if (!fs.existsSync(specsReadme) || options.force) {
-    const srcSpecsReadme = path.join(ROOT_DIR, 'specs', 'README.md');
-    if (fs.existsSync(srcSpecsReadme)) {
-      fs.copyFileSync(srcSpecsReadme, specsReadme);
-      log(`  [+] Creado: specs/README.md`, colors.green);
-    }
+  if (fs.existsSync(SPECIFY_SRC_DIR)) {
+    const targetSpecify = path.join(targetDir, '.specify');
+    copyDirRecursiveSync(SPECIFY_SRC_DIR, targetSpecify, options.force);
+    log(`  [+] Copiado soporte adicional: .specify/`, colors.green);
   }
 
-  // 4. Manejo de README.md
+  // 2. Copiar .github/prompts si existe
+  if (fs.existsSync(PROMPTS_SRC_DIR)) {
+    const targetPrompts = path.join(targetDir, '.github', 'prompts');
+    ensureDirSync(targetPrompts);
+    copyDirRecursiveSync(PROMPTS_SRC_DIR, targetPrompts, options.force);
+    log(`  [+] Instalados prompts: .github/prompts/`, colors.green);
+  }
+
+  // 3. Manejo de README.md / ODD_GUIDE.md (Zero-Overwrite)
   const targetReadme = path.join(targetDir, 'README.md');
   if (chosenMode === 'new') {
     if (!fs.existsSync(targetReadme) || options.force) {
-      let readmeTpl = fs.readFileSync(path.join(TEMPLATES_SCAFFOLD_DIR, 'README.project.template.md'), 'utf8');
-      readmeTpl = readmeTpl
-        .replace(/\{\{PROJECT_NAME\}\}/g, context.stack.projectName)
-        .replace(/\{\{PROJECT_DESCRIPTION\}\}/g, `Proyecto desarrollado con arquitectura modular y metodología Organic-Driven Development (ODD).`)
-        .replace(/\{\{PREREQUISITES\}\}/g, `Entorno configurado para ${context.stack.name}`)
-        .replace(/\{\{INSTALL_COMMAND\}\}/g, `npm install`)
-        .replace(/\{\{DEV_COMMAND\}\}/g, context.stack.devCmd)
-        .replace(/\{\{BUILD_COMMAND\}\}/g, context.stack.buildCmd)
-        .replace(/\{\{TEST_COMMAND\}\}/g, context.stack.testCmd)
-        .replace(/\{\{LINT_COMMAND\}\}/g, context.stack.lintCmd)
-        .replace(/\{\{PROJECT_TREE\}\}/g, `├── src/\n├── specs/\n├── .specify/\n└── PROJECT_LOG.md`);
+      const readmeTpl = fs.existsSync(path.join(TEMPLATES_SCAFFOLD_DIR, 'README.project.template.md'))
+        ? fs.readFileSync(path.join(TEMPLATES_SCAFFOLD_DIR, 'README.project.template.md'), 'utf8')
+            .replace(/\{\{PROJECT_NAME\}\}/g, context.stack.projectName)
+            .replace(/\{\{PROJECT_DESCRIPTION\}\}/g, `Proyecto desarrollado con Organic-Driven Development (ODD) — Gentle Shell v5.`)
+            .replace(/\{\{PREREQUISITES\}\}/g, `Entorno configurado para ${context.stack.name}`)
+            .replace(/\{\{INSTALL_COMMAND\}\}/g, `npm install`)
+            .replace(/\{\{DEV_COMMAND\}\}/g, context.stack.devCmd)
+            .replace(/\{\{BUILD_COMMAND\}\}/g, context.stack.buildCmd)
+            .replace(/\{\{TEST_COMMAND\}\}/g, context.stack.testCmd)
+            .replace(/\{\{LINT_COMMAND\}\}/g, context.stack.lintCmd)
+            .replace(/\{\{PROJECT_TREE\}\}/g, `├── src/\n├── odd/tasks/\n├── .agents/\n└── PROJECT_LOG.md`)
+        : `# ${context.stack.projectName}\n\nProyecto gobernado bajo **Organic-Driven Development (ODD) — Gentle Shell v5**.\n\n## Comandos\n- Desarrollo: \`${context.stack.devCmd}\`\n- Build: \`${context.stack.buildCmd}\`\n- Tests: \`${context.stack.testCmd}\`\n- Lint: \`${context.stack.lintCmd}\`\n- Verificar ODD: \`agent verify\`\n`;
 
       fs.writeFileSync(targetReadme, readmeTpl, 'utf8');
       log(`  [+] Generado README.md para nuevo proyecto`, colors.green);
@@ -1101,78 +1218,80 @@ async function cmdInit(options) {
       log(`  [INFO] README.md ya existe. Se preserva sin cambios.`, colors.gray);
     }
   } else {
-    const guideDest = path.join(targetDir, 'SPECKIT_GUIDE.md');
-    const guideSrc = path.join(TEMPLATES_SCAFFOLD_DIR, 'SPECKIT_GUIDE.template.md');
-    if (fs.existsSync(guideSrc) && (!fs.existsSync(guideDest) || options.force)) {
-      fs.copyFileSync(guideSrc, guideDest);
-      log(`  [+] Generado: SPECKIT_GUIDE.md (Tu README.md original ha sido protegido)`, colors.green);
+    const guideDest = path.join(targetDir, 'ODD_GUIDE.md');
+    if (!fs.existsSync(guideDest) || options.force) {
+      const guideContent = `# Guía ODD (Gentle Shell v5) — ${context.stack.projectName}\n\nTu \`README.md\` original ha sido protegido (Zero-Overwrite).\n\n- Tareas pequeñas: ejecución inline con verificación focalizada y línea \`Risk:\`.\n- Tareas grandes: \`agent create <feature>\` crea \`odd/tasks/NNN-<feature>.md\`.\n- Auditoría de guardrails: \`agent guard\`.\n- Validación de gobernanza: \`agent registry validate\` y \`agent memory validate\`.\n`;
+      fs.writeFileSync(guideDest, guideContent, 'utf8');
+      log(`  [+] Generado: ODD_GUIDE.md (Tu README.md original ha sido protegido)`, colors.green);
     }
   }
 
-  // 5. Manejo de AGENTS.md
+  // 4. Manejo de AGENTS.md (Zero-Overwrite)
   const targetAgents = path.join(targetDir, 'AGENTS.md');
-  let agentsTpl = fs.readFileSync(path.join(TEMPLATES_SCAFFOLD_DIR, 'AGENTS.new.template.md'), 'utf8');
-  agentsTpl = agentsTpl
-    .replace(/\{\{PROJECT_NAME\}\}/g, context.stack.projectName)
-    .replace(/\{\{DEV_COMMAND\}\}/g, context.stack.devCmd)
-    .replace(/\{\{BUILD_COMMAND\}\}/g, context.stack.buildCmd)
-    .replace(/\{\{LINT_COMMAND\}\}/g, context.stack.lintCmd)
-    .replace(/\{\{TEST_COMMAND\}\}/g, context.stack.testCmd)
-    .replace(/\{\{SRC_PATH\}\}/g, context.stack.srcPath)
-    .replace(/\{\{COMPONENTS_PATH\}\}/g, context.stack.componentsPath)
-    .replace(/\{\{SPECIALIZED_AGENTS_LIST\}\}/g, `| **SpecAgent** | Guardián de especificaciones y ciclo ODD | spec-kit |`)
-    .replace(/\{\{PHASE_PLAN_CHECKLIST\}\}/g, `- [ ] Fase 1: Integración y validación de especificaciones base.\n- [ ] Fase 2: Desarrollo continuo guiado por specs.`);
+  const agentsTpl = `# AGENTS.md — ${context.stack.projectName}
+
+Este proyecto opera bajo **Organic-Driven Development (ODD) — Gentle Shell v5** y gobernanza de agentes tipados.
+Idioma obligatorio: **Español**.
+
+## Comandos Principales
+- Desarrollo: \`${context.stack.devCmd}\`
+- Build: \`${context.stack.buildCmd}\`
+- Lint: \`${context.stack.lintCmd}\`
+- Tests: \`${context.stack.testCmd}\`
+- Verificar ODD: \`agent verify\`
+- Guardrails: \`agent guard\`
+
+## Reglas ODD (Gentle Shell v5)
+1. **Task Size & Resume Test**: Pequeña si está entendida, tiene riesgo contenido y es reanudable desde el diff; grande si requiere \`odd/tasks/<feature>.md\`.
+2. **Separación de Autoridad (Agent ≠ Authority)**: Ningún agente puede auto-aprobarse ni hacer merge sin aprobación humana.
+3. **Allowed edit surfaces**: Toda delegación a writer debe declarar rutas relativas acotadas (nunca \`.\`).
+4. **Work-Unit Commits**: Commits coherentes (~400 líneas con código + pruebas + docs) y línea \`Risk: item N\` o \`Risk: none\`.
+`;
 
   if (!fs.existsSync(targetAgents)) {
     fs.writeFileSync(targetAgents, agentsTpl, 'utf8');
     log(`  [+] Generado: AGENTS.md`, colors.green);
+  } else if (options.force) {
+    if (options.backup) backupFile(targetAgents);
+    fs.writeFileSync(targetAgents, agentsTpl, 'utf8');
+    log(`  [!] Actualizado (force): AGENTS.md`, colors.yellow);
   } else {
-    if (options.force) {
-      if (options.backup) backupFile(targetAgents);
-      fs.writeFileSync(targetAgents, agentsTpl, 'utf8');
-      log(`  [!] Actualizado (force): AGENTS.md`, colors.yellow);
-    } else {
-      const agentsOverlayPath = path.join(targetDir, 'AGENTS.speckit.md');
-      fs.writeFileSync(agentsOverlayPath, agentsTpl, 'utf8');
-      log(`  [INFO] AGENTS.md ya existía. Generado 'AGENTS.speckit.md' para evitar sobreescritura.`, colors.yellow);
-    }
+    const agentsOverlayPath = path.join(targetDir, 'AGENTS.odd.md');
+    fs.writeFileSync(agentsOverlayPath, agentsTpl, 'utf8');
+    log(`  [INFO] AGENTS.md ya existía. Generado 'AGENTS.odd.md' para evitar sobreescritura.`, colors.yellow);
   }
 
-  // 6. Manejo de PROJECT_LOG.md
+  // 5. Manejo de PROJECT_LOG.md
   const targetLog = path.join(targetDir, 'PROJECT_LOG.md');
   const dateStr = new Date().toISOString().split('T')[0];
   if (!fs.existsSync(targetLog)) {
-    let logTpl = fs.readFileSync(path.join(TEMPLATES_SCAFFOLD_DIR, 'PROJECT_LOG.template.md'), 'utf8');
-    logTpl = logTpl
-      .replace(/\{\{INIT_DATE\}\}/g, dateStr)
-      .replace(/\{\{INIT_EVENT\}\}/g, chosenMode === 'new' ? 'Inicialización de nuevo proyecto' : 'Integración no destructiva de Spec-Kit')
-      .replace(/\{\{DETECTED_STACK\}\}/g, context.stack.name);
+    const logTpl = `# 📋 Registro de Decisiones del Proyecto (PROJECT_LOG.md)\n\n## [${dateStr}] - ${chosenMode === 'new' ? 'Inicialización ODD' : 'Integración ODD (Gentle Shell v5)'}\n- **Stack**: ${context.stack.name}\n- **Metodología**: Organic-Driven Development (ODD)\n`;
     fs.writeFileSync(targetLog, logTpl, 'utf8');
     log(`  [+] Generado: PROJECT_LOG.md`, colors.green);
   } else {
     const currentLog = fs.readFileSync(targetLog, 'utf8');
-    if (!currentLog.includes(`[${dateStr}] - Integración de Spec-Kit`)) {
-      const appendEntry = `\n\n## [${dateStr}] - Integración de Spec-Kit (ODD)\n- **Evento**: Integración segura de Spec-Kit.\n- **Stack**: ${context.stack.name}\n- **Estado**: Guardrails y plantillas activadas sin alterar archivos existentes.\n`;
+    if (!currentLog.includes(`[${dateStr}] - Integración ODD`)) {
+      const appendEntry = `\n\n## [${dateStr}] - Integración ODD (Gentle Shell v5)\n- **Evento**: Integración segura de gobernanza ODD.\n- **Stack**: ${context.stack.name}\n- **Estado**: Guardrails y plantillas activadas sin alterar archivos existentes.\n`;
       fs.appendFileSync(targetLog, appendEntry, 'utf8');
       log(`  [+] Añadida nueva entrada de evento a PROJECT_LOG.md`, colors.green);
     }
   }
 
-  // 7. Manejo de .cursorrules
+  // 6. Manejo de .cursorrules
   const targetCursorRules = path.join(targetDir, '.cursorrules');
-  const cursorRulesSnippet = `\n# Reglas de Proyecto - ODD & Elite Agent\n1. Idioma: Toda respuesta, commit y documentación DEBE ser en Español.\n2. Metodología: Organic-Driven Development (ODD) — Gentle Shell.\n3. Guardrails: No comitear ni abrir PRs con errores de lint, typecheck o tests.\n4. Consulta odd/tasks/<feature>.md para principios y tareas.\n`;
+  const cursorRulesSnippet = `\n# Reglas de Proyecto - ODD (Gentle Shell v5) & Elite Agent\n1. Idioma: Toda respuesta, commit y documentación DEBE ser en Español.\n2. Metodología: Organic-Driven Development (ODD) — Gentle Shell v5.\n3. Guardrails: No comitear con marcadores de conflicto, rutas sensibles ni fallos de lint/tests.\n4. Tareas grandes: documentar en odd/tasks/<feature>.md y cerrar cambios con línea Risk:.\n`;
   if (!fs.existsSync(targetCursorRules)) {
     fs.writeFileSync(targetCursorRules, cursorRulesSnippet.trim() + '\n', 'utf8');
     log(`  [+] Generado: .cursorrules`, colors.green);
   } else {
     const existingRules = fs.readFileSync(targetCursorRules, 'utf8');
-    if (!existingRules.includes('Spec-Kit & Elite Agent')) {
+    if (!existingRules.includes('Gentle Shell')) {
       fs.appendFileSync(targetCursorRules, '\n' + cursorRulesSnippet, 'utf8');
-      log(`  [+] Añadidas directrices Spec-Kit a .cursorrules existente`, colors.green);
+      log(`  [+] Añadidas directrices ODD a .cursorrules existente`, colors.green);
     }
   }
 
-  // 8. Workflow de release-please
+  // 7. Workflow de release-please
   const srcWorkflow = path.join(WORKFLOWS_SRC_DIR, 'release-please.yml');
   const targetWorkflowDir = path.join(targetDir, '.github', 'workflows');
   const targetWorkflow = path.join(targetWorkflowDir, 'release-please.yml');
@@ -1182,12 +1301,14 @@ async function cmdInit(options) {
     log(`  [+] Configurado workflow: .github/workflows/release-please.yml`, colors.green);
   }
 
-  // 9. Aprovisionar agentes, memoria y Starter Pack de skills en proyectos
+  // 8. Aprovisionar .agents/, memoria, skills, .evals/, .evidence/ y lib/guards
   const targetAgentsDir = path.join(targetDir, '.agents');
   ensureDirSync(path.join(targetAgentsDir, 'skills'));
   ensureDirSync(path.join(targetAgentsDir, 'memory'));
   ensureDirSync(path.join(targetAgentsDir, 'handoffs'));
   ensureDirSync(path.join(targetAgentsDir, 'mcp'));
+  ensureDirSync(path.join(targetDir, '.evidence'));
+
   const srcMcpTemplate = path.join(ROOT_DIR, '.agents', 'mcp', 'mcp_config.template.json');
   const srcMcpReadme = path.join(ROOT_DIR, '.agents', 'mcp', 'README.md');
   if (fs.existsSync(srcMcpTemplate)) {
@@ -1200,7 +1321,15 @@ async function cmdInit(options) {
 
   const srcSkillsDir = path.join(ROOT_DIR, 'skills');
   if (fs.existsSync(srcSkillsDir)) {
-    const starterSkills = ['find-skills', 'grill-me', 'frontend-design', 'web-design-guidelines', 'systematic-debugging', 'speckit-odd'];
+    const starterSkills = [
+      'find-skills',
+      'grill-me',
+      'frontend-design',
+      'web-design-guidelines',
+      'systematic-debugging',
+      'speckit-odd',
+      'work-unit-commits'
+    ];
     starterSkills.forEach(s => {
       const srcFile = path.join(srcSkillsDir, s, 'SKILL.md');
       if (fs.existsSync(srcFile)) {
@@ -1216,7 +1345,7 @@ async function cmdInit(options) {
   const targetRegistry = path.join(targetAgentsDir, 'registry.json');
   if (fs.existsSync(srcRegistry) && (!fs.existsSync(targetRegistry) || options.force)) {
     fs.copyFileSync(srcRegistry, targetRegistry);
-    log(`  [+] Configurado registro de gobernanza v2.2.0: .agents/registry.json`, colors.green);
+    log(`  [+] Configurado registro de gobernanza: .agents/registry.json`, colors.green);
   }
 
   const srcMemory = path.join(ROOT_DIR, 'MEMORY.md');
@@ -1226,22 +1355,28 @@ async function cmdInit(options) {
     log(`  [+] Inicializado sistema de memoria: MEMORY.md`, colors.green);
   }
 
+  if (fs.existsSync(EVALS_SRC_DIR)) {
+    copyDirRecursiveSync(EVALS_SRC_DIR, path.join(targetDir, '.evals'), options.force);
+    log(`  [+] Inicializado arnés de evaluación: .evals/`, colors.green);
+  }
+
+  if (fs.existsSync(SCHEMAS_SRC_DIR)) {
+    copyDirRecursiveSync(SCHEMAS_SRC_DIR, path.join(targetDir, 'schemas'), options.force);
+  }
+  if (fs.existsSync(LIB_SRC_DIR)) {
+    copyDirRecursiveSync(LIB_SRC_DIR, path.join(targetDir, 'lib'), options.force);
+  }
+
   log(`
 ${colors.green}${colors.bold}=======================================================
-🎉 ¡Spec-Kit integrado con éxito en modo ${chosenMode.toUpperCase()}!
+🎉 ¡Entorno ODD (Gentle Shell v5) integrado en modo ${chosenMode.toUpperCase()}!
 =======================================================${colors.reset}
 
-${colors.yellow}Comandos disponibles en tu editor / IA:${colors.reset}
-  👉 ${colors.bold}/specify (o /speckit.specify)${colors.reset}   - Crear una nueva especificación formal
-  👉 ${colors.bold}/clarify (o /speckit.clarify)${colors.reset}   - Resolver ambigüedades técnicas
-  👉 ${colors.bold}/plan (o /speckit.plan)${colors.reset}      - Diseñar arquitectura y contratos
-  👉 ${colors.bold}/tasks (o /speckit.tasks)${colors.reset}     - Desglosar checklist de tareas atómicas
-  👉 ${colors.bold}/implement (o /speckit.implement)${colors.reset} - Desarrollar paso a paso con TDD
-  👉 ${colors.bold}/converge (o /speckit.converge)${colors.reset}  - Validar guardrails y preparar PR
-
 ${colors.yellow}Comandos CLI disponibles en la terminal:${colors.reset}
-  👉 ${colors.bold}agent create <nombre>${colors.reset} - Crea una nueva spec con plantillas
-  👉 ${colors.bold}agent verify${colors.reset}          - Comprueba el estado de todas las specs
+  👉 ${colors.bold}agent create <nombre>${colors.reset} - Crea un documento ODD en odd/tasks/
+  👉 ${colors.bold}agent verify${colors.reset}          - Comprueba el estado de odd/tasks/ y specs/
+  👉 ${colors.bold}agent guard${colors.reset}           - Audita conflictos, rutas sensibles y comandos
+  👉 ${colors.bold}agent route "<tarea>"${colors.reset} - Enruta tarea con rúbrica de riesgo ODD
   👉 ${colors.bold}agent install-skill${colors.reset}   - Instala la skill speckit-odd en Antigravity
 `);
 }
@@ -1363,7 +1498,8 @@ function cmdInstallSkillsPack(options = {}) {
     'grill-me',
     'frontend-design',
     'web-design-guidelines',
-    'systematic-debugging'
+    'systematic-debugging',
+    'work-unit-commits'
   ];
 
   const geminiConfigDir = path.join(os.homedir(), '.gemini', 'config');
@@ -1447,14 +1583,14 @@ function cmdInstallSkill() {
   log(`3. Configurando directrices globales en GEMINI.md...`, colors.yellow);
   const globalRulesFile = path.join(geminiConfigDir, 'GEMINI.md');
   const ruleBlock = `
-## Metodología Spec-Driven Development & Elite Agent v2 (GitHub Spec Kit)
-- **Detección y Bootstrapping:** Si el espacio de trabajo actual contiene \`.specify/\`, \`specs/\` o \`.agents/registry.json\`, el agente entrará automáticamente en modo **Elite Agent Bootstrap v2 (ODD)**. Si no los contiene y el usuario solicita inicializar gobernanza o arrancar un proyecto, ejecutar o sugerir: \`npx --yes github:BeLc3bU/elite-agent-bootstrap init\`.
-- **Lectura Constitucional:** Es obligatorio leer \`.specify/memory/constitution.md\` antes de proponer cambios de arquitectura o código.
+## Metodología Organic-Driven Development (ODD — Gentle Shell v5) & Elite Agent v2
+- **Detección y Bootstrapping:** Si el espacio de trabajo actual contiene \`odd/tasks/\`, \`.agents/registry.json\` o \`specs/\`, el agente entrará automáticamente en modo **Elite Agent Bootstrap v2 (ODD)**. Si no los contiene y el usuario solicita inicializar gobernanza o arrancar un proyecto, ejecutar o sugerir: \`npx --yes github:BeLc3bU/elite-agent-bootstrap init\`.
+- **Protocolo ODD (7 pasos):** Authorize -> Explore (presupuesto ≤3 lecturas / ~10k tokens) -> Resolve uncertainty -> Classify (\`small\` vs \`large\` con *resume test*) -> Track (\`odd/tasks/<feature>.md\`) -> Implement (TDD aplicable, \`Allowed edit surfaces\`, work-unit commits) -> Close (línea \`Risk: item N\` o \`Risk: none\`).
 - **Separación de Autoridad (Agent ≠ Authority):** Ningún agente puede auto-aprobarse ni realizar merge directo sin aprobación humana. Consultar \`.agents/registry.json\` para roles, permisos y restricciones de rutas.
-- **Prohibición de Vibe Coding:** No escribir ni modificar código de producción sin contar con la especificación aprobada en \`specs/NNN-<feature>/\` (\`spec.md\`, \`plan.md\`, \`tasks.md\`).
+- **Guardrails Gentle Shell:** Usar \`agent guard\` para auditar rutas sensibles (\`.env*\`, \`.envrc\`, \`.netrc\`, \`.ssh\`, etc.), comandos destructivos y marcadores de conflicto antes de entregar.
 - **Protocolo de Traspasos y Evidencias:** Traspasos documentados en \`.agents/handoffs/\` y comprobantes de ejecución en \`.evidence/\`. No marcar \`[x]\` sin comprobante de verificación exitoso.
-- **Enrutamiento y Decisiones:** Usar \`agent route "<tarea>"\` o la capa de decisión (\`lib/adapters/DecisionProvider.js\` / Kev / Jev) para clasificar y asignar roles.
-- **Activación de Skill:** Usar la skill \`speckit-odd\` para orquestar las fases: specify -> plan -> tasks -> implement -> converge.
+- **Enrutamiento y Decisiones:** Usar \`agent route "<tarea>"\` o la capa de decisión (\`lib/adapters/DecisionProvider.js\` / Kev / Jev) para clasificar roles y detectar alto riesgo (ítems 1–6).
+- **Activación de Skills:** Usar \`speckit-odd\` para orquestar el flujo ODD y \`work-unit-commits\` para dividir entregas en unidades coherentes (~400 líneas).
 `;
 
   let currentContent = '';
@@ -1463,8 +1599,10 @@ function cmdInstallSkill() {
   }
 
   // Limpiar bloque antiguo si existía
-  if (currentContent.includes('## Metodología Spec-Driven Development')) {
-    currentContent = currentContent.replace(/## Metodología Spec-Driven Development[\s\S]*?(?=\n## |\n# |$)/g, '').trim();
+  if (currentContent.includes('## Metodología Spec-Driven Development') || currentContent.includes('## Metodología Organic-Driven Development')) {
+    currentContent = currentContent
+      .replace(/## Metodología (?:Spec-Driven|Organic-Driven) Development[\s\S]*?(?=\n## |\n# |$)/g, '')
+      .trim();
   }
 
   const finalContent = currentContent
@@ -1574,20 +1712,27 @@ Uso:
   speckit [comando] [opciones]
 
 Comandos:
-  init [directorio]      Inicializa o integra Spec-Kit en un proyecto (por defecto)
-  create <nombre>        Crea una nueva especificación numerada en specs/
-  verify                 Comprueba el estado y avance de todas las especificaciones
+  init [directorio]      Inicializa o integra ODD (Gentle Shell v5) en un proyecto
+  create <nombre>        Crea un documento ODD numerado en odd/tasks/
+  verify                 Comprueba el estado de odd/tasks/ y specs/ heredadas
+  guard [opciones]       Audita rutas sensibles, comandos destructivos y conflictos Git
   registry [list|val]    Consulta ('list') o valida ('validate') el catálogo de agentes
   handoff [list|val]     Lista ('list') o valida ('validate') traspasos entre agentes
   evidence [list|ver]    Lista ('list') o audita ('verify') comprobantes de ejecución
   memory [list|val|...]  Gestiona la memoria persistente ('list', 'validate', 'search', 'show', 'archive')
-  route <descripción>    Enruta una tarea al agente idóneo mediante la capa de decisión
+  route <descripción>    Enruta tarea y evalúa tamaño ODD + alto riesgo (ítems 1-6)
   eval                   Ejecuta la suite de evaluación sintética de agentes (.evals/)
   sync [mensaje]         Audita, commitea y sube los cambios a GitHub (push)
   install-skill          Instala la skill speckit-odd en Antigravity (~/.gemini/config)
-  install-skills-pack    Instala el Starter Pack de 5 skills (skills.sh) local y global
+  install-skills-pack    Instala el Starter Pack de skills (skills.sh + work-unit-commits)
   install-mcp-pack       Instala y fusiona el pack de 5 MCPs esenciales en Antigravity
   version                Muestra la versión instalada
+
+Opciones de 'guard':
+  --path <ruta>          Comprueba si la ruta está protegida por política sensible
+  --cmd <comando>        Clasifica si un comando de terminal es destructivo
+  --surfaces <s1,s2>     Valida Allowed edit surfaces (opcional: --check <ruta>)
+  --conflicts            Escanea marcadores de conflicto Git sin resolver (por defecto)
 
 Opciones de 'init':
   -t, --target <dir>     Directorio destino (por defecto: carpeta actual)
@@ -1666,9 +1811,18 @@ Ejemplos:
     return;
   }
 
+  if (command === 'guard' || command === 'guards') {
+    cmdGuard(process.cwd(), rawArgs.slice(1));
+    return;
+  }
+
   if (command === 'route' || command === 'decide') {
-    const query = rawArgs.slice(1).join(' ');
-    await cmdRoute(process.cwd(), query);
+    const fullDelegation = rawArgs.includes('--full-delegation');
+    const queryParts = rawArgs.slice(1).filter(a => a !== '--full-delegation');
+    const query = queryParts.join(' ');
+    await cmdRoute(process.cwd(), query, {
+      workflowMode: fullDelegation ? 'full-delegation' : 'organic'
+    });
     return;
   }
 

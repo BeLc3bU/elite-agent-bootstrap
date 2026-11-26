@@ -1,6 +1,6 @@
 # AGENTS.md - Plantilla Proyecto (Elite Agent Bootstrap v2)
 
-Este repositorio es el estándar de ingeniería y gobernanza para **Organic-Driven Development (ODD)** con inteligencia artificial y arquitectura de agentes tipados.
+Este repositorio es el estándar de ingeniería y gobernanza para **Organic-Driven Development (ODD — Gentle Shell v5)** con inteligencia artificial y arquitectura de agentes tipados.
 
 **REGLA DE ORO**: Toda la comunicación, documentación y mensajes de sistema deben ser exclusivamente en **ESPAÑOL**.
 
@@ -9,9 +9,10 @@ Este repositorio es el estándar de ingeniería y gobernanza para **Organic-Driv
 ## 🛠️ Comandos de Mantenimiento y Gobernanza
 | Comando | Descripción |
 |---|---|
-| `agent init [dir]` (o `init`) | Inicializar o integrar la infraestructura de agentes y ODD |
-| `agent verify` (o `verify`) | Verificar estado y tareas de todas las especificaciones |
-| `agent create <nombre>` (o `create`) | Crear una nueva especificación numerada en `specs/` |
+| `agent init [dir]` (o `init`) | Inicializar o integrar la infraestructura ODD v5 y agentes |
+| `agent verify` (o `verify`) | Verificar documentos ODD en `odd/tasks/` y specs heredadas |
+| `agent create <nombre>` (o `create`) | Crear un documento ODD numerado en `odd/tasks/NNN-<nombre>.md` |
+| `agent guard [opciones]` | Auditar rutas sensibles, comandos destructivos, superficies y conflictos Git |
 | `agent memory list` (o `memory list`) | Listar el catálogo de memorias activas categorizadas |
 | `agent memory validate` | Auditar la integridad del sistema de memoria persistente |
 | `agent memory search "<query>"` | Buscar patrones, decisiones o lecciones en la memoria |
@@ -23,11 +24,13 @@ Este repositorio es el estándar de ingeniería y gobernanza para **Organic-Driv
 | `agent handoff list` (o `handoff list`) | Listar el registro histórico de traspasos (handoffs) |
 | `agent evidence verify` | Auditar y verificar los comprobantes de ejecución inmutables |
 | `agent evidence list` (o `evidence list`) | Listar el catálogo de comprobantes de evidencia registrados |
-| `agent route "<tarea>"` (o `route`) | Enrutar una tarea al agente idóneo mediante la capa de decisión |
-| `agent eval` (o `eval`) | Ejecutar la suite de evaluación sintética de agentes (.evals/) |
-| `agent install-skill` (o `install-skill`) | Instalar la skill global en Antigravity (`~/.gemini/config`) |
+| `agent route "<tarea>"` (o `route`) | Enrutar tarea, clasificar tamaño ODD y evaluar alto riesgo (1–6) |
+| `agent eval` (o `eval`) | Ejecutar la suite de evaluación sintética de agentes (`.evals/`) |
+| `agent install-skill` (o `install-skill`) | Instalar la skill global `speckit-odd` en Antigravity (`~/.gemini/config`) |
 | `agent version` | Mostrar la versión del framework |
-| `npm run test:verify` | Ejecución automatizada de la suite de validación de specs |
+| `npm test` | Suite de pruebas unitarias e integración (`node --test tests/*.test.js`) |
+| `npm run test:guards` | Auditoría determinista de marcadores de conflicto y guardrails |
+| `npm run test:verify` | Ejecución automatizada de la suite de validación de docs ODD / specs |
 | `npm run test:memory` | Validación automatizada del sistema de memoria persistente |
 | `npm run test:evals` | Ejecución automatizada del arnés de evaluación sintética |
 | `git status` | Verificar estado de git y ramas |
@@ -42,13 +45,11 @@ Este repositorio es el estándar de ingeniería y gobernanza para **Organic-Driv
 - **Protocolo de Traspasos (Handoffs)**: `.agents/handoffs/`
 - **Registro de Evidencias Reproducibles**: `.evidence/`
 - **Arnés de Evaluación Sintética**: `.evals/`
-- **Capa de Decisión y Adaptadores**: `lib/adapters/DecisionProvider.js`
+- **Capa de Decisión y Guardrails**: `lib/adapters/DecisionProvider.js`, `lib/guards/GentleGuards.js`
 - **Esquemas JSON de Validación**: `schemas/agent.schema.json`, `schemas/registry.schema.json`, `schemas/handoff.schema.json`, `schemas/evidence.schema.json`, `schemas/memory.schema.json`
-- **Configuración Spec-Kit**: `.specify/`
-- **Constitución Inmutable**: `odd/tasks/<feature>.md`
-- **Plantillas ODD Canónicas**: `.specify/templates/`
-- **Especificaciones Activas**: `specs/`
-- **Prompts de Integración**: `.github/prompts/`
+- **Documentos ODD Canónicos**: `odd/tasks/<feature>.md`
+- **Guías Técnicas ODD v5**: `docs/gentle-shell-odd-v5.md`, `docs/skill-style-guide.md`
+- **Skills Exportables**: `skills/speckit-odd/SKILL.md`, `skills/work-unit-commits/SKILL.md`
 - **CLI Universal**: `bin/cli.js`
 - **Memoria de Decisiones y ADRs**: `PROJECT_LOG.md`
 

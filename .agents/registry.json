@@ -1,8 +1,8 @@
 {
-  "version": "2.3.0",
+  "version": "2.4.0",
   "project_name": "elite-agent-bootstrap",
-  "description": "Registro oficial y catálogo de gobernanza de agentes de IA para Elite Agent Bootstrap v2 (con soporte para memoria persistente, Starter Pack de Skills y MCPs esenciales)",
-  "governance_source": ".specify/memory/constitution.md",
+  "description": "Registro oficial y catálogo de gobernanza de agentes de IA para Elite Agent Bootstrap v2 + ODD (Gentle Shell v5)",
+  "governance_source": "AGENTS.md",
   "default_decision_provider": "deterministic",
   "agents": [
     {
@@ -27,6 +27,7 @@
       ],
       "skills": [
         "speckit-odd",
+        "work-unit-commits",
         "find-skills",
         "grill-me"
       ],
@@ -40,6 +41,7 @@
       ],
       "allowed_files": [
         ".agents/**",
+        "odd/tasks/**",
         "PROJECT_LOG.md",
         "README.md",
         "MEMORY.md"
@@ -47,7 +49,7 @@
       "forbidden_files": [
         "src/**",
         "app/**",
-        ".specify/memory/constitution.md"
+        ".agents/registry.json"
       ],
       "dependencies": [],
       "risk_level": "medium",
@@ -94,8 +96,8 @@
         "tasks.md"
       ],
       "allowed_files": [
+        "odd/tasks/**",
         "specs/**",
-        ".specify/templates/**",
         "MEMORY.md",
         ".agents/memory/decisions.md",
         ".agents/memory/context.md"
@@ -104,7 +106,7 @@
         "src/**",
         "app/**",
         "tests/**",
-        ".specify/memory/constitution.md"
+        "AGENTS.md"
       ],
       "dependencies": [
         "orchestrator"
@@ -144,6 +146,7 @@
       ],
       "skills": [
         "speckit-odd",
+        "work-unit-commits",
         "frontend-design",
         "web-design-guidelines",
         "systematic-debugging"
@@ -165,8 +168,9 @@
         ".agents/memory/lessons.md"
       ],
       "forbidden_files": [
-        ".specify/memory/constitution.md",
+        "AGENTS.md",
         ".github/workflows/**",
+        "odd/tasks/**",
         "specs/**"
       ],
       "dependencies": [
@@ -227,7 +231,7 @@
       ],
       "forbidden_files": [
         "src/**",
-        ".specify/memory/constitution.md",
+        "AGENTS.md",
         ".github/workflows/**"
       ],
       "dependencies": [
@@ -282,7 +286,7 @@
       "forbidden_files": [
         "src/**",
         "package.json",
-        ".specify/memory/constitution.md"
+        "AGENTS.md"
       ],
       "dependencies": [
         "implementer"
@@ -331,11 +335,12 @@
       ],
       "allowed_files": [
         ".evidence/**",
+        "odd/tasks/**",
         "specs/**"
       ],
       "forbidden_files": [
         "src/**",
-        ".specify/memory/constitution.md",
+        "AGENTS.md",
         ".agents/memory/**"
       ],
       "dependencies": [
@@ -388,7 +393,7 @@
       ],
       "forbidden_files": [
         "src/**",
-        ".specify/memory/constitution.md"
+        "AGENTS.md"
       ],
       "dependencies": [
         "implementer"

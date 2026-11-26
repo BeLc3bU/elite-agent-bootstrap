@@ -24,8 +24,8 @@
     },
     "governance_source": {
       "type": "string",
-      "default": ".specify/memory/constitution.md",
-      "description": "Ruta al documento rector de gobernanza y constitución del proyecto"
+      "default": "AGENTS.md",
+      "description": "Ruta al documento rector de gobernanza y reglas ODD del proyecto"
     },
     "default_decision_provider": {
       "type": "string",
